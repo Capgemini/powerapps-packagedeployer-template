@@ -1,0 +1,10 @@
+<entities xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <entity name="contact" displayname="Contact" etc="2" primaryidfield="contactid" primarynamefield="fullname" disableplugins="false">
+    <fields>
+      <field displayname="First Name" name="firstname" type="string" />
+      <field displayname="Gender" name="gendercode" type="optionsetvalue" />
+      <field displayname="Last Name" name="lastname" type="string" />
+      <field displayname="Birthday" name="birthdate" type="datetime" />
+    </fields>
+  </entity>
+</entities>

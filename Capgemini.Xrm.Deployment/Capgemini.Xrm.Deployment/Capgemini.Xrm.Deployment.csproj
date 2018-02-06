@@ -1,0 +1,169 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{01FF506F-1FED-4F50-B70A-3656599CE25E}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>Capgemini.Xrm.Deployment</RootNamespace>
+    <AssemblyName>Capgemini.Xrm.Deployment</AssemblyName>
+    <TargetFrameworkVersion>v4.6.2</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <SccProjectName>SAK</SccProjectName>
+    <SccLocalPath>SAK</SccLocalPath>
+    <SccAuxPath>SAK</SccAuxPath>
+    <SccProvider>SAK</SccProvider>
+    <TargetFrameworkProfile />
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup>
+    <SignAssembly>false</SignAssembly>
+  </PropertyGroup>
+  <PropertyGroup>
+    <AssemblyOriginatorKeyFile>
+    </AssemblyOriginatorKeyFile>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'CAP_RELEASE|AnyCPU'">
+    <OutputPath>..\..\lib\CAP_RELEASE\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <Optimize>true</Optimize>
+    <DebugType>pdbonly</DebugType>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="DocumentFormat.OpenXml, Version=2.5.5631.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+    </Reference>
+    <Reference Include="DotNetZip, Version=1.10.1.0, Culture=neutral, PublicKeyToken=6583c7c814667745, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\DotNetZip.1.10.1\lib\net20\DotNetZip.dll</HintPath>
+      <SpecificVersion>False</SpecificVersion>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Microsoft.Crm.Sdk.Proxy, Version=9.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\Microsoft.CrmSdk.CoreAssemblies.9.0.0.7\lib\net452\Microsoft.Crm.Sdk.Proxy.dll</HintPath>
+      <SpecificVersion>False</SpecificVersion>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Microsoft.CSharp, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+    </Reference>
+    <Reference Include="Microsoft.IdentityModel, Version=3.5.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+    </Reference>
+    <Reference Include="Microsoft.Xrm.Sdk, Version=9.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\Microsoft.CrmSdk.CoreAssemblies.9.0.0.7\lib\net452\Microsoft.Xrm.Sdk.dll</HintPath>
+      <SpecificVersion>False</SpecificVersion>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Newtonsoft.Json, Version=9.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\Newtonsoft.Json.9.0.1\lib\net45\Newtonsoft.Json.dll</HintPath>
+      <SpecificVersion>False</SpecificVersion>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="PresentationFramework" />
+    <Reference Include="System" />
+    <Reference Include="System.ComponentModel.Composition" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.DirectoryServices" />
+    <Reference Include="System.DirectoryServices.AccountManagement" />
+    <Reference Include="System.IdentityModel" />
+    <Reference Include="System.IO.Compression.FileSystem" />
+    <Reference Include="System.Numerics" />
+    <Reference Include="System.Runtime.Serialization" />
+    <Reference Include="System.Security" />
+    <Reference Include="System.ServiceModel" />
+    <Reference Include="System.ServiceModel.Web" />
+    <Reference Include="System.Web" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+    <Reference Include="WindowsBase" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Config\CRMDeploymentConfig.cs" />
+    <Compile Include="Config\PackageDeployerConfigReader.cs" />
+    <Compile Include="Config\SolutionImportSetting.cs" />
+    <Compile Include="Core\CrmAccess.cs" />
+    <Compile Include="Core\CrmAccessLogged.cs" />
+    <Compile Include="Core\Exceptions\ConfigurationException.cs" />
+    <Compile Include="Core\Exceptions\ValidationException.cs" />
+    <Compile Include="Core\ICrmRepository.cs" />
+    <Compile Include="Core\ILogger.cs" />
+    <Compile Include="Core\ImportStatus.cs" />
+    <Compile Include="Core\Model\ConfigurationParameter.cs" />
+    <Compile Include="Core\SoapLoggerOrganizationService.cs" />
+    <Compile Include="DocTemplates\DocTemplateManager.cs" />
+    <Compile Include="Model\SDKSepStatusCode.cs" />
+    <Compile Include="Model\SDKStepState.cs" />
+    <Compile Include="Model\Sla\SlaEntity.cs" />
+    <Compile Include="Model\Sla\SlaFields.cs" />
+    <Compile Include="Model\Sla\SlaState.cs" />
+    <Compile Include="Model\Sla\SlaStatusCode.cs" />
+    <Compile Include="Model\Sla\SlaType.cs" />
+    <Compile Include="Model\WorkflowCategory.cs" />
+    <Compile Include="Model\WorkflowEntity.cs" />
+    <Compile Include="Model\WorkflowState.cs" />
+    <Compile Include="Model\WorkflowStatusCode.cs" />
+    <Compile Include="Model\WorkflowType.cs" />
+    <Compile Include="Repository\CrmImportRepository.cs" />
+    <Compile Include="Repository\ICrmImportRepository.cs" />
+    <Compile Include="Repository\CrmOrganizationRepository.cs" />
+    <Compile Include="Core\CrmRepository.cs" />
+    <Compile Include="Repository\CrmSlaRepository.cs" />
+    <Compile Include="Repository\CrmTemplatesRepository.cs" />
+    <Compile Include="Repository\CrmWorkflowsRepository.cs" />
+    <Compile Include="Repository\Events\AsyncImportUpdateEventArgs.cs" />
+    <Compile Include="Repository\ICrmTemplatesRepository.cs" />
+    <Compile Include="Repository\ICrmWorkflowsRepository.cs" />
+    <Compile Include="Repository\ICrmOrganizationRepository.cs" />
+    <Compile Include="Repository\ICrmSlaRepository.cs" />
+    <Compile Include="SolutionImport\Events\ImportUpdateEventArgs.cs" />
+    <Compile Include="DeploymentHelpers\DeploymentActivities.cs" />
+    <Compile Include="DeploymentHelpers\ProcessesActivator.cs" />
+    <Compile Include="SolutionImport\SolutionPackage.cs" />
+    <Compile Include="Core\Model\SolutionDetails.cs" />
+    <Compile Include="SolutionImport\PackageDeployer.cs" />
+    <Compile Include="SolutionImport\SolutionFileManager.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="SolutionImport\SolutionImporter.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="app.config" />
+    <None Include="Capgemini.Xrm.Deployment.nuspec" />
+    <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup />
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <PropertyGroup>
+    <PostBuildEvent>
+    </PostBuildEvent>
+  </PropertyGroup>
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

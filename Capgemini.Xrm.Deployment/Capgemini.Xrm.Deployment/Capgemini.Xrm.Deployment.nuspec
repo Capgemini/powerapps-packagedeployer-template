@@ -1,0 +1,14 @@
+<?xml version="1.0"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
+  <metadata>
+    <id>Capgemini.Xrm.Deployment</id>
+    <version>1.0.0</version>
+    <title>Capgemini Xrm Deployment</title>
+    <authors>Capgemini</authors>
+    <owners>Capgemini</owners>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>Capgemini Deployment for Dynamics 365 - used by package deployer to implement custom deployment logic</description>
+    <copyright>Capgemini Copyright ©  2018</copyright>
+    <dependencies />
+  </metadata>
+ </package>
