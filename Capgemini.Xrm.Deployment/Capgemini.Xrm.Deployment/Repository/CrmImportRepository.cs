@@ -1,10 +1,12 @@
 ﻿using Capgemini.Xrm.Deployment.Core;
+using Capgemini.Xrm.Deployment.Core.Model;
 using Capgemini.Xrm.Deployment.Repository.Events;
 using Microsoft.Crm.Sdk.Messages;
 using Microsoft.Xrm.Sdk;
 using Microsoft.Xrm.Sdk.Messages;
 using Microsoft.Xrm.Sdk.Query;
 using System;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Threading;
@@ -108,13 +110,6 @@ namespace Capgemini.Xrm.Deployment.Repository
                 };
             }
 
-            OnRaiseImportUpdatEvent(new AsyncImportUpdateEventArgs
-            {
-                Message = outResult.ImportMessage,
-                ImportState = outResult.ImportState,
-                ImportStatusCode = outResult.ImportStatusCode
-            });
-
             return outResult;
         }
 
@@ -144,13 +139,6 @@ namespace Capgemini.Xrm.Deployment.Repository
 
             _importJobId = null;
 
-            OnRaiseImportUpdatEvent(new AsyncImportUpdateEventArgs
-            {
-                Message = result.ImportMessage,
-                ImportState = result.ImportState,
-                ImportStatusCode = result.ImportStatusCode
-            });
-
             return result;
         }
 
@@ -164,15 +152,9 @@ namespace Capgemini.Xrm.Deployment.Repository
                    int asyncWaitTimeout,
                    bool useHoldingSolution = false)
         {
+
             if (_importJobId.HasValue) throw new Exception("Import already in progress");
-
-            Guid? asyncJobId = null;
             _importJobId = Guid.NewGuid();
-
-            var result = new ImportStatus
-            {
-                ImportId = _importJobId
-            };
 
             var solutionBytes = File.ReadAllBytes(solutionFilePath);
 
@@ -183,14 +165,61 @@ namespace Capgemini.Xrm.Deployment.Repository
                 ConvertToManaged = convertToManaged,
                 OverwriteUnmanagedCustomizations = overwriteUnmanagedCustomizations,
                 ImportJobId = _importJobId.Value,
-                HoldingSolution = useHoldingSolution
+                HoldingSolution = useHoldingSolution,
+                SkipProductUpdateDependencies = true
+            };
+
+            var result = ExecuteImportOperation(importSolutionRequest, importAsync, waitForCompletion, sleepInterval, asyncWaitTimeout);
+            return result;
+
+        }
+
+        public ImportStatus ApplySolutionUpgrade(string solutionName)
+        {
+            if (_importJobId.HasValue) throw new Exception("Import already in progress");
+            _importJobId = Guid.NewGuid();
+
+            var upgradeRequest = new DeleteAndPromoteRequest
+            {
+                UniqueName = solutionName,
+                RequestId = _importJobId
+            };
+
+            var upgradeResponse = CurrentOrganizationService.Execute(upgradeRequest) as DeleteAndPromoteResponse;
+
+            var result= new ImportStatus
+            {
+                ImportId = _importJobId,
+                ImportMessage = "Solution has been promoted to the new version",
+                ImportState = "Promoted",
+                SolutionName = solutionName
+            };
+
+            _importJobId = null;
+
+            return result;
+        }
+
+        private ImportStatus ExecuteImportOperation(OrganizationRequest request,
+                  bool importAsync,
+                  bool waitForCompletion,
+                  int sleepInterval,
+                  int asyncWaitTimeout
+                  )
+        {
+           
+            Guid? asyncJobId = null;
+ 
+            var result = new ImportStatus
+            {
+                ImportId = _importJobId
             };
 
             if (importAsync)
             {
                 var asyncRequest = new ExecuteAsyncRequest
                 {
-                    Request = importSolutionRequest
+                    Request = request
                 };
 
                 var asyncResponse = CurrentOrganizationService.Execute(asyncRequest) as ExecuteAsyncResponse;
@@ -198,35 +227,51 @@ namespace Capgemini.Xrm.Deployment.Repository
                 asyncJobId = asyncResponse.AsyncJobId;
                 result.ImportAsyncId = asyncJobId;
 
+                var watch = Stopwatch.StartNew();
+                watch.Start();
+
                 if (waitForCompletion)
                 {
                     var end = DateTime.Now.AddSeconds(asyncWaitTimeout);
 
                     while (end >= DateTime.Now)
                     {
+                        Thread.Sleep(sleepInterval);
+
                         var asyncOperation = CheckAsyncImportStatus(asyncJobId.Value);
 
-                        int statusCode = asyncOperation.ImportStatusCode;
+                        AsyncOperationStatusEnum statusCode = (AsyncOperationStatusEnum)asyncOperation.ImportStatusCode;
 
                         switch (statusCode)
                         {
-                            //Succeeded
-                            case 30:
+                            case AsyncOperationStatusEnum.Succeeded:
+                                watch.Stop();
                                 result = CheckImportStatus();
                                 return result;
-                            //Pausing //Canceling //Failed //Canceled
-                            case 21:
-                            case 22:
-                            case 31:
-                            case 32:
-                                throw new Exception(string.Format("Solution Import Failed: {0} {1}", statusCode, asyncOperation.ImportMessage));
-                        }
 
-                        Thread.Sleep(sleepInterval);
+                            case AsyncOperationStatusEnum.Pausing:
+                            case AsyncOperationStatusEnum.Canceling:
+                            case AsyncOperationStatusEnum.Failed:
+                            case AsyncOperationStatusEnum.Canceled:
+                                watch.Stop();
+                                throw new Exception(string.Format("Solution Import Failed: {0} {1}", statusCode, asyncOperation.ImportMessage));
+
+                            default:
+                                OnRaiseImportUpdatEvent(new AsyncImportUpdateEventArgs
+                                {
+                                    Message = $"{statusCode} {asyncOperation.ImportMessage}, Id:{asyncOperation.ImportAsyncId}, ElapsedTime:{watch.Elapsed.TotalSeconds}",
+                                    ImportState = asyncOperation.ImportState,
+                                    ImportStatusCode = asyncOperation.ImportStatusCode,
+                                    ImportId = asyncOperation.ImportAsyncId
+                                });
+                                break;
+                        }
                     }
 
                     throw new Exception(string.Format("Import Timeout: {0}", asyncWaitTimeout));
                 }
+
+                watch.Stop();
 
                 result = CheckAsyncImportStatus(asyncJobId.Value);
                 return result;
@@ -235,7 +280,7 @@ namespace Capgemini.Xrm.Deployment.Repository
             {
                 try
                 {
-                    var importSolutionResponse = CurrentOrganizationService.Execute(importSolutionRequest) as ImportSolutionResponse;
+                    var importSolutionResponse = CurrentOrganizationService.Execute(request);
                 }
                 catch (Exception)
                 {
@@ -248,18 +293,7 @@ namespace Capgemini.Xrm.Deployment.Repository
             return result;
         }
 
-        public void ApplySolutionUpgrade(string solutionName)
-        {
-            _importJobId = Guid.NewGuid();
-
-            var upgradeRequest = new DeleteAndPromoteRequest
-            {
-                UniqueName = solutionName,
-                RequestId = _importJobId
-            };
-
-            var upgradeResponse = CurrentOrganizationService.Execute(upgradeRequest) as DeleteAndPromoteResponse;
-        }
+       
 
         public void DeactivateProcess(Guid processId)
         {

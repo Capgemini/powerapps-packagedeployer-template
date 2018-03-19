@@ -23,7 +23,7 @@ namespace Capgemini.Xrm.Deployment.IntegrationTests.ImportTests
 
             var configReader = new PackageDeployerConfigReader(pkgPath);
 
-            var pd = new PackageDeployer(repo, 5000, 3600, true, configReader);
+            var pd = new PackageDeployer(repo, configReader);
 
             pd.RaiseImportUpdateEvent += Pd_RaiseImportUpdateEvent;
             pd.InstallHoldingSolutions();

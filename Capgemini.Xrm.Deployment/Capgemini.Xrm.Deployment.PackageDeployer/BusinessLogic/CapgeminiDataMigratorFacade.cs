@@ -1,5 +1,6 @@
-﻿using Capgemini.Xrm.DataMigration.Config;
-using Capgemini.Xrm.DataMigration.Core;
+﻿using Capgemini.DataMigration.Core;
+using Capgemini.DataMigration.Resiliency.Polly;
+using Capgemini.Xrm.DataMigration.CrmStore.Config;
 using Capgemini.Xrm.DataMigration.Engine;
 using Capgemini.Xrm.DataMigration.Repositories;
 using Microsoft.Xrm.Sdk;
@@ -68,7 +69,7 @@ namespace Capgemini.Xrm.Deployment.PackageDeployer.BusinessLogic
             _logger.Info("Importing Started" + extractedDataPath);
             _logger.Info("Import Config Path set to " + configFilePath);
 
-            EntityRepository entityRepo = new EntityRepository(_service);
+            EntityRepository entityRepo = new EntityRepository(_service,  new ServiceRetryExecutor());
 
             CrmImportConfig importConfig = CrmImportConfig.GetConfiguration(configFilePath);
 

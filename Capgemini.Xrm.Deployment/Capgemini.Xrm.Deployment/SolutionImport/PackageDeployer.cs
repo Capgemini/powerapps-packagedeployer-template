@@ -1,4 +1,5 @@
 ﻿using Capgemini.Xrm.Deployment.Config;
+using Capgemini.Xrm.Deployment.Core;
 using Capgemini.Xrm.Deployment.Repository;
 using Capgemini.Xrm.Deployment.SolutionImport.Events;
 using System;
@@ -17,25 +18,20 @@ namespace Capgemini.Xrm.Deployment.SolutionImport
         private readonly int _sleepIntervalMiliseconds = 1000;
         private readonly int _asyncTimeoutSeconds = 1200;
         private readonly bool _importAsync = true;
-        private readonly PackageDeployerConfigReader _configReader;
+        private readonly IPackageDeployerConfig _configReader;
 
         #endregion Private Fields
 
         #region Constructors
 
-        public PackageDeployer(ICrmImportRepository importRepo, PackageDeployerConfigReader configReader)
+        public PackageDeployer(ICrmImportRepository importRepo, IPackageDeployerConfig configReader)
         {
             _importRepo = importRepo;
             _configReader = configReader;
+            _sleepIntervalMiliseconds = configReader.AsyncSleepIntervalMiliseconds;
+            _asyncTimeoutSeconds = configReader.AsyncTimeoutSeconds;
+            _importAsync = configReader.UseAsyncImport;
             ReadConfiguration();
-        }
-
-        public PackageDeployer(ICrmImportRepository importRepo, int sleepIntervalMiliseconds, int asyncTimeoutSeconds, bool importAsync, PackageDeployerConfigReader configReader)
-            : this(importRepo, configReader)
-        {
-            _sleepIntervalMiliseconds = sleepIntervalMiliseconds;
-            _asyncTimeoutSeconds = asyncTimeoutSeconds;
-            _importAsync = importAsync;
         }
 
         #endregion Constructors
@@ -59,6 +55,10 @@ namespace Capgemini.Xrm.Deployment.SolutionImport
 
         #region Public Methods and Properties
 
+        public ICrmImportRepository ImportRepository { get { return _importRepo; } }
+
+        public IPackageDeployerConfig DeploymentConfiguration { get { return _configReader; } }
+
         public List<SolutionImporter> GetSolutionDetails
         {
             get
@@ -67,23 +67,25 @@ namespace Capgemini.Xrm.Deployment.SolutionImport
             }
         }
 
+        /// <summary>
+        /// Install holding solutions only if global option not disabled and DeleteOnly flag not set up
+        /// </summary>
         public void InstallHoldingSolutions()
         {
-            if (_configReader.DontUseHoldingSulutions)
-                return;
 
             foreach (var item in _packages)
             {
-                if (!item.ImportSetting.DeleteOnly)
+                bool useAsync = item.ImportSetting.UseAsync && _importAsync;
+
+                if (!item.ImportSetting.DeleteOnly && !_configReader.DontUseHoldingSulutions)
                 {
                     OnRaiseImportUpdatEvent(new ImportUpdateEventArgs
                     {
                         SolutionDetails = item.SolutionImporter.GetSolutionDetails,
-                        Message = String.Format("Holding Solution installation started, PublishWorkflows:{0}, OverwriteUnmanagedCustomizations {1}", item.ImportSetting.PublishWorkflows, item.ImportSetting.OverwriteUnmanagedCustomizations)
+                        Message = $"Holding Solution installation started UseAsync:{useAsync}, PublishWorkflows:{item.ImportSetting.PublishWorkflows}, OverwriteUnmanagedCustomizations {item.ImportSetting.OverwriteUnmanagedCustomizations}"
                     });
 
-                    var result = item.SolutionImporter.ImportHoldingSolution(_importAsync, true, _sleepIntervalMiliseconds, _asyncTimeoutSeconds, item.ImportSetting.PublishWorkflows, item.ImportSetting.OverwriteUnmanagedCustomizations);
-                    //var result = item.SolutionImporter.ImportHoldingSolution(_importAsync, true, _sleepIntervalMiliseconds, _asyncTimeoutSeconds, true, false);
+                    var result = item.SolutionImporter.ImportHoldingSolution(useAsync, true, _sleepIntervalMiliseconds, _asyncTimeoutSeconds, item.ImportSetting.PublishWorkflows, item.ImportSetting.OverwriteUnmanagedCustomizations);
 
                     OnRaiseImportUpdatEvent(new ImportUpdateEventArgs
                     {
@@ -96,12 +98,15 @@ namespace Capgemini.Xrm.Deployment.SolutionImport
                     OnRaiseImportUpdatEvent(new ImportUpdateEventArgs
                     {
                         SolutionDetails = item.SolutionImporter.GetSolutionDetails,
-                        Message = "Holding Solution is not required"
+                        Message = $"Holding Solution is not required because DontUseHoldingSulutions:{_configReader.DontUseHoldingSulutions} and DeleteOnly:{item.ImportSetting.DeleteOnly}"
                     });
                 }
             }
         }
 
+        /// <summary>
+        /// Delete Original solutions only if DeleteOnly set up or DontUseHoldingSolutions false
+        /// </summary>
         public void DeleteOriginalSolutions()
         {
             var procList = _packages.ToList();
@@ -109,12 +114,13 @@ namespace Capgemini.Xrm.Deployment.SolutionImport
 
             foreach (var item in procList)
             {
+                
                 if (!_configReader.DontUseHoldingSulutions || item.ImportSetting.DeleteOnly)
                 {
                     OnRaiseImportUpdatEvent(new ImportUpdateEventArgs
                     {
                         SolutionDetails = item.SolutionImporter.GetSolutionDetails,
-                        Message = "Original Solution deletion started"
+                        Message = $"Original Solution deletion started because DontUseHoldingSulutions:{_configReader.DontUseHoldingSulutions} and DeleteOnly:{item.ImportSetting.DeleteOnly}"
                     });
 
                     var result = item.SolutionImporter.DeleteOriginalSolution(item.ImportSetting.DeleteOnly);
@@ -125,6 +131,14 @@ namespace Capgemini.Xrm.Deployment.SolutionImport
                         Message = result
                     });
                 }
+                else
+                {
+                    OnRaiseImportUpdatEvent(new ImportUpdateEventArgs
+                    {
+                        SolutionDetails = item.SolutionImporter.GetSolutionDetails,
+                        Message = $"Original Solution deletion not required because DontUseHoldingSulutions:{_configReader.DontUseHoldingSulutions} and DeleteOnly:{item.ImportSetting.DeleteOnly}"
+                    });
+                }
             }
         }
 
@@ -132,13 +146,15 @@ namespace Capgemini.Xrm.Deployment.SolutionImport
         {
             foreach (var item in _packages)
             {
+                bool useAsync = item.ImportSetting.UseAsync && _importAsync;
+
                 OnRaiseImportUpdatEvent(new ImportUpdateEventArgs
                 {
                     SolutionDetails = item.SolutionImporter.GetSolutionDetails,
-                    Message = String.Format("Updated Solution installation started, PublishWorkflows:{0}, OverwriteUnmanagedCustomizations {1}", item.ImportSetting.PublishWorkflows, item.ImportSetting.OverwriteUnmanagedCustomizations)
+                    Message = $"Updated Solution installation started UseAsync:{useAsync}, PublishWorkflows:{item.ImportSetting.PublishWorkflows}, OverwriteUnmanagedCustomizations {item.ImportSetting.OverwriteUnmanagedCustomizations}"
                 });
 
-                var result = item.SolutionImporter.ImportUpdatedSolution(_importAsync, true, _sleepIntervalMiliseconds, _asyncTimeoutSeconds, item.ImportSetting.PublishWorkflows, item.ImportSetting.OverwriteUnmanagedCustomizations);
+                var result = item.SolutionImporter.ImportUpdatedSolution(useAsync, true, _sleepIntervalMiliseconds, _asyncTimeoutSeconds, item.ImportSetting.PublishWorkflows, item.ImportSetting.OverwriteUnmanagedCustomizations);
 
                 OnRaiseImportUpdatEvent(new ImportUpdateEventArgs
                 {
@@ -152,7 +168,7 @@ namespace Capgemini.Xrm.Deployment.SolutionImport
                     OnRaiseImportUpdatEvent(new ImportUpdateEventArgs
                     {
                         SolutionDetails = item.SolutionImporter.GetSolutionDetails,
-                        Message = "Holding Solution deletion started"
+                        Message = $"Holding Solution deletion started because DontUseHoldingSulutions:{_configReader.DontUseHoldingSulutions} and DeleteOnly:{item.ImportSetting.DeleteOnly}"
                     });
 
                     var result2 = item.SolutionImporter.DeleteHoldingSolution();
@@ -168,7 +184,7 @@ namespace Capgemini.Xrm.Deployment.SolutionImport
                     OnRaiseImportUpdatEvent(new ImportUpdateEventArgs
                     {
                         SolutionDetails = item.SolutionImporter.GetSolutionDetails,
-                        Message = "Holding Solution deletion not required"
+                        Message = $"Holding Solution deletion not required because DontUseHoldingSulutions:{_configReader.DontUseHoldingSulutions} and DeleteOnly:{item.ImportSetting.DeleteOnly}"
                     });
                 }
             }

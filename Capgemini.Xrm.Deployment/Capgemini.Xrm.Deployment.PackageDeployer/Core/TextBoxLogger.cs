@@ -6,12 +6,12 @@ using System.Windows.Forms;
 
 namespace Capgemini.Xrm.PackageDeployer.TestUI.Logging
 {
-    public class MessageLogger : ILogger, Capgemini.DataMigration.Core.ILogger
+    public class TextBoxLogger : ILogger, Capgemini.DataMigration.Core.ILogger
     {
         private readonly SynchronizationContext _syncContext;
         private readonly TextBox _tbMessage;
 
-        public MessageLogger(TextBox tbMessage, SynchronizationContext syncContext)
+        public TextBoxLogger(TextBox tbMessage, SynchronizationContext syncContext)
         {
             _tbMessage = tbMessage;
             _syncContext = syncContext;

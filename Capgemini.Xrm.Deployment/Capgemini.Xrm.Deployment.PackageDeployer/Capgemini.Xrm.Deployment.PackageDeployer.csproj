@@ -31,8 +31,33 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Capgemini.Xrm.DataMigration.Engine, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\Capgemini.Xrm.DataMigration.Engine.1.6.2\lib\net452\Capgemini.Xrm.DataMigration.Engine.dll</HintPath>
+    <Reference Include="Capgemini.DataMigration.Core, Version=2.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\Capgemini.Xrm.DataMigration.Engine.2.1.0\lib\net462\Capgemini.DataMigration.Core.dll</HintPath>
+      <SpecificVersion>False</SpecificVersion>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Capgemini.DataMigration.Resiliency.Polly, Version=2.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\Capgemini.Xrm.DataMigration.Engine.2.1.0\lib\net462\Capgemini.DataMigration.Resiliency.Polly.dll</HintPath>
+      <SpecificVersion>False</SpecificVersion>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Capgemini.Xrm.DataMigration.Core, Version=2.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\Capgemini.Xrm.DataMigration.Engine.2.1.0\lib\net462\Capgemini.Xrm.DataMigration.Core.dll</HintPath>
+      <SpecificVersion>False</SpecificVersion>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Capgemini.Xrm.DataMigration.CrmStore, Version=2.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\Capgemini.Xrm.DataMigration.Engine.2.1.0\lib\net462\Capgemini.Xrm.DataMigration.CrmStore.dll</HintPath>
+      <SpecificVersion>False</SpecificVersion>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Capgemini.Xrm.DataMigration.Engine, Version=2.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\Capgemini.Xrm.DataMigration.Engine.2.1.0\lib\net462\Capgemini.Xrm.DataMigration.Engine.dll</HintPath>
+      <SpecificVersion>False</SpecificVersion>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Capgemini.Xrm.DataMigration.FileStore, Version=2.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\Capgemini.Xrm.DataMigration.Engine.2.1.0\lib\net462\Capgemini.Xrm.DataMigration.FileStore.dll</HintPath>
       <SpecificVersion>False</SpecificVersion>
       <Private>True</Private>
     </Reference>
@@ -50,9 +75,6 @@
       <Private>True</Private>
     </Reference>
     <Reference Include="Microsoft.CSharp, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-    </Reference>
-    <Reference Include="Microsoft.IdentityModel, Version=3.5.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
     </Reference>
     <Reference Include="Microsoft.IdentityModel.Clients.ActiveDirectory, Version=2.28.0.725, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
@@ -150,8 +172,8 @@
       <SpecificVersion>False</SpecificVersion>
       <Private>True</Private>
     </Reference>
-    <Reference Include="Polly, Version=5.3.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\Polly.5.3.0\lib\net45\Polly.dll</HintPath>
+    <Reference Include="Polly, Version=5.8.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\Polly.5.8.0\lib\net45\Polly.dll</HintPath>
       <SpecificVersion>False</SpecificVersion>
       <Private>True</Private>
     </Reference>
@@ -187,8 +209,10 @@
     <Compile Include="BusinessLogic\CapgeminiDataMigratorFacade.cs" />
     <Compile Include="CapgeminiPackageTemplate.cs" />
     <Compile Include="Core\CapgeminiDeploymentManager.cs" />
+    <Compile Include="Core\CrmAccessClient.cs" />
     <Compile Include="Core\IPackageTemplate.cs" />
     <Compile Include="Core\Logger.cs" />
+    <Compile Include="Core\TextBoxLogger.cs" />
     <Compile Include="Forms\CapgeminiPackageDeployerForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -202,7 +226,9 @@
       <SubType>Designer</SubType>
     </None>
     <None Include="Capgemini.Xrm.Deployment.PackageDeployer.nuspec" />
-    <None Include="packages.config" />
+    <None Include="packages.config">
+      <SubType>Designer</SubType>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Capgemini.Xrm.Deployment\Capgemini.Xrm.Deployment.csproj">

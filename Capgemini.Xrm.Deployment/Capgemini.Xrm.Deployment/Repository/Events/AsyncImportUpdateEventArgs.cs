@@ -11,5 +11,7 @@ namespace Capgemini.Xrm.Deployment.Repository.Events
         public int ImportStatusCode { get; set; }
 
         public DateTime EventTime { get; set; }
+
+        public Guid? ImportId { get; set; }
     }
 }

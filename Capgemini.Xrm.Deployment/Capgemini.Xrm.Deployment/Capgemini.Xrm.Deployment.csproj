@@ -67,9 +67,6 @@
     <Reference Include="Microsoft.CSharp, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
     </Reference>
-    <Reference Include="Microsoft.IdentityModel, Version=3.5.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-    </Reference>
     <Reference Include="Microsoft.Xrm.Sdk, Version=9.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <HintPath>..\..\packages\Microsoft.CrmSdk.CoreAssemblies.9.0.0.7\lib\net452\Microsoft.Xrm.Sdk.dll</HintPath>
       <SpecificVersion>False</SpecificVersion>
@@ -102,6 +99,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Config\CRMDeploymentConfig.cs" />
+    <Compile Include="Core\IPackageDeployerConfig.cs" />
     <Compile Include="Config\PackageDeployerConfigReader.cs" />
     <Compile Include="Config\SolutionImportSetting.cs" />
     <Compile Include="Core\CrmAccess.cs" />
@@ -111,6 +109,7 @@
     <Compile Include="Core\ICrmRepository.cs" />
     <Compile Include="Core\ILogger.cs" />
     <Compile Include="Core\ImportStatus.cs" />
+    <Compile Include="Core\Model\AsyncOperationStatusEnum.cs" />
     <Compile Include="Core\Model\ConfigurationParameter.cs" />
     <Compile Include="Core\SoapLoggerOrganizationService.cs" />
     <Compile Include="DocTemplates\DocTemplateManager.cs" />

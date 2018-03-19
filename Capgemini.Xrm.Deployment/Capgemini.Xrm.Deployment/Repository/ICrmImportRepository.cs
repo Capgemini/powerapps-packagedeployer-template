@@ -1,11 +1,14 @@
 ﻿using Capgemini.Xrm.Deployment.Core;
+using Capgemini.Xrm.Deployment.Repository.Events;
 using Microsoft.Xrm.Sdk;
 using System;
 
 namespace Capgemini.Xrm.Deployment.Repository
 {
-    public interface ICrmImportRepository
+    public interface ICrmImportRepository : ICrmRepository
     {
+        event EventHandler<AsyncImportUpdateEventArgs> RaiseImportUpdateEvent;
+
         ImportStatus CheckAsyncImportStatus(Guid asyncJobId);
 
         ImportStatus CheckImportStatus();
@@ -16,7 +19,7 @@ namespace Capgemini.Xrm.Deployment.Repository
 
         ImportStatus ImportSolution(string solutionFilePath, bool publishWorkflows, bool convertToManaged, bool overwriteUnmanagedCustomizations, bool importAsync, bool waitForCompletion, int sleepInterval, int asyncWaitTimeout, bool useHoldingSolution = false);
 
-        void ApplySolutionUpgrade(string solutionName);
+        ImportStatus ApplySolutionUpgrade(string solutionName);
 
         void DeactivateProcess(Guid processId);
 

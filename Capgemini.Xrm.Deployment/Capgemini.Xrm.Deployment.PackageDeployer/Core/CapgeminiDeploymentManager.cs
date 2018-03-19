@@ -13,15 +13,21 @@ namespace Capgemini.Xrm.Deployment.PackageDeployer.Core
 {
     public class CapgeminiDeploymentManager
     {
-        private readonly IPackageTemplate _packageTemplate;
+        //private readonly IPackageTemplate _packageTemplate;
         private readonly ILogger _logger;
         private readonly CrmAccess _gatewayAccess;
         private readonly ICrmImportRepository _impGateway;
         private readonly SolutionImport.PackageDeployer _packageDeployer;
+        private readonly Dispatcher _dispatcher;
 
-        public CapgeminiDeploymentManager(IPackageTemplate packageTemplate, ILogger logger, CrmAccess gatewayAccess, PackageDeployerConfigReader configReader)
+        public CapgeminiDeploymentManager(ILogger logger, CrmAccess gatewayAccess, IPackageDeployerConfig configReader)
+            : this(null, logger, gatewayAccess, configReader)
         {
-            _packageTemplate = packageTemplate;
+        }
+
+        public CapgeminiDeploymentManager(IPackageTemplate packageTemplate, ILogger logger, CrmAccess gatewayAccess, IPackageDeployerConfig configReader)
+        {
+            _dispatcher = packageTemplate != null ? packageTemplate.RootControlDispatcher : null;
             _logger = logger;
             _gatewayAccess = gatewayAccess;
 
@@ -29,16 +35,19 @@ namespace Capgemini.Xrm.Deployment.PackageDeployer.Core
             var packageFolder = Path.Combine(assemblyFolder, packageTemplate.GetImportPackageDataFolderName);
 
             _impGateway = new CrmImportRepository(gatewayAccess);
-            _packageDeployer = new SolutionImport.PackageDeployer(_impGateway, 10000, 15000, false, configReader);
+            _impGateway.RaiseImportUpdateEvent += _impGateway_RaiseImportUpdateEvent;
+            _packageDeployer = new SolutionImport.PackageDeployer(_impGateway, configReader);
 
             _packageDeployer.RaiseImportUpdateEvent += packageDeployer_RaiseImportUpdateEvent;
         }
+
+      
 
         public void StartCustomDeployment()
         {
             _logger.WriteLogMessage("Capgemini Package Deployer - Deployment Start", TraceEventType.Start);
 
-            if (_packageTemplate.RootControlDispatcher != null)
+            if (_dispatcher != null)
             {
                 StartDeploymentWithUI();
             }
@@ -50,7 +59,7 @@ namespace Capgemini.Xrm.Deployment.PackageDeployer.Core
 
         private void StartDeploymentWithUI()
         {
-            _packageTemplate.RootControlDispatcher.Invoke((Action)(() =>
+            _dispatcher.Invoke((Action)(() =>
             {
                 var window = new CapgeminiPackageDeployerForm(_packageDeployer, _impGateway)
                 {
@@ -96,7 +105,7 @@ namespace Capgemini.Xrm.Deployment.PackageDeployer.Core
 
             try
             {
-                _logger.WriteLogMessage("Capgemini Package Deployer - InstallNewSolutions", TraceEventType.Start);
+                _logger.WriteLogMessage("Capgemini Package Deployer - InstallNewSolutions and delete holding solutions", TraceEventType.Start);
                 _packageDeployer.InstallNewSolutions();
             }
             catch (Exception ex)
@@ -111,5 +120,12 @@ namespace Capgemini.Xrm.Deployment.PackageDeployer.Core
             var message = string.Format("Solution:{0}:{1} - {2}", e.SolutionDetails.SolutionName, e.SolutionDetails.SolutionVersion, e.Message);
             _logger.WriteLogMessage(message);
         }
+
+        private void _impGateway_RaiseImportUpdateEvent(object sender, Repository.Events.AsyncImportUpdateEventArgs e)
+        {
+            var message = string.Format($"AsyncImportUpdate:{ e.Message}");
+            _logger.WriteLogMessage(message, TraceEventType.Verbose);
+        }
+
     }
 }

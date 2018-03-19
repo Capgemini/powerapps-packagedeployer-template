@@ -5,7 +5,7 @@ using System.Diagnostics;
 
 namespace Capgemini.Xrm.Deployment.PackageDeployer.Core
 {
-    public class Logger : ILogger, Capgemini.Xrm.DataMigration.Core.ILogger
+    public class Logger : ILogger, Capgemini.DataMigration.Core.ILogger
     {
         private IPackageTemplate _impExtension;
 

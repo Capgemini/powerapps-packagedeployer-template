@@ -2,12 +2,12 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
   <metadata>
     <id>Capgemini.Xrm.Deployment.PackageDeployer</id>
-    <version>1.0.0</version>
+    <version>1.4.0</version>
     <title>Capgemini Package Deployer Extensions</title>
     <authors>Capgemini</authors>
     <owners>Capgemini</owners>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
-    <description>Capgemini Dynamics 365 PackageDeployerExtensions - contains custom deployment form and CapgeminiPackageTemplate, wrapper for Capgemini.Xrm.Deployment library</description>
+    <description>Capgemini Dynamics 365 PackageDeployerExtensions (v9 SDK) - contains custom deployment form and CapgeminiPackageTemplate, wrapper for Capgemini.Xrm.Deployment library</description>
     <copyright>Capgemini Copyright ©  2018</copyright>
     <dependencies />
   </metadata>

@@ -1,4 +1,5 @@
 ﻿using Capgemini.Xrm.Deployment.DocTemplates;
+using Capgemini.Xrm.Deployment.PackageDeployer.Core;
 using Capgemini.Xrm.Deployment.Repository;
 using System;
 using System.Windows.Forms;

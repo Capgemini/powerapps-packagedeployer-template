@@ -13,5 +13,7 @@
         public bool PublishWorkflows { get; set; }
 
         public bool ForceUpgrade { get; set; }
+
+        public bool UseAsync { get; set; } 
     }
 }

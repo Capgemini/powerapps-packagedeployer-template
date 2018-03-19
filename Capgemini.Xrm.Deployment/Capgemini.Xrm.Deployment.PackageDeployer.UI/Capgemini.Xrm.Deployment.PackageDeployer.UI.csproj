@@ -4,19 +4,14 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{ED62929E-BCDB-4CB9-BA61-88F85A81DC09}</ProjectGuid>
+    <ProjectGuid>{9474A3AD-A202-458B-BA4B-89923084A8A7}</ProjectGuid>
     <OutputType>WinExe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Capgemini.Xrm.PackageDeployer.TestUI</RootNamespace>
-    <AssemblyName>Capgemini.Xrm.PackageDeployer.TestUI</AssemblyName>
+    <RootNamespace>Capgemini.Xrm.Deployment.PackageDeployer.UI</RootNamespace>
+    <AssemblyName>Capgemini.Xrm.Deployment.PackageDeployer.UI</AssemblyName>
     <TargetFrameworkVersion>v4.6.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
-    <SccProjectName>SAK</SccProjectName>
-    <SccLocalPath>SAK</SccLocalPath>
-    <SccAuxPath>SAK</SccAuxPath>
-    <SccProvider>SAK</SccProvider>
-    <TargetFrameworkProfile />
-    <IsWebBootstrapper>false</IsWebBootstrapper>
+    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <PublishUrl>publish\</PublishUrl>
     <Install>true</Install>
     <InstallFrom>Disk</InstallFrom>
@@ -29,11 +24,12 @@
     <MapFileExtensions>true</MapFileExtensions>
     <ApplicationRevision>0</ApplicationRevision>
     <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
+    <IsWebBootstrapper>false</IsWebBootstrapper>
     <UseApplicationTrust>false</UseApplicationTrust>
     <BootstrapperEnabled>true</BootstrapperEnabled>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <PlatformTarget>x64</PlatformTarget>
+    <PlatformTarget>AnyCPU</PlatformTarget>
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
@@ -53,123 +49,123 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <PropertyGroup>
-    <StartupObject>Capgemini.Xrm.PackageDeployer.TestUI.Program</StartupObject>
+    <StartupObject>Capgemini.Xrm.Deployment.PackageDeployer.UI.Program</StartupObject>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Capgemini.DataMigration.Core, Version=2.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\..\..\packages\Capgemini.Xrm.DataMigration.Engine.2.1.0\lib\net462\Capgemini.DataMigration.Core.dll</HintPath>
+      <HintPath>..\..\packages\Capgemini.Xrm.DataMigration.Engine.2.1.0\lib\net462\Capgemini.DataMigration.Core.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="Capgemini.DataMigration.Resiliency.Polly, Version=2.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\..\..\packages\Capgemini.Xrm.DataMigration.Engine.2.1.0\lib\net462\Capgemini.DataMigration.Resiliency.Polly.dll</HintPath>
+      <HintPath>..\..\packages\Capgemini.Xrm.DataMigration.Engine.2.1.0\lib\net462\Capgemini.DataMigration.Resiliency.Polly.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="Capgemini.Xrm.DataMigration.Core, Version=2.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\..\..\packages\Capgemini.Xrm.DataMigration.Engine.2.1.0\lib\net462\Capgemini.Xrm.DataMigration.Core.dll</HintPath>
+      <HintPath>..\..\packages\Capgemini.Xrm.DataMigration.Engine.2.1.0\lib\net462\Capgemini.Xrm.DataMigration.Core.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="Capgemini.Xrm.DataMigration.CrmStore, Version=2.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\..\..\packages\Capgemini.Xrm.DataMigration.Engine.2.1.0\lib\net462\Capgemini.Xrm.DataMigration.CrmStore.dll</HintPath>
+      <HintPath>..\..\packages\Capgemini.Xrm.DataMigration.Engine.2.1.0\lib\net462\Capgemini.Xrm.DataMigration.CrmStore.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="Capgemini.Xrm.DataMigration.Engine, Version=2.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\..\..\packages\Capgemini.Xrm.DataMigration.Engine.2.1.0\lib\net462\Capgemini.Xrm.DataMigration.Engine.dll</HintPath>
+      <HintPath>..\..\packages\Capgemini.Xrm.DataMigration.Engine.2.1.0\lib\net462\Capgemini.Xrm.DataMigration.Engine.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="Capgemini.Xrm.DataMigration.FileStore, Version=2.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\..\..\packages\Capgemini.Xrm.DataMigration.Engine.2.1.0\lib\net462\Capgemini.Xrm.DataMigration.FileStore.dll</HintPath>
+      <HintPath>..\..\packages\Capgemini.Xrm.DataMigration.Engine.2.1.0\lib\net462\Capgemini.Xrm.DataMigration.FileStore.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="DocumentFormat.OpenXml, Version=2.5.5631.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <HintPath>..\..\..\packages\DocumentFormat.OpenXml.2.5\lib\DocumentFormat.OpenXml.dll</HintPath>
+      <HintPath>..\..\packages\DocumentFormat.OpenXml.2.5\lib\DocumentFormat.OpenXml.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="DotNetZip, Version=1.10.1.0, Culture=neutral, PublicKeyToken=6583c7c814667745, processorArchitecture=MSIL">
-      <HintPath>..\..\..\packages\DotNetZip.1.10.1\lib\net20\DotNetZip.dll</HintPath>
+      <HintPath>..\..\packages\DotNetZip.1.10.1\lib\net20\DotNetZip.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="Microsoft.Crm.Sdk.Proxy, Version=9.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <HintPath>..\..\..\packages\Microsoft.CrmSdk.CoreAssemblies.9.0.0.7\lib\net452\Microsoft.Crm.Sdk.Proxy.dll</HintPath>
+      <HintPath>..\..\packages\Microsoft.CrmSdk.CoreAssemblies.9.0.0.7\lib\net452\Microsoft.Crm.Sdk.Proxy.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="Microsoft.IdentityModel.Clients.ActiveDirectory, Version=2.28.0.725, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <HintPath>..\..\..\packages\Microsoft.IdentityModel.Clients.ActiveDirectory.2.28.0\lib\net45\Microsoft.IdentityModel.Clients.ActiveDirectory.dll</HintPath>
+      <HintPath>..\..\packages\Microsoft.IdentityModel.Clients.ActiveDirectory.2.28.0\lib\net45\Microsoft.IdentityModel.Clients.ActiveDirectory.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="Microsoft.IdentityModel.Clients.ActiveDirectory.WindowsForms, Version=2.28.0.725, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <HintPath>..\..\..\packages\Microsoft.IdentityModel.Clients.ActiveDirectory.2.28.0\lib\net45\Microsoft.IdentityModel.Clients.ActiveDirectory.WindowsForms.dll</HintPath>
+      <HintPath>..\..\packages\Microsoft.IdentityModel.Clients.ActiveDirectory.2.28.0\lib\net45\Microsoft.IdentityModel.Clients.ActiveDirectory.WindowsForms.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="Microsoft.Uii.AifServices, Version=3.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <HintPath>..\..\..\packages\Microsoft.CrmSdk.UII.CommonAssemblies.9.0.0.7\lib\net452\Microsoft.Uii.AifServices.dll</HintPath>
+      <HintPath>..\..\packages\Microsoft.CrmSdk.UII.CommonAssemblies.9.0.0.7\lib\net452\Microsoft.Uii.AifServices.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="Microsoft.Uii.Common, Version=3.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <HintPath>..\..\..\packages\Microsoft.CrmSdk.UII.CommonAssemblies.9.0.0.7\lib\net452\Microsoft.Uii.Common.dll</HintPath>
+      <HintPath>..\..\packages\Microsoft.CrmSdk.UII.CommonAssemblies.9.0.0.7\lib\net452\Microsoft.Uii.Common.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="Microsoft.Uii.Common.Configuration, Version=3.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <HintPath>..\..\..\packages\Microsoft.CrmSdk.UII.CommonAssemblies.9.0.0.7\lib\net452\Microsoft.Uii.Common.Configuration.dll</HintPath>
+      <HintPath>..\..\packages\Microsoft.CrmSdk.UII.CommonAssemblies.9.0.0.7\lib\net452\Microsoft.Uii.Common.Configuration.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="Microsoft.Uii.Common.Listeners, Version=3.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <HintPath>..\..\..\packages\Microsoft.CrmSdk.UII.CommonAssemblies.9.0.0.7\lib\net452\Microsoft.Uii.Common.Listeners.dll</HintPath>
+      <HintPath>..\..\packages\Microsoft.CrmSdk.UII.CommonAssemblies.9.0.0.7\lib\net452\Microsoft.Uii.Common.Listeners.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="Microsoft.Uii.Common.Logging, Version=3.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <HintPath>..\..\..\packages\Microsoft.CrmSdk.UII.CommonAssemblies.9.0.0.7\lib\net452\Microsoft.Uii.Common.Logging.dll</HintPath>
+      <HintPath>..\..\packages\Microsoft.CrmSdk.UII.CommonAssemblies.9.0.0.7\lib\net452\Microsoft.Uii.Common.Logging.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="Microsoft.Uii.Common.Logging.Providers, Version=3.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <HintPath>..\..\..\packages\Microsoft.CrmSdk.UII.CommonAssemblies.9.0.0.7\lib\net452\Microsoft.Uii.Common.Logging.Providers.dll</HintPath>
+      <HintPath>..\..\packages\Microsoft.CrmSdk.UII.CommonAssemblies.9.0.0.7\lib\net452\Microsoft.Uii.Common.Logging.Providers.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="Microsoft.Uii.Common.Providers, Version=3.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <HintPath>..\..\..\packages\Microsoft.CrmSdk.UII.CommonAssemblies.9.0.0.7\lib\net452\Microsoft.Uii.Common.Providers.dll</HintPath>
+      <HintPath>..\..\packages\Microsoft.CrmSdk.UII.CommonAssemblies.9.0.0.7\lib\net452\Microsoft.Uii.Common.Providers.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="Microsoft.Uii.Common.TypeProvider, Version=3.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <HintPath>..\..\..\packages\Microsoft.CrmSdk.UII.CommonAssemblies.9.0.0.7\lib\net452\Microsoft.Uii.Common.TypeProvider.dll</HintPath>
+      <HintPath>..\..\packages\Microsoft.CrmSdk.UII.CommonAssemblies.9.0.0.7\lib\net452\Microsoft.Uii.Common.TypeProvider.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="Microsoft.Uii.Csr.Browser.Web, Version=3.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <HintPath>..\..\..\packages\Microsoft.CrmSdk.UII.CommonAssemblies.9.0.0.7\lib\net452\Microsoft.Uii.Csr.Browser.Web.dll</HintPath>
+      <HintPath>..\..\packages\Microsoft.CrmSdk.UII.CommonAssemblies.9.0.0.7\lib\net452\Microsoft.Uii.Csr.Browser.Web.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="Microsoft.Uii.Csr.Core, Version=3.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <HintPath>..\..\..\packages\Microsoft.CrmSdk.UII.CommonAssemblies.9.0.0.7\lib\net452\Microsoft.Uii.Csr.Core.dll</HintPath>
+      <HintPath>..\..\packages\Microsoft.CrmSdk.UII.CommonAssemblies.9.0.0.7\lib\net452\Microsoft.Uii.Csr.Core.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="Microsoft.Uii.Csr.Win32Api, Version=3.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <HintPath>..\..\..\packages\Microsoft.CrmSdk.UII.CommonAssemblies.9.0.0.7\lib\net452\Microsoft.Uii.Csr.Win32Api.dll</HintPath>
+      <HintPath>..\..\packages\Microsoft.CrmSdk.UII.CommonAssemblies.9.0.0.7\lib\net452\Microsoft.Uii.Csr.Win32Api.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="Microsoft.Xrm.Sdk, Version=9.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <HintPath>..\..\..\packages\Microsoft.CrmSdk.CoreAssemblies.9.0.0.7\lib\net452\Microsoft.Xrm.Sdk.dll</HintPath>
+      <HintPath>..\..\packages\Microsoft.CrmSdk.CoreAssemblies.9.0.0.7\lib\net452\Microsoft.Xrm.Sdk.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="Microsoft.Xrm.Sdk.Deployment, Version=9.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <HintPath>..\..\..\packages\Microsoft.CrmSdk.Deployment.9.0.0.7\lib\net452\Microsoft.Xrm.Sdk.Deployment.dll</HintPath>
+      <HintPath>..\..\packages\Microsoft.CrmSdk.Deployment.9.0.0.7\lib\net452\Microsoft.Xrm.Sdk.Deployment.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="Microsoft.Xrm.Sdk.Workflow, Version=9.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <HintPath>..\..\..\packages\Microsoft.CrmSdk.Workflow.9.0.0.7\lib\net452\Microsoft.Xrm.Sdk.Workflow.dll</HintPath>
+      <HintPath>..\..\packages\Microsoft.CrmSdk.Workflow.9.0.0.7\lib\net452\Microsoft.Xrm.Sdk.Workflow.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="Microsoft.Xrm.Tooling.Connector, Version=3.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <HintPath>..\..\..\packages\Microsoft.CrmSdk.XrmTooling.CoreAssembly.9.0.0.7\lib\net452\Microsoft.Xrm.Tooling.Connector.dll</HintPath>
+      <HintPath>..\..\packages\Microsoft.CrmSdk.XrmTooling.CoreAssembly.9.0.0.7\lib\net452\Microsoft.Xrm.Tooling.Connector.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="Microsoft.Xrm.Tooling.PackageDeployment.CrmPackageExtentionBase, Version=1.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <HintPath>..\..\..\packages\Microsoft.CrmSdk.XrmTooling.PackageDeployment.9.0.0.7\lib\net452\Microsoft.Xrm.Tooling.PackageDeployment.CrmPackageExtentionBase.dll</HintPath>
+      <HintPath>..\..\packages\Microsoft.CrmSdk.XrmTooling.PackageDeployment.9.0.0.7\lib\net452\Microsoft.Xrm.Tooling.PackageDeployment.CrmPackageExtentionBase.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="Newtonsoft.Json, Version=9.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
-      <HintPath>..\..\..\packages\Newtonsoft.Json.9.0.1\lib\net45\Newtonsoft.Json.dll</HintPath>
+      <HintPath>..\..\packages\Newtonsoft.Json.9.0.1\lib\net45\Newtonsoft.Json.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="Polly, Version=5.8.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\..\..\packages\Polly.5.8.0\lib\net45\Polly.dll</HintPath>
+      <HintPath>..\..\packages\Polly.5.8.0\lib\net45\Polly.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="PresentationFramework" />
@@ -181,14 +177,11 @@
     <Reference Include="System.DirectoryServices" />
     <Reference Include="System.DirectoryServices.AccountManagement" />
     <Reference Include="System.IdentityModel" />
-    <Reference Include="System.Runtime.Caching" />
     <Reference Include="System.Runtime.Serialization" />
     <Reference Include="System.Security" />
     <Reference Include="System.ServiceModel" />
-    <Reference Include="System.ServiceModel.Activation" />
     <Reference Include="System.ServiceModel.Web" />
     <Reference Include="System.Web" />
-    <Reference Include="System.Web.Extensions" />
     <Reference Include="System.Web.Services" />
     <Reference Include="System.Workflow.Activities" />
     <Reference Include="System.Workflow.ComponentModel" />
@@ -204,30 +197,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Import.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="Import.Designer.cs">
-      <DependentUpon>Import.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Logging\MessageLogger.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="StartForm.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="StartForm.Designer.cs">
-      <DependentUpon>StartForm.cs</DependentUpon>
-    </Compile>
-    <Compile Include="TemplateMigration.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="TemplateMigration.Designer.cs">
-      <DependentUpon>TemplateMigration.cs</DependentUpon>
-    </Compile>
-    <EmbeddedResource Include="Import.resx">
-      <DependentUpon>Import.cs</DependentUpon>
-    </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
@@ -236,17 +207,8 @@
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>
       <DependentUpon>Resources.resx</DependentUpon>
-      <DesignTime>True</DesignTime>
     </Compile>
-    <EmbeddedResource Include="StartForm.resx">
-      <DependentUpon>StartForm.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="TemplateMigration.resx">
-      <DependentUpon>TemplateMigration.cs</DependentUpon>
-    </EmbeddedResource>
-    <None Include="packages.config">
-      <SubType>Designer</SubType>
-    </None>
+    <None Include="packages.config" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
@@ -258,14 +220,22 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <None Include="App.config">
-      <SubType>Designer</SubType>
-    </None>
+    <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
-    <BootstrapperPackage Include=".NETFramework,Version=v4.5.2">
+    <ProjectReference Include="..\Capgemini.Xrm.Deployment.PackageDeployer\Capgemini.Xrm.Deployment.PackageDeployer.csproj">
+      <Project>{3012a966-c78e-4a84-bd4b-abf3d60fcf1a}</Project>
+      <Name>Capgemini.Xrm.Deployment.PackageDeployer</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Capgemini.Xrm.Deployment\Capgemini.Xrm.Deployment.csproj">
+      <Project>{01ff506f-1fed-4f50-b70a-3656599ce25e}</Project>
+      <Name>Capgemini.Xrm.Deployment</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <BootstrapperPackage Include=".NETFramework,Version=v4.6.2">
       <Visible>False</Visible>
-      <ProductName>Microsoft .NET Framework 4.5.2 %28x86 and x64%29</ProductName>
+      <ProductName>Microsoft .NET Framework 4.6.2 %28x86 and x64%29</ProductName>
       <Install>true</Install>
     </BootstrapperPackage>
     <BootstrapperPackage Include="Microsoft.Net.Framework.3.5.SP1">
@@ -273,16 +243,6 @@
       <ProductName>.NET Framework 3.5 SP1</ProductName>
       <Install>false</Install>
     </BootstrapperPackage>
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\..\Capgemini.Xrm.Deployment.PackageDeployer\Capgemini.Xrm.Deployment.PackageDeployer.csproj">
-      <Project>{3012a966-c78e-4a84-bd4b-abf3d60fcf1a}</Project>
-      <Name>Capgemini.Xrm.Deployment.PackageDeployer</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\..\Capgemini.Xrm.Deployment\Capgemini.Xrm.Deployment.csproj">
-      <Project>{01ff506f-1fed-4f50-b70a-3656599ce25e}</Project>
-      <Name>Capgemini.Xrm.Deployment</Name>
-    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Capgemini.Xrm.Deployment.Core;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -7,7 +8,7 @@ using System.Xml.Linq;
 
 namespace Capgemini.Xrm.Deployment.Config
 {
-    public class PackageDeployerConfigReader
+    public class PackageDeployerConfigReader : IPackageDeployerConfig
     {
         public string SolutionsFolder { get; private set; }
 
@@ -24,6 +25,12 @@ namespace Capgemini.Xrm.Deployment.Config
         public bool DontUseHoldingSulutions { get; private set; }
 
         public bool UseNewApi { get; private set; }
+
+        public bool UseAsyncImport { get; private set; }
+
+        public int AsyncTimeoutSeconds { get; private set; }
+
+        public int AsyncSleepIntervalMiliseconds { get; private set; }
 
         public bool EnableSlaAfterImport { get; private set; }
 
@@ -65,6 +72,9 @@ namespace Capgemini.Xrm.Deployment.Config
             DontUseHoldingSulutions = ReadBoolMainSettings(nodeMain, "dontUseHoldingSolution");
             SkipPostDeploymentActions = ReadBoolMainSettings(nodeMain, "skipPostDeploymentActions");
             UseNewApi = ReadBoolMainSettings(nodeMain, "useNewApi");
+            UseAsyncImport = ReadBoolMainSettings(nodeMain, "useAsyncImport");
+            AsyncTimeoutSeconds = ReadIntMainSettings(nodeMain, "asyncTimeoutSeconds", 3600);
+            AsyncSleepIntervalMiliseconds = ReadIntMainSettings(nodeMain, "asyncSleepIntervalMiliseconds", 10000);
             EnableSlaAfterImport = ReadBoolMainSettings(nodeMain, "enableSlaAfterImport");
             DisableSlaBeforeImport = ReadBoolMainSettings(nodeMain, "disableSlaBeforeImport");
 
@@ -82,7 +92,8 @@ namespace Capgemini.Xrm.Deployment.Config
                     DeleteOnly = ReadBoolMainSettings(item, "deleteonly"),
                     OverwriteUnmanagedCustomizations = ReadBoolMainSettings(item, "overwriteunmanagedcustomizations", true),
                     PublishWorkflows = ReadBoolMainSettings(item, "publishworkflowsandactivateplugins", true),
-                    ForceUpgrade = ReadBoolMainSettings(item, "forceUpgrade")
+                    ForceUpgrade = ReadBoolMainSettings(item, "forceUpgrade"),
+                    UseAsync = ReadBoolMainSettings(item, "useAsync")
                 };
 
                 SolutionImportSettings.Add(solImpSet);
@@ -117,6 +128,13 @@ namespace Capgemini.Xrm.Deployment.Config
             bool boolValue = defaultValue;
             if (node.Attributes[settingName] != null) bool.TryParse(node.Attributes[settingName].Value, out boolValue);
             return boolValue;
+        }
+
+        private int ReadIntMainSettings(XmlNode node, string settingName, int defaultValue)
+        {
+            int intValue = defaultValue;
+            if (node.Attributes[settingName] != null) int.TryParse(node.Attributes[settingName].Value, out intValue);
+            return intValue;
         }
 
         private static string GetStringSettingFromImportConfig(XmlNode node, string settingName)

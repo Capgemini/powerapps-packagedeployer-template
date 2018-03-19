@@ -54,7 +54,7 @@ namespace Capgemini.Xrm.Deployment.SolutionImport
             {
                 return new ImportStatus
                 {
-                    ImportState = "Not Required",
+                    ImportState = "Not Required, already installed",
                     ImportMessage = "Solution with version " + InstalledVersion + " is already installed"
                 };
             }
@@ -66,11 +66,11 @@ namespace Capgemini.Xrm.Deployment.SolutionImport
         {
             UpdateSolutionDetails();
 
-            if (InstalledHoldingVersion == GetSolutionDetails.SolutionVersion)
+            if (InstalledHoldingVersion == GetSolutionDetails.SolutionVersion && !_solutionFileManager.SolutionDetails.ForceUpdate)
             {
                 return new ImportStatus
                 {
-                    ImportState = "Holding Solution Not Needed",
+                    ImportState = "Holding Solution Not Needed because already exists",
                     ImportMessage = "Holding Solution with version " + InstalledHoldingVersion + " is already installed"
                 };
             }
@@ -79,42 +79,47 @@ namespace Capgemini.Xrm.Deployment.SolutionImport
             {
                 var importResult = _importRepo.ImportSolution(_solutionFileManager.SolutionDetails.SolutionFilePath, publishWorkflows, CRMDeploymentConfig.ConvertToManaged, overwriteUnamanagedCust, importAsync, waitForCompletion, sleepInterval, asyncWaitTimeoutSeconds);
 
-                return new ImportStatus
-                {
-                    ImportState = "Holding Solution Not Needed",
-                    ImportMessage = "Holding Solution not required becasue it is the first installation, so the new solution has been installed"
-                };
+                importResult.ImportState += ", First Installation, Original solution has been installed instead";
+                importResult.ImportMessage += ", Holding Solution not required becasue it is the first installation, so the new solution has been installed instead";
+
+                return importResult;
             }
 
             if (InstalledVersion >= GetSolutionDetails.SolutionVersion && !_solutionFileManager.SolutionDetails.ForceUpdate)
             {
                 return new ImportStatus
                 {
-                    ImportState = "Holding Solution Not Needed",
+                    ImportState = "Holding Solution Not Needed, newer version already installed",
                     ImportMessage = "Solution with version " + InstalledVersion + " is already installed"
                 };
             }
-
-            if (!_useNewAPI)
+            else
             {
-                _solutionFileManager.CreateHoldingSolutionFile();
 
-                try
+                if (!_useNewAPI)
                 {
-                    return _importRepo.ImportSolution(_solutionFileManager.SolutionDetails.HoldingSolutionFilePath, publishWorkflows, CRMDeploymentConfig.ConvertToManaged, overwriteUnamanagedCust, importAsync, waitForCompletion, sleepInterval, asyncWaitTimeoutSeconds);
+                    _solutionFileManager.CreateHoldingSolutionFile();
+
+                    try
+                    {
+                        return _importRepo.ImportSolution(_solutionFileManager.SolutionDetails.HoldingSolutionFilePath, publishWorkflows, CRMDeploymentConfig.ConvertToManaged, overwriteUnamanagedCust, importAsync, waitForCompletion, sleepInterval, asyncWaitTimeoutSeconds);
+                    }
+                    finally
+                    {
+                        _solutionFileManager.DeleteHoldingSolutionFile();
+                    }
                 }
-                finally
+                else
                 {
-                    _solutionFileManager.DeleteHoldingSolutionFile();
+
+                    if (_solutionFileManager.SolutionDetails.ForceUpdate)
+                    {
+                        throw new Exception("Force update cannot be used with built in holding solutions! Change useNewApi to False or disable force update");
+                    }
+
+                    return _importRepo.ImportSolution(_solutionFileManager.SolutionDetails.SolutionFilePath, publishWorkflows, CRMDeploymentConfig.ConvertToManaged, overwriteUnamanagedCust, importAsync, waitForCompletion, sleepInterval, asyncWaitTimeoutSeconds, true);
                 }
             }
-
-            if (_solutionFileManager.SolutionDetails.ForceUpdate)
-            {
-                throw new Exception("Force update cannot be used with built in holding solutions! Change useNewApi to False or disable force update");
-            }
-
-            return _importRepo.ImportSolution(_solutionFileManager.SolutionDetails.SolutionFilePath, publishWorkflows, CRMDeploymentConfig.ConvertToManaged, overwriteUnamanagedCust, importAsync, waitForCompletion, sleepInterval, asyncWaitTimeoutSeconds, true);
         }
 
         public string DeleteOriginalSolution(bool noHolding)
@@ -142,9 +147,11 @@ namespace Capgemini.Xrm.Deployment.SolutionImport
 
                 return "Original Solution with version " + InstalledVersion + " has been deleted";
             }
-
-            _importRepo.ApplySolutionUpgrade(_solutionFileManager.SolutionDetails.SolutionName);
-            return "Solution with version " + InstalledVersion + " has been UPGRADED, new API used";
+            else
+            {
+                _importRepo.ApplySolutionUpgrade(_solutionFileManager.SolutionDetails.SolutionName);
+                return "Solution with version " + InstalledVersion + " has been UPGRADED, new API used";
+            }
         }
 
         public string DeleteHoldingSolution()

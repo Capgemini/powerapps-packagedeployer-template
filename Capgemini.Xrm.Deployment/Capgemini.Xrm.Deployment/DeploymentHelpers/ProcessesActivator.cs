@@ -12,13 +12,13 @@ namespace Capgemini.Xrm.DeploymentHelpers
 {
     public class ProcessesActivator
     {
-        private readonly PackageDeployerConfigReader _config;
+        private readonly IPackageDeployerConfig _config;
         private readonly ILogger _packageLog;
         private readonly CrmWorkflowsRepository _workflowRepo;
 
-        public ProcessesActivator(PackageDeployerConfigReader configReader, ILogger packageLog, CrmAccess crmAccess)
+        public ProcessesActivator(IPackageDeployerConfig config, ILogger packageLog, CrmAccess crmAccess)
         {
-            _config = configReader;
+            _config = config;
             _packageLog = packageLog;
             _workflowRepo = new CrmWorkflowsRepository(crmAccess);
         }

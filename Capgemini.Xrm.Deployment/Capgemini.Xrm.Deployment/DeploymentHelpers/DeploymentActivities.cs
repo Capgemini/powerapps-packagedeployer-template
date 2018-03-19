@@ -12,14 +12,14 @@ namespace Capgemini.Xrm.DeploymentHelpers
 {
     public class DeploymentActivities
     {
-        private readonly PackageDeployerConfigReader _config;
+        private readonly IPackageDeployerConfig _config;
         private readonly ILogger _packageLog;
         private readonly CrmTemplatesRepository _crmTemplatesRepo;
         private readonly CrmSlaRepository _slaRepo;
 
-        public DeploymentActivities(PackageDeployerConfigReader configReader, ILogger packageLog, CrmAccess crmAccess)
+        public DeploymentActivities(IPackageDeployerConfig config, ILogger packageLog, CrmAccess crmAccess)
         {
-            _config = configReader;
+            _config = config;
             _packageLog = packageLog;
             _crmTemplatesRepo = new CrmTemplatesRepository(crmAccess);
             _slaRepo = new CrmSlaRepository(crmAccess);

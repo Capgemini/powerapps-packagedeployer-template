@@ -1,5 +1,6 @@
 ﻿using Capgemini.Xrm.Deployment.Config;
 using Capgemini.Xrm.Deployment.PackageDeployer.BusinessLogic;
+using Capgemini.Xrm.Deployment.PackageDeployer.Core;
 using Capgemini.Xrm.Deployment.Repository;
 using Capgemini.Xrm.Deployment.Repository.Events;
 using Capgemini.Xrm.Deployment.SolutionImport.Events;
@@ -62,7 +63,7 @@ namespace Capgemini.Xrm.PackageDeployer.TestUI
                 impRepo.RaiseImportUpdateEvent += ImpGateway_RaiseImportUpdateEvent;
                 var configReader = new PackageDeployerConfigReader(Settings.Default.PkgFolderPath);
 
-                _deployer = new Deployment.SolutionImport.PackageDeployer(impRepo, 1000, 3600, false, configReader);
+                _deployer = new Deployment.SolutionImport.PackageDeployer(impRepo, configReader);
 
                 _deployer.RaiseImportUpdateEvent += _deployer_RaiseImportUpdateEvent;
 

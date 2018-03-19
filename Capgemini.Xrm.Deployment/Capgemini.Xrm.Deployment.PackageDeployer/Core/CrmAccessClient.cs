@@ -3,7 +3,7 @@ using Microsoft.Xrm.Sdk;
 using Microsoft.Xrm.Tooling.Connector;
 using System.Configuration;
 
-namespace Capgemini.Xrm.PackageDeployer.TestUI
+namespace Capgemini.Xrm.Deployment.PackageDeployer.Core
 {
     public class CrmAccessClient : CrmAccess
     {
