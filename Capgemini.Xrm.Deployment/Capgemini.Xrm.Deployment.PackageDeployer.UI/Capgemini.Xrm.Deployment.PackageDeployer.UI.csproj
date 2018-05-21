@@ -53,27 +53,27 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Capgemini.DataMigration.Core, Version=2.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\Capgemini.Xrm.DataMigration.Engine.2.4.2\lib\net462\Capgemini.DataMigration.Core.dll</HintPath>
+      <HintPath>..\..\packages\Capgemini.Xrm.DataMigration.Engine.2.4.4.1\lib\net462\Capgemini.DataMigration.Core.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="Capgemini.DataMigration.Resiliency.Polly, Version=2.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\Capgemini.Xrm.DataMigration.Engine.2.4.2\lib\net462\Capgemini.DataMigration.Resiliency.Polly.dll</HintPath>
+      <HintPath>..\..\packages\Capgemini.Xrm.DataMigration.Engine.2.4.4.1\lib\net462\Capgemini.DataMigration.Resiliency.Polly.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="Capgemini.Xrm.DataMigration.Core, Version=2.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\Capgemini.Xrm.DataMigration.Engine.2.4.2\lib\net462\Capgemini.Xrm.DataMigration.Core.dll</HintPath>
+      <HintPath>..\..\packages\Capgemini.Xrm.DataMigration.Engine.2.4.4.1\lib\net462\Capgemini.Xrm.DataMigration.Core.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="Capgemini.Xrm.DataMigration.CrmStore, Version=2.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\Capgemini.Xrm.DataMigration.Engine.2.4.2\lib\net462\Capgemini.Xrm.DataMigration.CrmStore.dll</HintPath>
+      <HintPath>..\..\packages\Capgemini.Xrm.DataMigration.Engine.2.4.4.1\lib\net462\Capgemini.Xrm.DataMigration.CrmStore.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="Capgemini.Xrm.DataMigration.Engine, Version=2.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\Capgemini.Xrm.DataMigration.Engine.2.4.2\lib\net462\Capgemini.Xrm.DataMigration.Engine.dll</HintPath>
+      <HintPath>..\..\packages\Capgemini.Xrm.DataMigration.Engine.2.4.4.1\lib\net462\Capgemini.Xrm.DataMigration.Engine.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="Capgemini.Xrm.DataMigration.FileStore, Version=2.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\Capgemini.Xrm.DataMigration.Engine.2.4.2\lib\net462\Capgemini.Xrm.DataMigration.FileStore.dll</HintPath>
+      <HintPath>..\..\packages\Capgemini.Xrm.DataMigration.Engine.2.4.4.1\lib\net462\Capgemini.Xrm.DataMigration.FileStore.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="CsvHelper, Version=6.0.0.0, Culture=neutral, PublicKeyToken=8c4959082be5c823, processorArchitecture=MSIL">

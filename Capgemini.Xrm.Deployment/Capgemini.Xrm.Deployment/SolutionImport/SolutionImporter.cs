@@ -125,6 +125,7 @@ namespace Capgemini.Xrm.Deployment.SolutionImport
         public string DeleteOriginalSolution(bool noHolding)
         {
             UpdateSolutionDetails();
+            var currentVersion = InstalledVersion;
 
             if (InstalledVersion == null)
             {
@@ -143,14 +144,41 @@ namespace Capgemini.Xrm.Deployment.SolutionImport
 
             if (noHolding || !_useNewAPI)
             {
-                _importRepo.DeleteSolutionByName(_solutionFileManager.SolutionDetails.SolutionName);
+                try
+                {
+                    _importRepo.DeleteSolutionByName(_solutionFileManager.SolutionDetails.SolutionName);
+                    return "Original Solution with version " + InstalledVersion + " has been deleted";
+                }
+                catch (TimeoutException ext)
+                {
+                    // Checking if operation invoked OK
+                    UpdateSolutionDetails();
+                    if (InstalledVersion == null)
+                    {
+                        return $"Original Solution with version {currentVersion} has been deleted despite of timeout exception : {ext.Message}";
+                    }
 
-                return "Original Solution with version " + InstalledVersion + " has been deleted";
+                    throw;
+                }
             }
             else
             {
-                _importRepo.ApplySolutionUpgrade(_solutionFileManager.SolutionDetails.SolutionName);
-                return "Solution with version " + InstalledVersion + " has been UPGRADED, new API used";
+                try
+                {
+                    _importRepo.ApplySolutionUpgrade(_solutionFileManager.SolutionDetails.SolutionName);
+                    return "Solution with version " + InstalledVersion + " has been UPGRADED, new API used";
+                }
+                catch (TimeoutException ext)
+                {
+                    // Checking if operation invoked OK
+                    UpdateSolutionDetails();
+                    if (InstalledHoldingVersion == null)
+                    {
+                        return $"Solution Solution with version {currentVersion} has been updated despite of timeout exception : {ext.Message}";
+                    }
+
+                    throw;
+                } 
             }
         }
 
@@ -173,9 +201,24 @@ namespace Capgemini.Xrm.Deployment.SolutionImport
                 throw new Exception("No updated solution is installed, cannot process deletion!");
             }
 
-            _importRepo.DeleteSolutionByName(_solutionFileManager.SolutionDetails.HoldingSolutionName);
+            try
+            {
+                _importRepo.DeleteSolutionByName(_solutionFileManager.SolutionDetails.HoldingSolutionName);
+                return "Holding Solution with version " + InstalledHoldingVersion + " has been deleted";
+            }
+            catch (TimeoutException ext)
+            {
+                // Checking if operation invoked OK
+                var currentVersion = InstalledHoldingVersion;
+                UpdateSolutionDetails();
+                if (InstalledHoldingVersion == null)
+                {
+                    return $"Holding Solution with version {currentVersion} has been deleted despite of timeout exception : {ext.Message}";
+                }
 
-            return "Holding Solution with version " + InstalledHoldingVersion + " has been deleted";
+                throw;
+            }
+          
         }
 
         #endregion Public Methods
