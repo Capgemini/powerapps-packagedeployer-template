@@ -3,6 +3,7 @@ using Capgemini.Xrm.Deployment.Core;
 using Capgemini.Xrm.Deployment.Core.Model;
 using Capgemini.Xrm.Deployment.Repository;
 using System;
+using System.Threading;
 
 namespace Capgemini.Xrm.Deployment.SolutionImport
 {
@@ -155,6 +156,7 @@ namespace Capgemini.Xrm.Deployment.SolutionImport
                     UpdateSolutionDetails();
                     if (InstalledVersion == null)
                     {
+                        Thread.Sleep(10000);
                         return $"Original Solution with version {currentVersion} has been deleted despite of timeout exception : {ext.Message}";
                     }
 
@@ -174,6 +176,7 @@ namespace Capgemini.Xrm.Deployment.SolutionImport
                     UpdateSolutionDetails();
                     if (InstalledHoldingVersion == null)
                     {
+                        Thread.Sleep(10000);
                         return $"Solution Solution with version {currentVersion} has been updated despite of timeout exception : {ext.Message}";
                     }
 
@@ -213,6 +216,7 @@ namespace Capgemini.Xrm.Deployment.SolutionImport
                 UpdateSolutionDetails();
                 if (InstalledHoldingVersion == null)
                 {
+                    Thread.Sleep(10000);
                     return $"Holding Solution with version {currentVersion} has been deleted despite of timeout exception : {ext.Message}";
                 }
 
