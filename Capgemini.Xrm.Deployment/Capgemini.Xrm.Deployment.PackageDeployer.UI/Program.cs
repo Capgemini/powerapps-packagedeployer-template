@@ -24,7 +24,7 @@ namespace Capgemini.Xrm.Deployment.PackageDeployer.UI
             System.Net.ServicePointManager.SecurityProtocol = System.Net.SecurityProtocolType.Tls12;
 
             IPackageDeployerConfig config = new PackageDeployerConfigReader(Settings.Default.PkgFolderPath);
-            var crmAccess = new CrmAccessClient(ConfigurationManager.ConnectionStrings["CrmDefaultConnection"]);
+            var crmAccess = new CrmAccessClient(ConfigurationManager.ConnectionStrings["CrmDefaultConnection"], 60);
        
             CrmImportRepository impRepo = new CrmImportRepository(crmAccess);
             SolutionImport.PackageDeployer packageDeployer = new SolutionImport.PackageDeployer(impRepo, config);

@@ -15,7 +15,7 @@ namespace Capgemini.Xrm.PackageDeployer.TestUI
 
         private void btExport_Click(object sender, EventArgs e)
         {
-            var crmAccess = new CrmAccessClient(tbSourceConnection.Text);
+            var crmAccess = new CrmAccessClient(tbSourceConnection.Text, 60);
             var repository = new CrmTemplatesRepository(crmAccess);
             var templManager = new DocTemplateManager(repository);
 
@@ -24,7 +24,7 @@ namespace Capgemini.Xrm.PackageDeployer.TestUI
 
         private void btImport_Click(object sender, EventArgs e)
         {
-            var crmAccess = new CrmAccessClient(tbTargetConnection.Text);
+            var crmAccess = new CrmAccessClient(tbTargetConnection.Text, 60);
             var repository = new CrmTemplatesRepository(crmAccess);
             var templManager = new DocTemplateManager(repository);
 

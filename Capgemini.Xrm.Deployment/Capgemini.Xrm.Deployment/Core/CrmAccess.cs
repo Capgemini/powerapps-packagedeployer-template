@@ -6,6 +6,7 @@ using Microsoft.Xrm.Sdk.Client;
 using Microsoft.Xrm.Sdk.Messages;
 using Microsoft.Xrm.Sdk.Metadata;
 using Microsoft.Xrm.Sdk.Query;
+using Microsoft.Xrm.Sdk.WebServiceClient;
 using System;
 using System.IO;
 using System.Linq;
@@ -15,12 +16,19 @@ namespace Capgemini.Xrm.Deployment.Core
     public class CrmAccess
     {
         protected const string EntityImageField = "entityimage";
+        protected IOrganizationService _serviceProxy;
+        protected readonly int _timeOutMinutes;
 
         #region Constructors
 
-        public CrmAccess(IOrganizationService service)
+        public CrmAccess(IOrganizationService service) : this (service, 60)
+        {
+        }
+
+        public CrmAccess(IOrganizationService service, int timeOutMinutes)
         {
             this._serviceProxy = service;
+            this._timeOutMinutes = timeOutMinutes;
         }
 
         #endregion Constructors
@@ -54,12 +62,20 @@ namespace Capgemini.Xrm.Deployment.Core
             return GetDataByQuery(query, pageSize);
         }
 
-        protected IOrganizationService _serviceProxy;
+
 
         public virtual IOrganizationService CurrentServiceProxy
         {
             get
             {
+
+                if (_serviceProxy is OrganizationServiceProxy)
+                {
+                    ((OrganizationServiceProxy)_serviceProxy).Timeout = TimeSpan.FromMinutes(_timeOutMinutes);
+                }
+                else if (_serviceProxy is OrganizationWebProxyClient)
+                    ((OrganizationWebProxyClient)_serviceProxy).InnerChannel.OperationTimeout = TimeSpan.FromMinutes(_timeOutMinutes);
+
                 return _serviceProxy;
             }
         }
@@ -176,7 +192,7 @@ namespace Capgemini.Xrm.Deployment.Core
                 LogicalName = entityName
             };
 
-            RetrieveEntityResponse response = (RetrieveEntityResponse)_serviceProxy.Execute(request);
+            RetrieveEntityResponse response = (RetrieveEntityResponse)CurrentServiceProxy.Execute(request);
 
             return response.EntityMetadata;
         }

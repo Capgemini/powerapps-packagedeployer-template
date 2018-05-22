@@ -56,7 +56,7 @@ namespace Capgemini.Xrm.PackageDeployer.TestUI
             {
                 DisplayMessage("Package Folder:" + Settings.Default.PkgFolderPath);
 
-                var crmAccess = new CrmAccessClient(ConfigurationManager.ConnectionStrings["CrmDefaultConnection"]);
+                var crmAccess = new CrmAccessClient(ConfigurationManager.ConnectionStrings["CrmDefaultConnection"], 60);
                 DisplayMessage("CRM Url:" + crmAccess.ServiceClient.CrmConnectOrgUriActual);
 
                 var impRepo = new CrmImportRepository(crmAccess);
@@ -102,7 +102,7 @@ namespace Capgemini.Xrm.PackageDeployer.TestUI
 
         private void button1_Click_1(object sender, EventArgs e)
         {
-            var crmAccess = new CrmAccessClient(ConfigurationManager.ConnectionStrings["CrmDefaultConnection"]);
+            var crmAccess = new CrmAccessClient(ConfigurationManager.ConnectionStrings["CrmDefaultConnection"], 60);
             DisplayMessage("CRM Url:" + crmAccess.ServiceClient.CrmConnectOrgUriActual);
             MessageLogger logger = new MessageLogger(tbMessage, SynchronizationContext.Current);
             var configReader = new PackageDeployerConfigReader(Settings.Default.PkgFolderPath);
@@ -112,7 +112,7 @@ namespace Capgemini.Xrm.PackageDeployer.TestUI
 
         private void button3_Click(object sender, EventArgs e)
         {
-            var crmAccess = new CrmAccessClient(ConfigurationManager.ConnectionStrings["CrmDefaultConnection"]);
+            var crmAccess = new CrmAccessClient(ConfigurationManager.ConnectionStrings["CrmDefaultConnection"], 60);
             DisplayMessage("CRM Url:" + crmAccess.ServiceClient.CrmConnectOrgUriActual);
             MessageLogger logger = new MessageLogger(tbMessage, SynchronizationContext.Current);
 
@@ -123,7 +123,7 @@ namespace Capgemini.Xrm.PackageDeployer.TestUI
         private void button4_Click(object sender, EventArgs e)
         {
             MessageLogger.LogLevel = 3;
-            var crmAccess = new CrmAccessClient(ConfigurationManager.ConnectionStrings["CrmDefaultConnection"]);
+            var crmAccess = new CrmAccessClient(ConfigurationManager.ConnectionStrings["CrmDefaultConnection"], 60);
             DisplayMessage("CRM Url:" + crmAccess.ServiceClient.CrmConnectOrgUriActual);
             MessageLogger logger = new MessageLogger(tbMessage, SynchronizationContext.Current);
 
@@ -137,7 +137,7 @@ namespace Capgemini.Xrm.PackageDeployer.TestUI
         private void button5_Click(object sender, EventArgs e)
         {
             MessageLogger.LogLevel = 3;
-            var crmAccess = new CrmAccessClient(ConfigurationManager.ConnectionStrings["CrmDefaultConnection"]);
+            var crmAccess = new CrmAccessClient(ConfigurationManager.ConnectionStrings["CrmDefaultConnection"], 60);
             DisplayMessage("CRM Url:" + crmAccess.ServiceClient.CrmConnectOrgUriActual);
             MessageLogger logger = new MessageLogger(tbMessage, SynchronizationContext.Current);
             var configReader = new PackageDeployerConfigReader(Settings.Default.PkgFolderPath);

@@ -1,17 +1,18 @@
 ﻿using Capgemini.Xrm.Deployment.Core;
 using Microsoft.Xrm.Sdk;
 using Microsoft.Xrm.Tooling.Connector;
+using System;
 using System.Configuration;
 
 namespace Capgemini.Xrm.Deployment.PackageDeployer.Core
 {
     public class CrmAccessClient : CrmAccess
     {
-        public CrmAccessClient(ConnectionStringSettings connectionStringName) : this(connectionStringName.ConnectionString)
+        public CrmAccessClient(ConnectionStringSettings connectionStringName, int timeoutMinutes) : this(connectionStringName.ConnectionString, timeoutMinutes)
         {
         }
 
-        public CrmAccessClient(string connectionString) : base(null)
+        public CrmAccessClient(string connectionString, int timeoutMinutes) : base(null, timeoutMinutes)
         {
             if (!connectionString.ToUpper().Contains("REQUIRENEWINSTANCE=TRUE"))
                 connectionString = "RequireNewInstance=True; " + connectionString;
@@ -30,14 +31,14 @@ namespace Capgemini.Xrm.Deployment.PackageDeployer.Core
                 if (ServiceClient.OrganizationWebProxyClient != null)
                 {
                     var service = ServiceClient.OrganizationWebProxyClient;
-                    service.InnerChannel.OperationTimeout = new System.TimeSpan(1, 0, 0);
+                    service.InnerChannel.OperationTimeout = TimeSpan.FromMinutes(_timeOutMinutes);
                     return service;
                 }
 
                 if (ServiceClient.OrganizationServiceProxy != null)
                 {
                     var service = ServiceClient.OrganizationServiceProxy;
-                    service.Timeout = new System.TimeSpan(1, 0, 0);
+                    service.Timeout = TimeSpan.FromMinutes(_timeOutMinutes);
                     return service;
                 }
 

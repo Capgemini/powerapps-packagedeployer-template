@@ -89,7 +89,7 @@ namespace Capgemini.Xrm.Deployment.PackageDeployer
 
             _logger = new Logger(this);
             _logger.WriteLogMessage("InitializeCustomExtension", TraceEventType.Start);
-            _gatewayAcces = new CrmAccess(_orgService);
+            _gatewayAcces = new CrmAccess(_orgService, _maxTimeout);
 
             _deplActivities = new DeploymentActivities(_config, _logger, _gatewayAcces);
             _procActivator = new ProcessesActivator(_config, _logger, _gatewayAcces);
