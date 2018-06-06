@@ -24,26 +24,5 @@ namespace Capgemini.Xrm.Deployment.PackageDeployer.Core
 
         public CrmServiceClient ServiceClient { get; set; }
 
-        public override IOrganizationService CurrentServiceProxy
-        {
-            get
-            {
-                if (ServiceClient.OrganizationWebProxyClient != null)
-                {
-                    var service = ServiceClient.OrganizationWebProxyClient;
-                    service.InnerChannel.OperationTimeout = TimeSpan.FromMinutes(_timeOutMinutes);
-                    return service;
-                }
-
-                if (ServiceClient.OrganizationServiceProxy != null)
-                {
-                    var service = ServiceClient.OrganizationServiceProxy;
-                    service.Timeout = TimeSpan.FromMinutes(_timeOutMinutes);
-                    return service;
-                }
-
-                throw new System.Exception("Cannot get IOrganizationService");
-            }
-        }
     }
 }

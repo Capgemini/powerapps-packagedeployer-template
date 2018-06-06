@@ -93,7 +93,8 @@ namespace Capgemini.Xrm.Deployment.Config
                     OverwriteUnmanagedCustomizations = ReadBoolMainSettings(item, "overwriteunmanagedcustomizations", true),
                     PublishWorkflows = ReadBoolMainSettings(item, "publishworkflowsandactivateplugins", true),
                     ForceUpgrade = ReadBoolMainSettings(item, "forceUpgrade"),
-                    UseAsync = ReadBoolMainSettings(item, "useAsync")
+                    UseAsync = ReadBoolMainSettings(item, "useAsync"),
+                    UseUpgradeAsync = ReadBoolMainSettings(item, "useUpgradeAsync")
                 };
 
                 SolutionImportSettings.Add(solImpSet);

@@ -39,6 +39,8 @@ namespace Capgemini.Xrm.Deployment.IntegrationTests.Core
 
         public CrmAccessLogged GetCrmAccessLogged(string connString)
         {
+            System.Net.ServicePointManager.SecurityProtocol = System.Net.SecurityProtocolType.Tls12;
+
             var conn = new CrmServiceClient(connString);
 
             if (conn.OrganizationServiceProxy != null)
@@ -46,7 +48,11 @@ namespace Capgemini.Xrm.Deployment.IntegrationTests.Core
             else if (conn.OrganizationWebProxyClient != null)
                 conn.OrganizationWebProxyClient.InnerChannel.OperationTimeout = TimeSpan.FromMinutes(60);
 
+           
             var orgService = (IOrganizationService)conn.OrganizationWebProxyClient ?? conn.OrganizationServiceProxy;
+
+            if (orgService == null)
+                throw new Exception( "Can't connect to CRM: " + conn.LastCrmError);
 
             return new CrmAccessLogged(orgService);
         }

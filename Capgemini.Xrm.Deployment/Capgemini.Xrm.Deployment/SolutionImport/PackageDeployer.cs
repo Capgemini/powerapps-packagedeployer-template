@@ -114,16 +114,17 @@ namespace Capgemini.Xrm.Deployment.SolutionImport
 
             foreach (var item in procList)
             {
-                
+                bool useAsync = item.ImportSetting.UseUpgradeAsync && _importAsync;
+
                 if (!_configReader.DontUseHoldingSulutions || item.ImportSetting.DeleteOnly)
                 {
                     OnRaiseImportUpdatEvent(new ImportUpdateEventArgs
                     {
                         SolutionDetails = item.SolutionImporter.GetSolutionDetails,
-                        Message = $"Original Solution deletion started because DontUseHoldingSulutions:{_configReader.DontUseHoldingSulutions} and DeleteOnly:{item.ImportSetting.DeleteOnly}"
+                        Message = $"Original Solution deletion started because DontUseHoldingSulutions:{_configReader.DontUseHoldingSulutions}, DeleteOnly:{item.ImportSetting.DeleteOnly}, UseAsync:{useAsync}"
                     });
 
-                    var result = item.SolutionImporter.DeleteOriginalSolution(item.ImportSetting.DeleteOnly);
+                    var result = item.SolutionImporter.DeleteOriginalSolution(item.ImportSetting.DeleteOnly, useAsync, true, _sleepIntervalMiliseconds, _asyncTimeoutSeconds);
 
                     OnRaiseImportUpdatEvent(new ImportUpdateEventArgs
                     {

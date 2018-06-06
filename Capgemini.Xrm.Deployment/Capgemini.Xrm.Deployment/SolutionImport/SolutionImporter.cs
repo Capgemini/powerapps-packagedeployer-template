@@ -123,7 +123,7 @@ namespace Capgemini.Xrm.Deployment.SolutionImport
             }
         }
 
-        public string DeleteOriginalSolution(bool noHolding)
+        public string DeleteOriginalSolution(bool noHolding, bool applyUpgradeAsync, bool waitForCompletion, int sleepInterval, int asyncWaitTimeoutSeconds)
         {
             UpdateSolutionDetails();
             var currentVersion = InstalledVersion;
@@ -167,7 +167,7 @@ namespace Capgemini.Xrm.Deployment.SolutionImport
             {
                 try
                 {
-                    _importRepo.ApplySolutionUpgrade(_solutionFileManager.SolutionDetails.SolutionName);
+                    _importRepo.ApplySolutionUpgrade(_solutionFileManager.SolutionDetails.SolutionName, applyUpgradeAsync, waitForCompletion, sleepInterval, asyncWaitTimeoutSeconds);
                     return "Solution with version " + InstalledVersion + " has been UPGRADED, new API used";
                 }
                 catch (TimeoutException ext)
