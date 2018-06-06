@@ -19,6 +19,7 @@ namespace Capgemini.Xrm.Deployment.SolutionImport
         private readonly int _asyncTimeoutSeconds = 1200;
         private readonly bool _importAsync = true;
         private readonly IPackageDeployerConfig _configReader;
+        private readonly bool _upgradeAsync;
 
         #endregion Private Fields
 
@@ -31,6 +32,7 @@ namespace Capgemini.Xrm.Deployment.SolutionImport
             _sleepIntervalMiliseconds = configReader.AsyncSleepIntervalMiliseconds;
             _asyncTimeoutSeconds = configReader.AsyncTimeoutSeconds;
             _importAsync = configReader.UseAsyncImport;
+            _upgradeAsync = configReader.UseAsyncUpgrade;
             ReadConfiguration();
         }
 
@@ -114,7 +116,7 @@ namespace Capgemini.Xrm.Deployment.SolutionImport
 
             foreach (var item in procList)
             {
-                bool useAsync = item.ImportSetting.UseUpgradeAsync && _importAsync;
+                bool useAsync = item.ImportSetting.UseAsync && _upgradeAsync;
 
                 if (!_configReader.DontUseHoldingSulutions || item.ImportSetting.DeleteOnly)
                 {

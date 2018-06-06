@@ -16,6 +16,5 @@
 
         public bool UseAsync { get; set; }
         
-        public bool UseUpgradeAsync { get; set; } 
     }
 }
