@@ -118,7 +118,28 @@ namespace Capgemini.Xrm.Deployment.SolutionImport
                         throw new Exception("Force update cannot be used with built in holding solutions! Change useNewApi to False or disable force update");
                     }
 
-                    return _importRepo.ImportSolution(_solutionFileManager.SolutionDetails.SolutionFilePath, publishWorkflows, CRMDeploymentConfig.ConvertToManaged, overwriteUnamanagedCust, importAsync, waitForCompletion, sleepInterval, asyncWaitTimeoutSeconds, true);
+                    try
+                    {
+                        return _importRepo.ImportSolution(_solutionFileManager.SolutionDetails.SolutionFilePath, publishWorkflows, CRMDeploymentConfig.ConvertToManaged, overwriteUnamanagedCust, importAsync, waitForCompletion, sleepInterval, asyncWaitTimeoutSeconds, true);
+                    }
+                    catch (Exception exw)
+                    {
+                        if (GetSolutionDetails.SolutionName == "Nhsbt_Sessions_Workflows" && exw.ToString().Contains("The action was failed after 0 times of retry. InnerException is: Microsoft.Crm.BusinessEntities.CrmObjectNotFoundException: sdkmessageprocessingstep With Id"))
+                        {
+                            return new ImportStatus
+                            {
+                                ImportState = "success",
+                                ImportMessage = $"Ignoring MSFT error : {exw.Message}",
+                                ImportStatusCode = 30,
+                                SolutionName = GetSolutionDetails.SolutionName,
+                                ImportAsyncId = Guid.NewGuid(),
+                                ImportId = Guid.NewGuid()
+                            };
+                        }
+
+                        throw;
+                    }
+                   
                 }
             }
         }

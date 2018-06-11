@@ -159,7 +159,9 @@
     <None Include="app.config">
       <SubType>Designer</SubType>
     </None>
-    <None Include="packages.config" />
+    <None Include="packages.config">
+      <SubType>Designer</SubType>
+    </None>
     <None Include="TestData\IntegrationTestData.zip" />
     <None Include="TestFiles\PkgFolder\Capgemini_Base_Managed.zip" />
   </ItemGroup>
