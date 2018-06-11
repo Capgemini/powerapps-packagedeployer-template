@@ -126,10 +126,10 @@ namespace Capgemini.Xrm.Deployment.SolutionImport
                     {
                         if (GetSolutionDetails.SolutionName == "Nhsbt_Sessions_Workflows" && exw.ToString().Contains("The action was failed after 0 times of retry. InnerException is: Microsoft.Crm.BusinessEntities.CrmObjectNotFoundException: sdkmessageprocessingstep With Id"))
                         {
-                            Thread.Sleep(300000);
+                            Thread.Sleep(60000);
                             return new ImportStatus
                             {
-                                ImportState = "success with ignored MSFT error, waiting 300 seconds",
+                                ImportState = "success with ignored MSFT error, waiting 60 seconds",
                                 ImportMessage = $"Ignoring MSFT error : {exw.Message}",
                                 ImportStatusCode = 30,
                                 SolutionName = GetSolutionDetails.SolutionName,

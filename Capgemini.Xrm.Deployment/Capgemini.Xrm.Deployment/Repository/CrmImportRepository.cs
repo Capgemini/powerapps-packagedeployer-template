@@ -182,8 +182,16 @@ namespace Capgemini.Xrm.Deployment.Repository
                 SkipProductUpdateDependencies = true
             };
 
-            var result = ExecuteImportOperation(importSolutionRequest, importAsync, waitForCompletion, sleepInterval, asyncWaitTimeout);
-            return result;
+            try
+            {
+                var result = ExecuteImportOperation(importSolutionRequest, importAsync, waitForCompletion, sleepInterval, asyncWaitTimeout);
+                return result;
+            }
+            finally
+            {
+                _requestId = null;
+            }
+          
 
         }
 
@@ -196,7 +204,7 @@ namespace Capgemini.Xrm.Deployment.Repository
         /// <param name="sleepInterval">In miliseconds</param>
         /// <param name="asyncWaitTimeout">In seconds</param>
         /// <returns>ImportStatus</returns>
-        public ImportStatus ApplySolutionUpgrade(string solutionName, 
+        public ImportStatus ApplySolutionUpgrade(string solutionName,
             bool importAsync,
             bool waitForCompletion,
             int sleepInterval,
@@ -212,27 +220,32 @@ namespace Capgemini.Xrm.Deployment.Repository
             };
             var result = new ImportStatus();
 
-            if (!importAsync)
+            try
             {
-                var upgradeResponse = CurrentOrganizationService.Execute(upgradeRequest) as DeleteAndPromoteResponse;
-
-                result = new ImportStatus
+                if (!importAsync)
                 {
-                    ImportId = _requestId,
-                    ImportMessage = $"Solution {upgradeResponse.SolutionId} has been promoted to the new version",
-                    ImportState = "Promoted",
-                    SolutionName = solutionName
-                };
+                    var upgradeResponse = CurrentOrganizationService.Execute(upgradeRequest) as DeleteAndPromoteResponse;
 
+                    result = new ImportStatus
+                    {
+                        ImportId = _requestId,
+                        ImportMessage = $"Solution {upgradeResponse.SolutionId} has been promoted to the new version",
+                        ImportState = "Promoted",
+                        SolutionName = solutionName
+                    };
+
+                }
+                else
+                {
+                    result = ExecuteAsyncOperation(upgradeRequest, waitForCompletion, sleepInterval, asyncWaitTimeout);
+                    result.ImportMessage = $"Solution  has been promoted to the new version, Async:{result.ImportMessage}";
+                    result.SolutionName = solutionName;
+                }
             }
-            else
+            finally
             {
-                result = ExecuteAsyncOperation(upgradeRequest, waitForCompletion, sleepInterval, asyncWaitTimeout);
-                result.ImportMessage = $"Solution  has been promoted to the new version, Async:{result.ImportMessage}";
-                result.SolutionName = solutionName;
+                _requestId = null;
             }
-
-            _requestId = null;
 
             return result;
         }
