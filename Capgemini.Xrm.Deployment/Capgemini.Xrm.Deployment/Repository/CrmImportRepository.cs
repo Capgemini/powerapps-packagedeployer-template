@@ -18,7 +18,7 @@ namespace Capgemini.Xrm.Deployment.Repository
     {
         #region Constructors and Private Fields
 
-        private Guid? _importJobId;
+        private Guid? _requestId;
 
         public CrmImportRepository(CrmAccess crmAccess) : base(crmAccess)
         {
@@ -79,7 +79,7 @@ namespace Capgemini.Xrm.Deployment.Repository
             return records.Entities.FirstOrDefault();
         }
 
-        public ImportStatus CheckAsyncImportStatus(Guid asyncJobId)
+        public ImportStatus CheckAsyncOperationStatus(Guid asyncJobId)
         {
             ImportStatus outResult;
 
@@ -94,7 +94,7 @@ namespace Capgemini.Xrm.Deployment.Repository
                     ImportAsyncId = asyncJobId,
                     ImportState = statusCode.ToString(),
                     ImportMessage = asyncOperation.GetAttributeValue<string>("message"),
-                    ImportId = _importJobId.Value,
+                    ImportId = _requestId.Value,
                     ImportStatusCode = statusCode
                 };
             }
@@ -105,7 +105,7 @@ namespace Capgemini.Xrm.Deployment.Repository
                     ImportAsyncId = asyncJobId,
                     ImportState = "Unknown",
                     ImportMessage = "Cannot get import status, error:" + ex,
-                    ImportId = _importJobId.Value,
+                    ImportId = _requestId.Value,
                     ImportStatusCode = 0
                 };
             }
@@ -115,7 +115,7 @@ namespace Capgemini.Xrm.Deployment.Repository
 
         public ImportStatus CheckImportStatus()
         {
-            var job = CurrentOrganizationService.Retrieve("importjob", _importJobId.Value, new ColumnSet(new System.String[] { "data", "solutionname" }));
+            var job = CurrentOrganizationService.Retrieve("importjob", _requestId.Value, new ColumnSet(new System.String[] { "data", "solutionname" }));
 
             if (job == null) throw new Exception("Invalid importjob id");
 
@@ -131,17 +131,30 @@ namespace Capgemini.Xrm.Deployment.Repository
 
             var result = new ImportStatus
             {
-                ImportId = _importJobId.Value,
+                ImportId = _requestId.Value,
                 ImportState = SolutionImportResult,
                 SolutionName = ImportedSolutionName,
                 ImportMessage = reportData
             };
 
-            _importJobId = null;
+            _requestId = null;
 
             return result;
         }
 
+        /// <summary>
+        /// ImportSolution
+        /// </summary>
+        /// <param name="solutionFilePath"></param>
+        /// <param name="publishWorkflows"></param>
+        /// <param name="convertToManaged"></param>
+        /// <param name="overwriteUnmanagedCustomizations"></param>
+        /// <param name="importAsync"></param>
+        /// <param name="waitForCompletion"></param>
+        /// <param name="sleepInterval">In miliseconds</param>
+        /// <param name="asyncWaitTimeout">In seconds</param>
+        /// <param name="useHoldingSolution"></param>
+        /// <returns>ImportStatus</returns>
         public ImportStatus ImportSolution(string solutionFilePath,
                    bool publishWorkflows,
                    bool convertToManaged,
@@ -153,8 +166,8 @@ namespace Capgemini.Xrm.Deployment.Repository
                    bool useHoldingSolution = false)
         {
 
-            if (_importJobId.HasValue) throw new Exception("Import already in progress");
-            _importJobId = Guid.NewGuid();
+            if (_requestId.HasValue) throw new Exception("Import already in progress");
+            _requestId = Guid.NewGuid();
 
             var solutionBytes = File.ReadAllBytes(solutionFilePath);
 
@@ -164,132 +177,169 @@ namespace Capgemini.Xrm.Deployment.Repository
                 PublishWorkflows = publishWorkflows,
                 ConvertToManaged = convertToManaged,
                 OverwriteUnmanagedCustomizations = overwriteUnmanagedCustomizations,
-                ImportJobId = _importJobId.Value,
+                ImportJobId = _requestId.Value,
                 HoldingSolution = useHoldingSolution,
                 SkipProductUpdateDependencies = true
             };
 
-            var result = ExecuteImportOperation(importSolutionRequest, importAsync, waitForCompletion, sleepInterval, asyncWaitTimeout);
-            return result;
+            try
+            {
+                var result = ExecuteImportOperation(importSolutionRequest, importAsync, waitForCompletion, sleepInterval, asyncWaitTimeout);
+                return result;
+            }
+            finally
+            {
+                _requestId = null;
+            }
+          
 
         }
 
-        public ImportStatus ApplySolutionUpgrade(string solutionName)
+        /// <summary>
+        /// ApplySolutionUpgrade
+        /// </summary>
+        /// <param name="solutionName">Solution Name</param>
+        /// <param name="importAsync">Import async</param>
+        /// <param name="waitForCompletion">Wait for completion</param>
+        /// <param name="sleepInterval">In miliseconds</param>
+        /// <param name="asyncWaitTimeout">In seconds</param>
+        /// <returns>ImportStatus</returns>
+        public ImportStatus ApplySolutionUpgrade(string solutionName,
+            bool importAsync,
+            bool waitForCompletion,
+            int sleepInterval,
+            int asyncWaitTimeout)
         {
-            if (_importJobId.HasValue) throw new Exception("Import already in progress");
-            _importJobId = Guid.NewGuid();
+            if (_requestId.HasValue) throw new Exception("ANother operation already in progress");
+            _requestId = Guid.NewGuid();
 
             var upgradeRequest = new DeleteAndPromoteRequest
             {
                 UniqueName = solutionName,
-                RequestId = _importJobId
+                RequestId = _requestId
             };
+            var result = new ImportStatus();
 
-            var upgradeResponse = CurrentOrganizationService.Execute(upgradeRequest) as DeleteAndPromoteResponse;
-
-            var result= new ImportStatus
+            try
             {
-                ImportId = _importJobId,
-                ImportMessage = "Solution has been promoted to the new version",
-                ImportState = "Promoted",
-                SolutionName = solutionName
-            };
+                if (!importAsync)
+                {
+                    var upgradeResponse = CurrentOrganizationService.Execute(upgradeRequest) as DeleteAndPromoteResponse;
 
-            _importJobId = null;
+                    result = new ImportStatus
+                    {
+                        ImportId = _requestId,
+                        ImportMessage = $"Solution {upgradeResponse.SolutionId} has been promoted to the new version",
+                        ImportState = "Promoted",
+                        SolutionName = solutionName
+                    };
+
+                }
+                else
+                {
+                    result = ExecuteAsyncOperation(upgradeRequest, waitForCompletion, sleepInterval, asyncWaitTimeout);
+                    result.ImportMessage = $"Solution  has been promoted to the new version, Async:{result.ImportMessage}";
+                    result.SolutionName = solutionName;
+                }
+            }
+            finally
+            {
+                _requestId = null;
+            }
 
             return result;
         }
 
-        private ImportStatus ExecuteImportOperation(OrganizationRequest request,
+        private ImportStatus ExecuteAsyncOperation(OrganizationRequest request,
+                  bool waitForCompletion,
+                  int sleepInterval,
+                  int asyncWaitTimeout)
+        {
+            Guid? asyncJobId = null;
+
+            var asyncRequest = new ExecuteAsyncRequest
+            {
+                Request = request
+            };
+
+            var asyncResponse = CurrentOrganizationService.Execute(asyncRequest) as ExecuteAsyncResponse;
+
+            asyncJobId = asyncResponse.AsyncJobId;
+
+            var watch = Stopwatch.StartNew();
+            watch.Start();
+
+            if (waitForCompletion)
+            {
+                var end = DateTime.Now.AddSeconds(asyncWaitTimeout);
+
+                while (end >= DateTime.Now)
+                {
+                    Thread.Sleep(sleepInterval);
+
+                    var asyncOperation = CheckAsyncOperationStatus(asyncJobId.Value);
+
+                    AsyncOperationStatusEnum statusCode = (AsyncOperationStatusEnum)asyncOperation.ImportStatusCode;
+
+                    switch (statusCode)
+                    {
+                        case AsyncOperationStatusEnum.Succeeded:
+                            watch.Stop();
+                            return asyncOperation;
+
+                        case AsyncOperationStatusEnum.Pausing:
+                        case AsyncOperationStatusEnum.Canceling:
+                        case AsyncOperationStatusEnum.Failed:
+                        case AsyncOperationStatusEnum.Canceled:
+                            watch.Stop();
+                            throw new Exception(string.Format("Async Operation Failed: {0} {1}", statusCode, asyncOperation.ImportMessage));
+
+                        default:
+                            OnRaiseImportUpdatEvent(new AsyncImportUpdateEventArgs
+                            {
+                                Message = $"{statusCode} {asyncOperation.ImportMessage}, Id:{asyncOperation.ImportAsyncId}, ElapsedTime:{watch.Elapsed.TotalSeconds}",
+                                ImportState = asyncOperation.ImportState,
+                                ImportStatusCode = asyncOperation.ImportStatusCode,
+                                ImportId = asyncOperation.ImportAsyncId
+                            });
+                            break;
+                    }
+                }
+
+                throw new TimeoutException(string.Format("Async Operation Timeout: {0}", asyncWaitTimeout));
+            }
+
+            watch.Stop();
+
+            return CheckAsyncOperationStatus(asyncJobId.Value);
+
+        }
+
+        private ImportStatus ExecuteImportOperation(ImportSolutionRequest request,
                   bool importAsync,
                   bool waitForCompletion,
                   int sleepInterval,
                   int asyncWaitTimeout
                   )
         {
-           
-            Guid? asyncJobId = null;
- 
-            var result = new ImportStatus
-            {
-                ImportId = _importJobId
-            };
+
+            ImportStatus result = null;
 
             if (importAsync)
             {
-                var asyncRequest = new ExecuteAsyncRequest
-                {
-                    Request = request
-                };
+                var asyncResult = ExecuteAsyncOperation(request, waitForCompletion, sleepInterval, asyncWaitTimeout);
+                result = CheckImportStatus();
+                result.ImportAsyncId = asyncResult.ImportAsyncId;
+                result.ImportMessage = $"{result.ImportMessage}, Async:{asyncResult.ImportMessage}";
 
-                var asyncResponse = CurrentOrganizationService.Execute(asyncRequest) as ExecuteAsyncResponse;
 
-                asyncJobId = asyncResponse.AsyncJobId;
-                result.ImportAsyncId = asyncJobId;
-
-                var watch = Stopwatch.StartNew();
-                watch.Start();
-
-                if (waitForCompletion)
-                {
-                    var end = DateTime.Now.AddSeconds(asyncWaitTimeout);
-
-                    while (end >= DateTime.Now)
-                    {
-                        Thread.Sleep(sleepInterval);
-
-                        var asyncOperation = CheckAsyncImportStatus(asyncJobId.Value);
-
-                        AsyncOperationStatusEnum statusCode = (AsyncOperationStatusEnum)asyncOperation.ImportStatusCode;
-
-                        switch (statusCode)
-                        {
-                            case AsyncOperationStatusEnum.Succeeded:
-                                watch.Stop();
-                                result = CheckImportStatus();
-                                return result;
-
-                            case AsyncOperationStatusEnum.Pausing:
-                            case AsyncOperationStatusEnum.Canceling:
-                            case AsyncOperationStatusEnum.Failed:
-                            case AsyncOperationStatusEnum.Canceled:
-                                watch.Stop();
-                                throw new Exception(string.Format("Solution Import Failed: {0} {1}", statusCode, asyncOperation.ImportMessage));
-
-                            default:
-                                OnRaiseImportUpdatEvent(new AsyncImportUpdateEventArgs
-                                {
-                                    Message = $"{statusCode} {asyncOperation.ImportMessage}, Id:{asyncOperation.ImportAsyncId}, ElapsedTime:{watch.Elapsed.TotalSeconds}",
-                                    ImportState = asyncOperation.ImportState,
-                                    ImportStatusCode = asyncOperation.ImportStatusCode,
-                                    ImportId = asyncOperation.ImportAsyncId
-                                });
-                                break;
-                        }
-                    }
-
-                    throw new Exception(string.Format("Import Timeout: {0}", asyncWaitTimeout));
-                }
-
-                watch.Stop();
-
-                result = CheckAsyncImportStatus(asyncJobId.Value);
-                return result;
             }
             else
             {
-                try
-                {
-                    var importSolutionResponse = CurrentOrganizationService.Execute(request);
-                }
-                catch (Exception)
-                {
-                    result = CheckImportStatus();
-                    throw;
-                }
+                CurrentOrganizationService.Execute(request);
+                result = CheckImportStatus();
             }
 
-            result = CheckImportStatus();
             return result;
         }
 

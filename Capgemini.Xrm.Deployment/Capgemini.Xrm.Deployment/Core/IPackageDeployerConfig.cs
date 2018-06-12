@@ -82,6 +82,11 @@ namespace Capgemini.Xrm.Deployment.Core
         bool UseAsyncImport { get; }
 
         /// <summary>
+        /// Enables Async Import but can be disabled on solution level as well in SolutionImportSettings
+        /// </summary>
+        bool UseAsyncUpgrade { get; }
+
+        /// <summary>
         /// Use Step For Upgrades instead of holding solutions
         /// </summary>
         bool UseNewApi { get; }

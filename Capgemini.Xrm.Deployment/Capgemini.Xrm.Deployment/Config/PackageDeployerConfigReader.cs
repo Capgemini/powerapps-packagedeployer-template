@@ -28,6 +28,8 @@ namespace Capgemini.Xrm.Deployment.Config
 
         public bool UseAsyncImport { get; private set; }
 
+        public bool UseAsyncUpgrade { get; private set; }
+
         public int AsyncTimeoutSeconds { get; private set; }
 
         public int AsyncSleepIntervalMiliseconds { get; private set; }
@@ -73,6 +75,8 @@ namespace Capgemini.Xrm.Deployment.Config
             SkipPostDeploymentActions = ReadBoolMainSettings(nodeMain, "skipPostDeploymentActions");
             UseNewApi = ReadBoolMainSettings(nodeMain, "useNewApi");
             UseAsyncImport = ReadBoolMainSettings(nodeMain, "useAsyncImport");
+            UseAsyncUpgrade = ReadBoolMainSettings(nodeMain, "useAsyncUpgrade");
+            
             AsyncTimeoutSeconds = ReadIntMainSettings(nodeMain, "asyncTimeoutSeconds", 3600);
             AsyncSleepIntervalMiliseconds = ReadIntMainSettings(nodeMain, "asyncSleepIntervalMiliseconds", 10000);
             EnableSlaAfterImport = ReadBoolMainSettings(nodeMain, "enableSlaAfterImport");

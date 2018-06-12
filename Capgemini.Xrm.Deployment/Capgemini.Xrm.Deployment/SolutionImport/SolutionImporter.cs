@@ -3,6 +3,7 @@ using Capgemini.Xrm.Deployment.Core;
 using Capgemini.Xrm.Deployment.Core.Model;
 using Capgemini.Xrm.Deployment.Repository;
 using System;
+using System.Threading;
 
 namespace Capgemini.Xrm.Deployment.SolutionImport
 {
@@ -117,14 +118,37 @@ namespace Capgemini.Xrm.Deployment.SolutionImport
                         throw new Exception("Force update cannot be used with built in holding solutions! Change useNewApi to False or disable force update");
                     }
 
-                    return _importRepo.ImportSolution(_solutionFileManager.SolutionDetails.SolutionFilePath, publishWorkflows, CRMDeploymentConfig.ConvertToManaged, overwriteUnamanagedCust, importAsync, waitForCompletion, sleepInterval, asyncWaitTimeoutSeconds, true);
+                    try
+                    {
+                        return _importRepo.ImportSolution(_solutionFileManager.SolutionDetails.SolutionFilePath, publishWorkflows, CRMDeploymentConfig.ConvertToManaged, overwriteUnamanagedCust, importAsync, waitForCompletion, sleepInterval, asyncWaitTimeoutSeconds, true);
+                    }
+                    catch (Exception exw)
+                    {
+                        if (GetSolutionDetails.SolutionName == "Nhsbt_Sessions_Workflows" && exw.ToString().Contains("The action was failed after 0 times of retry. InnerException is: Microsoft.Crm.BusinessEntities.CrmObjectNotFoundException: sdkmessageprocessingstep With Id"))
+                        {
+                            Thread.Sleep(60000);
+                            return new ImportStatus
+                            {
+                                ImportState = "success with ignored MSFT error, waiting 60 seconds",
+                                ImportMessage = $"Ignoring MSFT error : {exw.Message}",
+                                ImportStatusCode = 30,
+                                SolutionName = GetSolutionDetails.SolutionName,
+                                ImportAsyncId = Guid.NewGuid(),
+                                ImportId = Guid.NewGuid()
+                            };
+                        }
+
+                        throw;
+                    }
+                   
                 }
             }
         }
 
-        public string DeleteOriginalSolution(bool noHolding)
+        public string DeleteOriginalSolution(bool noHolding, bool applyUpgradeAsync, bool waitForCompletion, int sleepInterval, int asyncWaitTimeoutSeconds)
         {
             UpdateSolutionDetails();
+            var currentVersion = InstalledVersion;
 
             if (InstalledVersion == null)
             {
@@ -143,14 +167,43 @@ namespace Capgemini.Xrm.Deployment.SolutionImport
 
             if (noHolding || !_useNewAPI)
             {
-                _importRepo.DeleteSolutionByName(_solutionFileManager.SolutionDetails.SolutionName);
+                try
+                {
+                    _importRepo.DeleteSolutionByName(_solutionFileManager.SolutionDetails.SolutionName);
+                    return "Original Solution with version " + InstalledVersion + " has been deleted";
+                }
+                catch (TimeoutException ext)
+                {
+                    // Checking if operation invoked OK
+                    UpdateSolutionDetails();
+                    if (InstalledVersion == null)
+                    {
+                        Thread.Sleep(10000);
+                        return $"Original Solution with version {currentVersion} has been deleted despite of timeout exception : {ext.Message}";
+                    }
 
-                return "Original Solution with version " + InstalledVersion + " has been deleted";
+                    throw;
+                }
             }
             else
             {
-                _importRepo.ApplySolutionUpgrade(_solutionFileManager.SolutionDetails.SolutionName);
-                return "Solution with version " + InstalledVersion + " has been UPGRADED, new API used";
+                try
+                {
+                    _importRepo.ApplySolutionUpgrade(_solutionFileManager.SolutionDetails.SolutionName, applyUpgradeAsync, waitForCompletion, sleepInterval, asyncWaitTimeoutSeconds);
+                    return "Solution with version " + InstalledVersion + " has been UPGRADED, new API used";
+                }
+                catch (TimeoutException ext)
+                {
+                    // Checking if operation invoked OK
+                    UpdateSolutionDetails();
+                    if (InstalledHoldingVersion == null)
+                    {
+                        Thread.Sleep(10000);
+                        return $"Solution Solution with version {currentVersion} has been updated despite of timeout exception : {ext.Message}";
+                    }
+
+                    throw;
+                } 
             }
         }
 
@@ -173,9 +226,25 @@ namespace Capgemini.Xrm.Deployment.SolutionImport
                 throw new Exception("No updated solution is installed, cannot process deletion!");
             }
 
-            _importRepo.DeleteSolutionByName(_solutionFileManager.SolutionDetails.HoldingSolutionName);
+            try
+            {
+                _importRepo.DeleteSolutionByName(_solutionFileManager.SolutionDetails.HoldingSolutionName);
+                return "Holding Solution with version " + InstalledHoldingVersion + " has been deleted";
+            }
+            catch (TimeoutException ext)
+            {
+                // Checking if operation invoked OK
+                var currentVersion = InstalledHoldingVersion;
+                UpdateSolutionDetails();
+                if (InstalledHoldingVersion == null)
+                {
+                    Thread.Sleep(10000);
+                    return $"Holding Solution with version {currentVersion} has been deleted despite of timeout exception : {ext.Message}";
+                }
 
-            return "Holding Solution with version " + InstalledHoldingVersion + " has been deleted";
+                throw;
+            }
+          
         }
 
         #endregion Public Methods

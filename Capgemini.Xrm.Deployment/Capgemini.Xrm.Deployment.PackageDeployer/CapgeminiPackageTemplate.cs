@@ -29,7 +29,7 @@ namespace Capgemini.Xrm.Deployment.PackageDeployer
 
         private string _impConfigSubfolder = "";
         private bool _skipPostDeploymentActions = false;
-        private int _maxTimeout = 60;
+        private int _maxTimeout = 30;
 
         /// <summary>
         /// Called When the package is initialized.
@@ -68,7 +68,7 @@ namespace Capgemini.Xrm.Deployment.PackageDeployer
 
                 if (RuntimeSettings.ContainsKey("MaxCrmConnectionTimeOutMinutes"))
                 {
-                    int maxTimeout = 60;
+                    int maxTimeout = 30;
                     if (int.TryParse((string)RuntimeSettings["MaxCrmConnectionTimeOutMinutes"], out maxTimeout))
                         _maxTimeout = maxTimeout;
 
@@ -89,7 +89,7 @@ namespace Capgemini.Xrm.Deployment.PackageDeployer
 
             _logger = new Logger(this);
             _logger.WriteLogMessage("InitializeCustomExtension", TraceEventType.Start);
-            _gatewayAcces = new CrmAccess(_orgService);
+            _gatewayAcces = new CrmAccess(_orgService, _maxTimeout);
 
             _deplActivities = new DeploymentActivities(_config, _logger, _gatewayAcces);
             _procActivator = new ProcessesActivator(_config, _logger, _gatewayAcces);
