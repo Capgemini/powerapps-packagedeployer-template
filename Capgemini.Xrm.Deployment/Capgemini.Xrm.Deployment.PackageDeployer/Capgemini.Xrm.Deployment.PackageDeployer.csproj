@@ -210,7 +210,7 @@
   <ItemGroup>
     <Compile Include="BusinessLogic\CapgeminiDataMigratorFacade.cs" />
     <Compile Include="CapgeminiPackageTemplate.cs" />
-    <None Include="Content\CapgeminiPackageTemplate.cs.pp" />
+    <None Include="Content\PackageTemplate.cs.pp" />
     <Compile Include="Core\CapgeminiDeploymentManager.cs" />
     <Compile Include="Core\CrmAccessClient.cs" />
     <Compile Include="Core\IPackageTemplate.cs" />

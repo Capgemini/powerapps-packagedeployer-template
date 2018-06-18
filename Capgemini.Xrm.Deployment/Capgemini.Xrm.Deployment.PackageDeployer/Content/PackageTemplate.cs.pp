@@ -8,7 +8,7 @@ namespace $rootnamespace$
     /// Import package starter frame. 
     /// </summary>
     [Export(typeof(IImportExtensions))]
-    public class CapgeminiPackageTemplate : CapgeminiPackageTemplate    
+    public class PackageTemplate : CapgeminiPackageTemplate    
     {
 
         #region Properties

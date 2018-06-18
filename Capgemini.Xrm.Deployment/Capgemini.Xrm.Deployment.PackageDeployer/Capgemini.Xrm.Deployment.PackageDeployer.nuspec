@@ -2,7 +2,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
   <metadata>
     <id>Capgemini.Xrm.Deployment.PackageDeployer</id>
-    <version>2.0.0</version>
+    <version>2.0.1</version>
     <title>Capgemini Package Deployer Extensions</title>
     <authors>Capgemini</authors>
     <owners>Capgemini</owners>
