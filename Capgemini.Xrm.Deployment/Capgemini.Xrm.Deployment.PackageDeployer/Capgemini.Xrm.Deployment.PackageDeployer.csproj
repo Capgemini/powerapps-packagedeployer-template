@@ -210,6 +210,7 @@
   <ItemGroup>
     <Compile Include="BusinessLogic\CapgeminiDataMigratorFacade.cs" />
     <Compile Include="CapgeminiPackageTemplate.cs" />
+    <None Include="Content\CapgeminiPackageTemplate.cs.pp" />
     <Compile Include="Core\CapgeminiDeploymentManager.cs" />
     <Compile Include="Core\CrmAccessClient.cs" />
     <Compile Include="Core\IPackageTemplate.cs" />
@@ -222,6 +223,11 @@
       <DependentUpon>CapgeminiPackageDeployerForm.cs</DependentUpon>
     </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <None Include="_CreateNewNuGetPackage\Config.ps1" />
+    <None Include="_CreateNewNuGetPackage\DoNotModify\CreateNuGetPackage.ps1" />
+    <None Include="_CreateNewNuGetPackage\DoNotModify\New-NuGetPackage.ps1" />
+    <None Include="_CreateNewNuGetPackage\DoNotModify\UploadNuGetPackage.ps1" />
+    <None Include="_CreateNewNuGetPackage\RunMeToUploadNuGetPackage.cmd" />
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config">
@@ -238,7 +244,41 @@
       <Name>Capgemini.Xrm.Deployment</Name>
     </ProjectReference>
   </ItemGroup>
+  <ItemGroup>
+    <None Include="Content\PkgFolder\Content\en-us\EndHtml\CSS\common.css" />
+    <None Include="Content\PkgFolder\Content\en-us\EndHtml\HTML\Default.htm" />
+    <None Include="Content\PkgFolder\Content\en-us\EndHtml\Images\body_back.gif" />
+    <None Include="Content\PkgFolder\Content\en-us\EndHtml\Images\contentarea_back.gif" />
+    <None Include="Content\PkgFolder\Content\en-us\EndHtml\Images\contentArea_back_home.gif" />
+    <None Include="Content\PkgFolder\Content\en-us\EndHtml\Images\content_back.gif" />
+    <None Include="Content\PkgFolder\Content\en-us\EndHtml\Images\content_back_orig.gif" />
+    <None Include="Content\PkgFolder\Content\en-us\EndHtml\Images\footer_back.gif" />
+    <None Include="Content\PkgFolder\Content\en-us\EndHtml\Images\header_back.gif" />
+    <None Include="Content\PkgFolder\Content\en-us\EndHtml\Images\nav_back.gif" />
+    <None Include="Content\PkgFolder\Content\en-us\EndHtml\Images\nav_list_back.gif" />
+    <None Include="Content\PkgFolder\Content\en-us\EndHtml\Images\top_item_selected_bg.gif" />
+    <None Include="Content\PkgFolder\Content\en-us\WelcomeHtml\CSS\common.css" />
+    <None Include="Content\PkgFolder\Content\en-us\WelcomeHtml\HTML\Default.htm" />
+    <None Include="Content\PkgFolder\Content\en-us\WelcomeHtml\Images\body_back.gif" />
+    <None Include="Content\PkgFolder\Content\en-us\WelcomeHtml\Images\contentarea_back.gif" />
+    <None Include="Content\PkgFolder\Content\en-us\WelcomeHtml\Images\contentArea_back_home.gif" />
+    <None Include="Content\PkgFolder\Content\en-us\WelcomeHtml\Images\content_back.gif" />
+    <None Include="Content\PkgFolder\Content\en-us\WelcomeHtml\Images\content_back_orig.gif" />
+    <None Include="Content\PkgFolder\Content\en-us\WelcomeHtml\Images\footer_back.gif" />
+    <None Include="Content\PkgFolder\Content\en-us\WelcomeHtml\Images\header_back.gif" />
+    <None Include="Content\PkgFolder\Content\en-us\WelcomeHtml\Images\nav_back.gif" />
+    <None Include="Content\PkgFolder\Content\en-us\WelcomeHtml\Images\nav_list_back.gif" />
+    <None Include="Content\PkgFolder\Content\en-us\WelcomeHtml\Images\top_item_selected_bg.gif" />
+    <None Include="Content\PkgFolder\ImportConfig.xml" />
+    <None Include="_CreateNewNuGetPackage\DoNotModify\NuGet.exe" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <PropertyGroup>
+    <PostBuildEvent>REM Create a NuGet package for this project and place the .nupkg file in the project's output directory.
+REM If you see this in Visual Studio's Error List window, check the Output window's Build tab for the actual error.
+ECHO Creating NuGet package in Post-Build event...
+PowerShell -NoProfile -ExecutionPolicy Bypass -Command "&amp; '$(ProjectDir)_CreateNewNuGetPackage\DoNotModify\CreateNuGetPackage.ps1' -ProjectFilePath '$(ProjectPath)' -OutputDirectory '$(TargetDir)' -BuildConfiguration '$(ConfigurationName)' -BuildPlatform '$(PlatformName)'"</PostBuildEvent>
+  </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">
