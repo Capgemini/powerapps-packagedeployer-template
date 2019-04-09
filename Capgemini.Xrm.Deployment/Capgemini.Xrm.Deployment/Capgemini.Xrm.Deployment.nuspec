@@ -6,9 +6,14 @@
     <title>Capgemini Xrm Deployment</title>
     <authors>Capgemini</authors>
     <owners>Capgemini</owners>
-    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <licenseUrl>https://github.com/Capgemini/xrm-packagedeployer/blob/master/LICENSE</licenseUrl>
+    <requireLicenseAcceptance>true</requireLicenseAcceptance>
+    <projectUrl>https://github.com/Capgemini/xrm-packagedeployer</projectUrl>
+    <repository type="git" url="https://github.com/Capgemini/xrm-packagedeployer" />
     <description>Capgemini Deployment for Dynamics 365 (v9 SDK) - used by package deployer to implement custom deployment logic</description>
-    <copyright>Capgemini Copyright ©  2018</copyright>
+    <copyright>Capgemini Copyright ©  2019</copyright>
+    <tags>Capgemini.Xrm.Deployment, Deployment, Xrm</tags>
+    <releaseNotes></releaseNotes>
     <dependencies />
   </metadata>
  </package>
