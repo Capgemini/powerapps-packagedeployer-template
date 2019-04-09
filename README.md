@@ -1,8 +1,9 @@
 # Capgemini Xrm Data Deployment and Package Deployer
 
-Build status Capgemini.Xrm.Deployment 
+Build status **Capgemini.Xrm.Deployment** 
 [![Build status](https://capgeminiuk.visualstudio.com/Capgemini%20Reusable%20IP/_apis/build/status/NUGET%20CI%20Builds/Capgemini%20Deployment%20V9%20NUGET)](https://capgeminiuk.visualstudio.com/Capgemini%20Reusable%20IP/_build/latest?definitionId=75)
-Build status Capgemini.Xrm.Deployment.PackageDeployer
+
+Build status **Capgemini.Xrm.Deployment.PackageDeployer**
 [![Build status](https://capgeminiuk.visualstudio.com/Capgemini%20Reusable%20IP/_apis/build/status/NUGET%20CI%20Builds/Capgemini%20Deployment%20PackageDeployer%20V9%20NUGET)](https://capgeminiuk.visualstudio.com/Capgemini%20Reusable%20IP/_build/latest?definitionId=76)
 
 ## Description
