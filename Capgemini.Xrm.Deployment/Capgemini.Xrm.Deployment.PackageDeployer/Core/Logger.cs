@@ -7,7 +7,7 @@ namespace Capgemini.Xrm.Deployment.PackageDeployer.Core
 {
     public class Logger : ILogger, Capgemini.DataMigration.Core.ILogger
     {
-        private IPackageTemplate _impExtension;
+        private readonly IPackageTemplate _impExtension;
 
         public Logger(IPackageTemplate impExtension)
         {

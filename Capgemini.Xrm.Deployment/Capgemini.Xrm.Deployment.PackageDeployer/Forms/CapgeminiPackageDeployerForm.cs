@@ -1,4 +1,5 @@
-﻿using Capgemini.Xrm.Deployment.PackageDeployer.BusinessLogic;
+﻿using Capgemini.Xrm.Deployment.Extensions;
+using Capgemini.Xrm.Deployment.PackageDeployer.BusinessLogic;
 using Capgemini.Xrm.Deployment.Repository;
 using Capgemini.Xrm.Deployment.SolutionImport.Events;
 using Capgemini.Xrm.DeploymentHelpers;
@@ -15,15 +16,15 @@ namespace Capgemini.Xrm.Deployment.PackageDeployer.Forms
         private readonly SynchronizationContext _syncContext;
         private readonly ICrmImportRepository _impRepo;
         private readonly string _configSubfolder = "";
-        private readonly bool _importData = false;
+        private readonly bool _importData;
 
         public Exception LastException { get; set; }
         public bool ImportFinished { get; set; }
 
         public CapgeminiPackageDeployerForm(SolutionImport.PackageDeployer packageDeployer, ICrmImportRepository impRepo, bool importData, string configSubfolder) : this(packageDeployer, impRepo)
         {
-            this._configSubfolder = configSubfolder;
-            this._importData = importData;
+            _configSubfolder = configSubfolder;
+            _importData = importData;
             var config = _deployer.DeploymentConfiguration;
 
             DisplayMessage($"SolutionsFolder={config.SolutionsFolder}");
@@ -61,13 +62,9 @@ namespace Capgemini.Xrm.Deployment.PackageDeployer.Forms
                 foreach (var item in _deployer.GetSolutionDetails)
                 {
                     item.UpdateSolutionDetails();
-                    DisplayMessage(string.Format("Solution:{0}, Version:{1}, Installed Version:{2}, Installed Holding Version:{3}",
-                        item.GetSolutionDetails.SolutionName,
-                        item.GetSolutionDetails.SolutionVersion,
-                        item.InstalledVersion == null ? "None" : item.InstalledVersion.ToString(),
-                        item.InstalledHoldingVersion == null ? "None" : item.InstalledHoldingVersion.ToString()));
+                    DisplayMessage($"Solution:{item.GetSolutionDetails.SolutionName}, Version:{item.GetSolutionDetails.SolutionVersion}, Installed Version:{(item.InstalledVersion == null ? "None" : item.InstalledVersion.ToString())}, Installed Holding Version:{(item.InstalledHoldingVersion == null ? "None" : item.InstalledHoldingVersion.ToString())}");
                 }
-            });
+            }).ConfigureAwait(false);
 
             btStart.Enabled = true;
         }
@@ -86,7 +83,7 @@ namespace Capgemini.Xrm.Deployment.PackageDeployer.Forms
         {
             this._syncContext.Send(p =>
             {
-                tbMessage.AppendText(string.Format("{0} - {1}{2}", DateTime.Now, message, Environment.NewLine));
+                tbMessage.AppendText($"{DateTime.Now} - {message}{Environment.NewLine}");
             }, null);
         }
 
@@ -133,10 +130,10 @@ namespace Capgemini.Xrm.Deployment.PackageDeployer.Forms
                 }
                 catch (Exception ex)
                 {
-                    DisplayMessage("ERROR:" + ex);
+                    DisplayMessage($"ERROR:{ex}");
                     LastException = ex;
                 }
-            });
+            }).ConfigureAwait(false);
 
             if (LastException == null)
             {
@@ -145,7 +142,7 @@ namespace Capgemini.Xrm.Deployment.PackageDeployer.Forms
             }
             else
             {
-                MessageBox.Show("Import Error, You can try to fix the problem and try again, Error: " + LastException);
+                MessageBox.Show($"Import Error, You can try to fix the problem and try again, Error: {LastException}");
                 btStart.Enabled = true;
             }
         }

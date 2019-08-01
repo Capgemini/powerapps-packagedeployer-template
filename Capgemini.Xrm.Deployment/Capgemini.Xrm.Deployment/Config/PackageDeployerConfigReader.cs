@@ -1,4 +1,5 @@
-﻿using Capgemini.Xrm.Deployment.Core;
+﻿using Capgemini.Xrm.Deployment.Constants;
+using Capgemini.Xrm.Deployment.Core;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -49,7 +50,7 @@ namespace Capgemini.Xrm.Deployment.Config
         private readonly string _pkgFolderPath;
 
         private const string ConfigFileName = "ImportConfig.xml";
-
+        
         public PackageDeployerConfigReader(string pkgFolderPath)
         {
             SolutionsFolder = pkgFolderPath;
@@ -63,7 +64,9 @@ namespace Capgemini.Xrm.Deployment.Config
             SolutionConfigFilePath = Path.Combine(_pkgFolderPath, ConfigFileName);
 
             if (!File.Exists(SolutionConfigFilePath))
-                throw new Exception("Package eployer configuration file not found!");
+            {
+                throw new Exception(CommonConstants.PackageDeployerConfigNotFound);
+            }
 
             var doc = new XmlDocument();
             doc.Load(SolutionConfigFilePath);
@@ -127,17 +130,23 @@ namespace Capgemini.Xrm.Deployment.Config
                 DefaultSLANames = defaultSLAs.Split(',').ToList();
         }
 
-        private bool ReadBoolMainSettings(XmlNode node, string settingName, bool defaultValue = false)
+        private static bool ReadBoolMainSettings(XmlNode node, string settingName, bool defaultValue = false)
         {
             bool boolValue = defaultValue;
-            if (node.Attributes[settingName] != null) bool.TryParse(node.Attributes[settingName].Value, out boolValue);
+            if (node.Attributes[settingName] != null)
+            {
+                var result = bool.TryParse(node.Attributes[settingName].Value, out boolValue);
+            }
             return boolValue;
         }
 
-        private int ReadIntMainSettings(XmlNode node, string settingName, int defaultValue)
+        private static  int ReadIntMainSettings(XmlNode node, string settingName, int defaultValue)
         {
             int intValue = defaultValue;
-            if (node.Attributes[settingName] != null) int.TryParse(node.Attributes[settingName].Value, out intValue);
+            if (node.Attributes[settingName] != null)
+            {
+                var result = int.TryParse(node.Attributes[settingName].Value, out intValue);
+            }
             return intValue;
         }
 

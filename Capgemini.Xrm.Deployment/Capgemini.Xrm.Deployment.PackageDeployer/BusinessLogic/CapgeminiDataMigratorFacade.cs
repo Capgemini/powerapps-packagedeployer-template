@@ -14,6 +14,8 @@ namespace Capgemini.Xrm.Deployment.PackageDeployer.BusinessLogic
 {
     public class CapgeminiDataMigratorFacade
     {
+        private const string MigrateDataPackagesMessage = "MigrateDataPackages importing started";
+        private const string MigrateDataPackagesCompleteMessage = "MigrateDataPackages importing finished";
         private readonly ILogger _logger;
         private readonly IOrganizationService _service;
 
@@ -25,7 +27,7 @@ namespace Capgemini.Xrm.Deployment.PackageDeployer.BusinessLogic
 
         public void MigrateDataPackages(string importConfigPath, string configSubfolder)
         {
-            _logger.Info("MigrateDataPackages importing started");
+            _logger.Info(MigrateDataPackagesMessage);
 
             string impConfigFolder = Path.GetDirectoryName(importConfigPath);
 
@@ -56,12 +58,12 @@ namespace Capgemini.Xrm.Deployment.PackageDeployer.BusinessLogic
                     }
                     catch (Exception ex)
                     {
-                        _logger.Error("MigrateDataPackages Error:" + ex);
+                        _logger.Error($"MigrateDataPackages Error:{ex}");
                     }
                 }
             }
 
-            _logger.Info("MigrateDataPackages importing finished");
+            _logger.Info(MigrateDataPackagesCompleteMessage);
         }
 
         private void ImportDataPackage(string extractedDataPath, string configFilePath)

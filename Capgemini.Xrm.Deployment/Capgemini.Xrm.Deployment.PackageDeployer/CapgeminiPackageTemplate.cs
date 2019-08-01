@@ -20,6 +20,8 @@ namespace Capgemini.Xrm.Deployment.PackageDeployer
     /// </summary>
     public class CapgeminiPackageTemplate : ImportExtension, IPackageTemplate
     {
+        private const string RuntimeSettingsMessage = "Runtime Settings not populated";
+        private const string InitializeCustomExtensionMessage = "InitializeCustomExtension";
         private Logger _logger;
         private CrmAccess _gatewayAcces;
         private IOrganizationService _orgService;
@@ -28,7 +30,7 @@ namespace Capgemini.Xrm.Deployment.PackageDeployer
         private ProcessesActivator _procActivator;
 
         private string _impConfigSubfolder = "";
-        private bool _skipPostDeploymentActions = false;
+        private bool _skipPostDeploymentActions;
         private int _maxTimeout = 30;
 
         /// <summary>
@@ -38,10 +40,10 @@ namespace Capgemini.Xrm.Deployment.PackageDeployer
         {
             if (RuntimeSettings != null)
             {
-                PackageLog.Log(string.Format("Runtime Settings populated.  Count = {0}", RuntimeSettings.Count));
+                PackageLog.Log($"Runtime Settings populated.  Count = {RuntimeSettings.Count}");
                 foreach (var setting in RuntimeSettings)
                 {
-                    PackageLog.Log(string.Format("Key={0} | Value={1}", setting.Key, setting.Value));
+                    PackageLog.Log($"Key={setting.Key} | Value={setting.Value}");
                 }
 
                 // Check to see if skip checks is present.
@@ -76,7 +78,7 @@ namespace Capgemini.Xrm.Deployment.PackageDeployer
                 }
             }
             else
-                PackageLog.Log("Runtime Settings not populated");
+                PackageLog.Log(RuntimeSettingsMessage);
 
             _config = new PackageDeployerConfigReader(GetImportPackageFolderPath);
 
@@ -88,7 +90,7 @@ namespace Capgemini.Xrm.Deployment.PackageDeployer
                 _orgService = this.CrmSvc.OrganizationWebProxyClient;
 
             _logger = new Logger(this);
-            _logger.WriteLogMessage("InitializeCustomExtension", TraceEventType.Start);
+            _logger.WriteLogMessage(InitializeCustomExtensionMessage, TraceEventType.Start);
             _gatewayAcces = new CrmAccess(_orgService, _maxTimeout);
 
             _deplActivities = new DeploymentActivities(_config, _logger, _gatewayAcces);
@@ -108,7 +110,7 @@ namespace Capgemini.Xrm.Deployment.PackageDeployer
             {
                 var deplMgr = new CapgeminiDeploymentManager(this, _logger, _gatewayAcces, _config);
                 deplMgr.StartCustomDeployment();
-                _logger.WriteLogMessage("InitializeCustomExtension", TraceEventType.Stop);
+                _logger.WriteLogMessage(InitializeCustomExtensionMessage, TraceEventType.Stop);
             }
         }
 
@@ -156,7 +158,7 @@ namespace Capgemini.Xrm.Deployment.PackageDeployer
             {
                 try
                 {
-                    var importFacade = new CapgeminiDataMigratorFacade(this._gatewayAcces.CurrentServiceProxy, this._logger);
+                    var importFacade = new CapgeminiDataMigratorFacade(_gatewayAcces.CurrentServiceProxy, _logger);
                     importFacade.MigrateDataPackages(_config.SolutionConfigFilePath, _impConfigSubfolder);
                 }
                 catch (Exception ex)
@@ -301,7 +303,7 @@ namespace Capgemini.Xrm.Deployment.PackageDeployer
             {
                 if (ConfigurationManager.AppSettings.AllKeys.Contains("MaxCrmConnectionTimeOutMinutes"))
                 {
-                    int.TryParse(ConfigurationManager.AppSettings["MaxCrmConnectionTimeOutMinutes"], out MaxCrmConnectionTimeOutMinutes);
+                    var result = int.TryParse(ConfigurationManager.AppSettings["MaxCrmConnectionTimeOutMinutes"], out MaxCrmConnectionTimeOutMinutes);
                 }
             }
             catch (Exception)
@@ -309,10 +311,10 @@ namespace Capgemini.Xrm.Deployment.PackageDeployer
                 MaxCrmConnectionTimeOutMinutes = _maxTimeout;
             }
 
-            if (this.CrmSvc.OrganizationServiceProxy != null)
-                this.CrmSvc.OrganizationServiceProxy.Timeout = TimeSpan.FromMinutes(MaxCrmConnectionTimeOutMinutes);
-            else if (this.CrmSvc.OrganizationWebProxyClient != null)
-                this.CrmSvc.OrganizationWebProxyClient.InnerChannel.OperationTimeout = TimeSpan.FromMinutes(MaxCrmConnectionTimeOutMinutes);
+            if (CrmSvc.OrganizationServiceProxy != null)
+                CrmSvc.OrganizationServiceProxy.Timeout = TimeSpan.FromMinutes(MaxCrmConnectionTimeOutMinutes);
+            else if (CrmSvc.OrganizationWebProxyClient != null)
+                CrmSvc.OrganizationWebProxyClient.InnerChannel.OperationTimeout = TimeSpan.FromMinutes(MaxCrmConnectionTimeOutMinutes);
         }
     }
 }

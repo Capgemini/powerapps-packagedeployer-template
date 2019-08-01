@@ -7,6 +7,7 @@ using Microsoft.Xrm.Sdk.Messages;
 using Microsoft.Xrm.Sdk.Query;
 using System;
 using System.Diagnostics;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Threading;
@@ -92,7 +93,7 @@ namespace Capgemini.Xrm.Deployment.Repository
                 outResult = new ImportStatus
                 {
                     ImportAsyncId = asyncJobId,
-                    ImportState = statusCode.ToString(),
+                    ImportState = statusCode.ToString(CultureInfo.InvariantCulture),
                     ImportMessage = asyncOperation.GetAttributeValue<string>("message"),
                     ImportId = _requestId.Value,
                     ImportStatusCode = statusCode
@@ -115,7 +116,7 @@ namespace Capgemini.Xrm.Deployment.Repository
 
         public ImportStatus CheckImportStatus()
         {
-            var job = CurrentOrganizationService.Retrieve("importjob", _requestId.Value, new ColumnSet(new System.String[] { "data", "solutionname" }));
+            var job = CurrentOrganizationService.Retrieve("importjob", _requestId.Value, new ColumnSet(new [] { "data", "solutionname" }));
 
             if (job == null) throw new Exception("Invalid importjob id");
 
@@ -255,8 +256,6 @@ namespace Capgemini.Xrm.Deployment.Repository
                   int sleepInterval,
                   int asyncWaitTimeout)
         {
-            Guid? asyncJobId = null;
-
             var asyncRequest = new ExecuteAsyncRequest
             {
                 Request = request
@@ -264,7 +263,7 @@ namespace Capgemini.Xrm.Deployment.Repository
 
             var asyncResponse = CurrentOrganizationService.Execute(asyncRequest) as ExecuteAsyncResponse;
 
-            asyncJobId = asyncResponse.AsyncJobId;
+            Guid? asyncJobId = asyncResponse.AsyncJobId;
 
             var watch = Stopwatch.StartNew();
             watch.Start();
@@ -292,7 +291,7 @@ namespace Capgemini.Xrm.Deployment.Repository
                         case AsyncOperationStatusEnum.Failed:
                         case AsyncOperationStatusEnum.Canceled:
                             watch.Stop();
-                            throw new Exception(string.Format("Async Operation Failed: {0} {1}", statusCode, asyncOperation.ImportMessage));
+                            throw new Exception($"Async Operation Failed: {statusCode} {asyncOperation.ImportMessage}");
 
                         default:
                             OnRaiseImportUpdatEvent(new AsyncImportUpdateEventArgs
@@ -306,7 +305,7 @@ namespace Capgemini.Xrm.Deployment.Repository
                     }
                 }
 
-                throw new TimeoutException(string.Format("Async Operation Timeout: {0}", asyncWaitTimeout));
+                throw new TimeoutException($"Async Operation Timeout: {asyncWaitTimeout}");
             }
 
             watch.Stop();

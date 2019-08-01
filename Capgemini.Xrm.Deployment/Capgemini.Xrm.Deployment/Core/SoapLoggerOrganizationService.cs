@@ -1,4 +1,5 @@
-﻿using Microsoft.Crm.Sdk.Messages;
+﻿using Capgemini.Xrm.Deployment.Extensions;
+using Microsoft.Crm.Sdk.Messages;
 using Microsoft.Xrm.Sdk;
 using Microsoft.Xrm.Sdk.Query;
 using System;
@@ -39,24 +40,13 @@ namespace Capgemini.Xrm.Deployment.Core
 
         public SoapLoggerOrganizationService(Uri rootServiceUri, IOrganizationService service, TextWriter outputWriter)
         {
-            if (null == rootServiceUri)
-            {
-                throw new ArgumentNullException(nameof(rootServiceUri));
-            }
+            rootServiceUri.ThrowArgumentNullExceptionIfNull(nameof(rootServiceUri));
+            service.ThrowArgumentNullExceptionIfNull(nameof(service));
+            outputWriter.ThrowArgumentNullExceptionIfNull(nameof(outputWriter));
 
-            if (null == service)
-            {
-                throw new ArgumentNullException(nameof(service));
-            }
-
-            if (null == outputWriter)
-            {
-                throw new ArgumentNullException(nameof(outputWriter));
-            }
-
-            this.RootServiceUri = rootServiceUri;
-            this.InnerService = service;
-            this.OutputWriter = outputWriter;
+            RootServiceUri = rootServiceUri;
+            InnerService = service;
+            OutputWriter = outputWriter;
         }
 
         #endregion Constructors and private fields
@@ -95,7 +85,7 @@ namespace Capgemini.Xrm.Deployment.Core
 
                 var result = WebUtility.HtmlDecode(fetchresponse.FetchXml);
                 result = PrintXML(result);
-                using (StreamWriter file = new System.IO.StreamWriter(@"fecthXml.txt", true))
+                using (StreamWriter file = new StreamWriter(@"fecthXml.txt", true))
                 {
                     file.WriteLine("------------------------------------");
                     file.WriteLine(result.Replace(@"""", @""""""));
@@ -107,45 +97,45 @@ namespace Capgemini.Xrm.Deployment.Core
 
         public static string PrintXML(string XML)
         {
-            string Result = "";
-
-            var mStream = new MemoryStream();
-            var writer = new XmlTextWriter(mStream, Encoding.Unicode);
-            var document = new XmlDocument();
+            string result = "";
 
             try
             {
-                // Load the XmlDocument with the XML.
-                document.LoadXml(XML);
+                using (var stream = new MemoryStream())
+                {
+                    using (var writer = new XmlTextWriter(stream, Encoding.Unicode))
+                    {
+                        var document = new XmlDocument();
 
-                writer.Formatting = Formatting.Indented;
+                        document.LoadXml(XML);
 
-                // Write the XML into a formatting XmlTextWriter
-                document.WriteContentTo(writer);
-                writer.Flush();
-                mStream.Flush();
+                        writer.Formatting = Formatting.Indented;
 
-                // Have to rewind the MemoryStream in order to read
-                // its contents.
-                mStream.Position = 0;
+                        // Write the XML into a formatting XmlTextWriter
+                        document.WriteContentTo(writer);
+                        writer.Flush();
+                        stream.Flush();
 
-                // Read MemoryStream contents into a StreamReader.
-                var sReader = new StreamReader(mStream);
+                        // Have to rewind the MemoryStream in order to read
+                        // its contents.
+                        stream.Position = 0;
 
-                // Extract the text from the StreamReader.
-                var FormattedXML = sReader.ReadToEnd();
+                        // Read MemoryStream contents into a StreamReader.
+                        var reader = new StreamReader(stream);
 
-                Result = FormattedXML;
+                         // Extract the text from the StreamReader.
+                         var FormattedXML = reader.ReadToEnd();
+
+                        result = FormattedXML;
+                    }
+                }
             }
             catch (XmlException ex)
             {
-                return "Error formating XML:" + ex.Message + "\n" + XML;
+                return $"Error formating XML:{ex.Message}\n{XML}";
             }
 
-            mStream.Close();
-            writer.Close();
-
-            return Result;
+            return result;
         }
 
         public Entity Retrieve(string entityName, Guid id, ColumnSet columnSet)
@@ -251,7 +241,7 @@ namespace Capgemini.Xrm.Deployment.Core
             }
         }
 
-        private string Serialize(object value)
+        private static string Serialize(object value)
         {
             if (null == value)
             {

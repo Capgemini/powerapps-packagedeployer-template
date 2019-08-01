@@ -51,8 +51,10 @@ namespace Capgemini.Xrm.Deployment.Core
         {
             pageSize = GetPageSize(pageSize);
 
-            var query = new QueryExpression(entityName);
-            query.ColumnSet = columnsToRetrieve != null ? new ColumnSet(columnsToRetrieve) : new ColumnSet(true);
+            var query = new QueryExpression(entityName)
+            {
+                ColumnSet = columnsToRetrieve != null ? new ColumnSet(columnsToRetrieve) : new ColumnSet(true)
+            };
 
             if (!string.IsNullOrWhiteSpace(columnName) && columnValue != null)
                 query.Criteria.AddCondition(columnName, ConditionOperator.Equal, columnValue);
@@ -99,14 +101,14 @@ namespace Capgemini.Xrm.Deployment.Core
 
         public void SetEntityPicture(EntityReference entityReference, byte[] picture)
         {
-            var ent = this.GetEntity(entityReference.LogicalName, entityReference.Id, new string[] { EntityImageField });
+            var ent = GetEntity(entityReference.LogicalName, entityReference.Id, new string[] { EntityImageField });
 
             if (ent == null)
                 throw new ValidationException("Cannot retrieve entity:" + entityReference.LogicalName + ", id:" + entityReference.Id);
 
             ent[EntityImageField] = picture;
 
-            this.CurrentServiceProxy.Update(ent);
+            CurrentServiceProxy.Update(ent);
         }
 
         public void SetEntityPicture(string filePath, char seperator)
@@ -116,17 +118,13 @@ namespace Capgemini.Xrm.Deployment.Core
             var items = file.Name.Split(seperator);
 
             if (items == null || items.Count() < 2)
-                throw new ValidationException(String.Format("Cannot extract entity name and id from filepath: {0}, using seperator: {1}", filePath, seperator));
+                throw new ValidationException($"Cannot extract entity name and id from filepath: {filePath}, using seperator: {seperator}");
 
-            //Get enity name
-            string entName = items[0];
-
-            //Get entity id
+            var entName = items[0];
             var entId = items[1].Remove(items[1].LastIndexOf('.'));
 
-            Guid id;
-            if (!Guid.TryParse(entId, out id))
-                throw new ValidationException("Cannot parse id:" + entId);
+            if (!Guid.TryParse(entId, out Guid id))
+                throw new ValidationException($"Cannot parse id:{entId}");
 
             SetEntityPicture(new EntityReference(entName, id), File.ReadAllBytes(filePath));
         }
@@ -138,9 +136,11 @@ namespace Capgemini.Xrm.Deployment.Core
             if (retrievedParam.Entities.Count == 0)
                 throw new ConfigurationException("Configuration Parameter: " + key + " not found");
 
-            var conf = new ConfigurationParameter();
-            conf.Value = retrievedParam[0].GetAttributeValue<String>("cap_value");
-            conf.Id = retrievedParam[0].Id;
+            var conf = new ConfigurationParameter
+            {
+                Value = retrievedParam[0].GetAttributeValue<String>("cap_value"),
+                Id = retrievedParam[0].Id
+            };
             return conf;
         }
 
@@ -226,8 +226,10 @@ namespace Capgemini.Xrm.Deployment.Core
 
         private Guid FindWorkflowByName(string name)
         {
-            var objQueryExpression = new QueryExpression("workflow");
-            objQueryExpression.ColumnSet = new ColumnSet(true);
+            var objQueryExpression = new QueryExpression("workflow")
+            {
+                ColumnSet = new ColumnSet(true)
+            };
             objQueryExpression.Criteria.AddCondition(new ConditionExpression("name", ConditionOperator.Equal, name));
             objQueryExpression.Criteria.AddCondition(new ConditionExpression("parentworkflowid", ConditionOperator.Null));
 
@@ -235,7 +237,7 @@ namespace Capgemini.Xrm.Deployment.Core
 
             if (!entities.Entities.Any())
             {
-                throw new ConfigurationException(string.Format("Workflow {0} not found", name));
+                throw new ConfigurationException($"Workflow {name} not found");
             }
             return entities.Entities[0].Id;
         }

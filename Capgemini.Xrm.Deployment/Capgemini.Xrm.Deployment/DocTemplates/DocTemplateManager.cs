@@ -3,6 +3,7 @@ using Capgemini.Xrm.Deployment.Repository;
 using DocumentFormat.OpenXml.Packaging;
 using Microsoft.Xrm.Sdk;
 using System;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -32,7 +33,6 @@ namespace Capgemini.Xrm.Deployment.DocTemplates
                 throw new ValidationException("Cannot find template " + templateName);
 
             string documentContent = template.GetAttributeValue<string>("content");
-            string name = template.GetAttributeValue<string>("name");
             byte[] content = Convert.FromBase64String(documentContent);
 
             File.WriteAllBytes(filePath, content);
@@ -41,7 +41,7 @@ namespace Capgemini.Xrm.Deployment.DocTemplates
         public void ImportTemplateFromFile(string templateName, string filePath)
         {
             var file = new FileInfo(filePath);
-            OptionSetValue templType = new OptionSetValue(file.Extension.ToUpper() == "xlsx" ? 1 : 2);
+            var templType = new OptionSetValue(file.Extension.ToUpper(CultureInfo.InvariantCulture) == "xlsx" ? 1 : 2);
 
             if (templType.Value != 2)
                 throw new ValidationException("Only docx word templates are supported! (documenttype 2)");
@@ -96,7 +96,7 @@ namespace Capgemini.Xrm.Deployment.DocTemplates
             return entityName;
         }
 
-        private Tuple<string, string> GetEntityAndCode(string text)
+        private static Tuple<string, string> GetEntityAndCode(string text)
         {
             string regExpr = @"urn:microsoft-crm\/document-template\/\w*\/\d+\/";
 

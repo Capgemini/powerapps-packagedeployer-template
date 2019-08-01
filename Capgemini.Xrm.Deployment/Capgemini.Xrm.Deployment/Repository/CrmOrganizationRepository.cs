@@ -3,6 +3,7 @@ using Microsoft.Crm.Sdk.Messages;
 using Microsoft.Xrm.Sdk;
 
 using System;
+using System.Globalization;
 
 namespace Capgemini.Xrm.Deployment.Repository
 {
@@ -39,7 +40,7 @@ namespace Capgemini.Xrm.Deployment.Repository
             switch (valueType)
             {
                 case "System.Boolean":
-                    return Convert.ToBoolean(value);
+                    return Convert.ToBoolean(value,CultureInfo.InvariantCulture);
 
                 case "System.String":
                     return value;

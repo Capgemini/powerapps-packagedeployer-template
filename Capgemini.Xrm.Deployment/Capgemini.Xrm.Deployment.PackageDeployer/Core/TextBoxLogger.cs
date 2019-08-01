@@ -28,42 +28,42 @@ namespace Capgemini.Xrm.PackageDeployer.TestUI.Logging
 
         public void Error(string message)
         {
-            this.WriteLine("Error:" + message);
+            WriteLine("Error:" + message);
         }
 
         public void Error(string message, Exception ex)
         {
-            this.WriteLine("Error:" + message + ",Ex:" + ex.ToString());
+            WriteLine($"Error:{message},Ex:{ex?.ToString()}");
         }
 
         public void Info(string message)
         {
             if (LogLevel > 1)
-                this.WriteLine("Info:" + message);
+                WriteLine($"Info:{message}");
         }
 
         public void Start(string message)
         {
             if (LogLevel > 1)
-                this.WriteLine("Start:" + message);
+                this.WriteLine($"Start:{message}");
         }
 
         public void Stop(string message)
         {
             if (LogLevel > 1)
-                this.WriteLine("Stop:" + message);
+                WriteLine($"Stop:{message}");
         }
 
         public void Verbose(string message)
         {
             if (LogLevel > 2)
-                this.WriteLine("Verbose:" + message);
+                WriteLine($"Verbose:{message}");
         }
 
         public void Warning(string message)
         {
             if (LogLevel > 0)
-                this.WriteLine("Warning:" + message);
+                WriteLine($"Warning:{message}");
         }
 
         public void WriteLogMessage(string message)
@@ -103,14 +103,14 @@ namespace Capgemini.Xrm.PackageDeployer.TestUI.Logging
 
         public void WriteLogMessage(string message, TraceEventType eventType, Exception ex)
         {
-            WriteLogMessage(message + " error:" + ex, eventType);
+            WriteLogMessage($"{message} error:{ex}", eventType);
         }
 
         private void WriteLine(string message)
         {
             _syncContext.Send(p =>
             {
-                _tbMessage.AppendText(string.Format("{0} - {1}{2}", DateTime.Now, message, Environment.NewLine));
+                _tbMessage.AppendText($"{DateTime.Now} - {message}{Environment.NewLine}");
             }, null);
         }
     }

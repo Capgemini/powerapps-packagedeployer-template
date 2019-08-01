@@ -18,7 +18,7 @@ namespace Capgemini.Xrm.PackageDeployer.TestUI
     public partial class Import : Form
     {
         private Deployment.SolutionImport.PackageDeployer _deployer;
-        private SynchronizationContext syncContext;
+        private readonly SynchronizationContext syncContext;
 
         public Import()
         {

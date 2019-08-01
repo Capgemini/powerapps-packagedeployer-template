@@ -11,8 +11,8 @@ namespace Capgemini.Xrm.Deployment.SolutionImport
 
         private const string HoldingSolutionSuffix = "_Upgrade";
         private SolutionDetails _details;
-        private FileInfo _solutionFile;
-        private bool _forceUpgrade;
+        private readonly FileInfo _solutionFile;
+        private readonly bool _forceUpgrade;
 
         #endregion Private Fields
 

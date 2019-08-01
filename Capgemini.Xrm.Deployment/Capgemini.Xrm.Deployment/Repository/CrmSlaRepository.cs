@@ -1,5 +1,6 @@
 ﻿using Capgemini.Xrm.Deployment.Core;
 using Capgemini.Xrm.Deployment.Core.Exceptions;
+using Capgemini.Xrm.Deployment.Extensions;
 using Capgemini.Xrm.Deployment.Model.Sla;
 using Microsoft.Xrm.Sdk;
 using System;
@@ -41,26 +42,34 @@ namespace Capgemini.Xrm.Deployment.Repository
 
         public void SetSlaDefault(SlaEntity sla)
         {
+            sla.ThrowIfNull();
+
             if (!sla.IsDefult)
             {
-                Entity updateSLA = new Entity(SlaEntity.EntityName);
-                updateSLA.Id = sla.SlaId;
+                var updateSLA = new Entity(SlaEntity.EntityName)
+                {
+                    Id = sla.SlaId
+                };
                 updateSLA.Attributes.Add(SlaFields.IsDefault, true);
-                this.CurrentOrganizationService.Update(updateSLA);
+                CurrentOrganizationService.Update(updateSLA);
             }
         }
 
         public void DeactivateSla(SlaEntity sla)
         {
+            sla.ThrowIfNull();
+
             if (sla.SlaState == SlaState.Active && sla.SlaStatus == SlaStatusCode.Active)
             {
                 Entity slaEnt = new Entity(SlaEntity.EntityName, sla.SlaId);
-                this.CurrentAccess.SetEntityStatus(slaEnt, (int)SlaState.Draft, (int)SlaStatusCode.Draft);
+                CurrentAccess.SetEntityStatus(slaEnt, (int)SlaState.Draft, (int)SlaStatusCode.Draft);
             }
         }
 
         public void ActivateSla(SlaEntity sla)
         {
+            sla.ThrowIfNull();
+
             if (sla.SlaState == SlaState.Draft && sla.SlaStatus == SlaStatusCode.Draft)
             {
                 Entity slaEnt = new Entity(SlaEntity.EntityName, sla.SlaId);

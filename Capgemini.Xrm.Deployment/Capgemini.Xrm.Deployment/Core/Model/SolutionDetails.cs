@@ -18,7 +18,7 @@ namespace Capgemini.Xrm.Deployment.Core.Model
 
         public override string ToString()
         {
-            return string.Format("SolutionName:{0}, HoldingSolutionName:{1}, SolutionVersion:{2}, ForceUpdate:{3}", SolutionName, HoldingSolutionName, SolutionVersion, ForceUpdate);
+            return $"SolutionName:{SolutionName}, HoldingSolutionName:{HoldingSolutionName}, SolutionVersion:{SolutionVersion}, ForceUpdate:{ForceUpdate}";
         }
     }
 }

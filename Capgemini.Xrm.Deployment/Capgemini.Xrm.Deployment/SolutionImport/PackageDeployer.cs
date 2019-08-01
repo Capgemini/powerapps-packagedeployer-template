@@ -1,5 +1,6 @@
 ﻿using Capgemini.Xrm.Deployment.Config;
 using Capgemini.Xrm.Deployment.Core;
+using Capgemini.Xrm.Deployment.Extensions;
 using Capgemini.Xrm.Deployment.Repository;
 using Capgemini.Xrm.Deployment.SolutionImport.Events;
 using System;
@@ -27,6 +28,7 @@ namespace Capgemini.Xrm.Deployment.SolutionImport
 
         public PackageDeployer(ICrmImportRepository importRepo, IPackageDeployerConfig configReader)
         {
+            configReader.ThrowIfNull();
             _importRepo = importRepo;
             _configReader = configReader;
             _sleepIntervalMiliseconds = configReader.AsyncSleepIntervalMiliseconds;
@@ -44,6 +46,7 @@ namespace Capgemini.Xrm.Deployment.SolutionImport
 
         protected virtual void OnRaiseImportUpdatEvent(ImportUpdateEventArgs e)
         {
+            e.ThrowIfNull();
             EventHandler<ImportUpdateEventArgs> handler = RaiseImportUpdateEvent;
 
             if (handler != null)
@@ -92,7 +95,7 @@ namespace Capgemini.Xrm.Deployment.SolutionImport
                     OnRaiseImportUpdatEvent(new ImportUpdateEventArgs
                     {
                         SolutionDetails = item.SolutionImporter.GetSolutionDetails,
-                        Message = string.Format("Holding Solution installation finished, status:{0}", result.ImportState)
+                        Message = $"Holding Solution installation finished, status:{result.ImportState}"
                     });
                 }
                 else
@@ -162,7 +165,7 @@ namespace Capgemini.Xrm.Deployment.SolutionImport
                 OnRaiseImportUpdatEvent(new ImportUpdateEventArgs
                 {
                     SolutionDetails = item.SolutionImporter.GetSolutionDetails,
-                    Message = string.Format("Updated Solution installation finished, status:{0}", result.ImportState)
+                    Message = $"Updated Solution installation finished, status:{result.ImportState}"
                 });
 
                 //Extra to delete holding solution immediatelly

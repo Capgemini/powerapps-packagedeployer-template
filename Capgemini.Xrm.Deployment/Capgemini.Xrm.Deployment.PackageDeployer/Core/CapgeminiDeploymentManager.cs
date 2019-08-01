@@ -13,9 +13,9 @@ namespace Capgemini.Xrm.Deployment.PackageDeployer.Core
 {
     public class CapgeminiDeploymentManager
     {
-        //private readonly IPackageTemplate _packageTemplate;
+        private const string StartCustomDeploymentMessage = "Capgemini Package Deployer - Deployment Start";
+
         private readonly ILogger _logger;
-        private readonly CrmAccess _gatewayAccess;
         private readonly ICrmImportRepository _impGateway;
         private readonly SolutionImport.PackageDeployer _packageDeployer;
         private readonly Dispatcher _dispatcher;
@@ -29,23 +29,20 @@ namespace Capgemini.Xrm.Deployment.PackageDeployer.Core
         {
             _dispatcher = packageTemplate != null ? packageTemplate.RootControlDispatcher : null;
             _logger = logger;
-            _gatewayAccess = gatewayAccess;
 
             var assemblyFolder = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
             var packageFolder = Path.Combine(assemblyFolder, packageTemplate.GetImportPackageDataFolderName);
 
             _impGateway = new CrmImportRepository(gatewayAccess);
-            _impGateway.RaiseImportUpdateEvent += _impGateway_RaiseImportUpdateEvent;
+            _impGateway.RaiseImportUpdateEvent += ImpGateway_RaiseImportUpdateEvent;
             _packageDeployer = new SolutionImport.PackageDeployer(_impGateway, configReader);
 
             _packageDeployer.RaiseImportUpdateEvent += packageDeployer_RaiseImportUpdateEvent;
-        }
-
-      
+        }            
 
         public void StartCustomDeployment()
         {
-            _logger.WriteLogMessage("Capgemini Package Deployer - Deployment Start", TraceEventType.Start);
+            _logger.WriteLogMessage(StartCustomDeploymentMessage, TraceEventType.Start);
 
             if (_dispatcher != null)
             {
@@ -117,13 +114,13 @@ namespace Capgemini.Xrm.Deployment.PackageDeployer.Core
 
         private void packageDeployer_RaiseImportUpdateEvent(object sender, ImportUpdateEventArgs e)
         {
-            var message = string.Format("Solution:{0}:{1} - {2}", e.SolutionDetails.SolutionName, e.SolutionDetails.SolutionVersion, e.Message);
+            var message = $"Solution:{e.SolutionDetails.SolutionName}:{e.SolutionDetails.SolutionVersion} - {e.Message}";
             _logger.WriteLogMessage(message);
         }
 
-        private void _impGateway_RaiseImportUpdateEvent(object sender, Repository.Events.AsyncImportUpdateEventArgs e)
+        private void ImpGateway_RaiseImportUpdateEvent(object sender, Repository.Events.AsyncImportUpdateEventArgs e)
         {
-            var message = string.Format($"AsyncImportUpdate:{ e.Message}");
+            var message = $"AsyncImportUpdate:{ e.Message}";
             _logger.WriteLogMessage(message, TraceEventType.Verbose);
         }
 
