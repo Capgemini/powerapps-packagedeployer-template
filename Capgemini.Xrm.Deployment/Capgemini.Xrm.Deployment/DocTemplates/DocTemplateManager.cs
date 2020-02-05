@@ -46,11 +46,15 @@ namespace Capgemini.Xrm.Deployment.DocTemplates
             if (templType.Value != 2)
                 throw new ValidationException("Only docx word templates are supported! (documenttype 2)");
 
-            byte[] content = File.ReadAllBytes(filePath);
 
-            using (MemoryStream stream = new MemoryStream(content))
+            using (MemoryStream stream = new MemoryStream())
             {
+                byte[] content = File.ReadAllBytes(filePath);
+                stream.Write(content, 0, content.Length);
+                stream.Position = 0;
+
                 string entityName = ReplaceCodeInWorld(stream);
+
                 byte[] contentChanged = stream.ToArray();
 
                 this._templRepo.SetTemplate(templateName, entityName, templType, contentChanged);
