@@ -34,13 +34,18 @@ stages:
         - task: CopyFiles@2
           displayName: Copy unit tests to staging directory
           inputs:
-            SourceFolder: tests/Capgemini.PowerApps.Deployment.UnitTests/bin/Release
+            SourceFolder: tests/Capgemini.PowerApps.Deployment.UnitTests/bin/$(buildConfiguration)
             TargetFolder: '$(Build.ArtifactStagingDirectory)/tests/unit'
         - task: CopyFiles@2
           displayName: Copy integration tests to staging directory
           inputs:
-            SourceFolder: tests/Capgemini.PowerApps.Deployment.IntegrationTests/bin/Release
+            SourceFolder: tests/Capgemini.PowerApps.Deployment.IntegrationTests/bin/$(buildConfiguration)
             TargetFolder: '$(Build.ArtifactStagingDirectory)/tests/integration'
+        - task: CopyFiles@2
+          displayName: Copy package deployer to staging directory
+          inputs:
+            SourceFolder: tests/Capgemini.PowerApps.Deployment.IntegrationTests/bin/PackageDeployer
+            TargetFolder: '$(Build.ArtifactStagingDirectory)/tests/packagedeployer'
         - publish: $(Build.ArtifactStagingDirectory)/out
           displayName: Publish NuGet artifact
           artifact: Capgemini.PowerApps.Deployment
@@ -87,21 +92,20 @@ stages:
               command: push
               packagesToPush: '$(Pipeline.Workspace)/Capgemini.PowerApps.Deployment/*.nupkg'
               publishVstsFeed: 'e64f1ace-b73a-42b0-8b8e-4b2fdbdac2c9'
-  # - stage: PublishToPublicFeed
-  #   displayName: Publish to Public Feed
-  #   jobs:
-  #     - job: PublishNuGetJob
-  #       displayName: Publish to Public Feed
-  #       steps:
-  #         - checkout: none
-  #         - download: current
-  #           artifact: Capgemini.PowerApps.Deployment
-  #           displayName: Download NuGet package artifact
-  #         - task: NuGetCommand@2
-  #           displayName: Push to public feed
-  #           inputs:
-  #             command: push
-  #             packagesToPush: '$(Pipeline.Workspace)/Capgemini.PowerApps.Deployment/*.nupkg'
-  #             nuGetFeedType: external
-  #             publishFeedCredentials: CapgeminiUkKey              
-                  
+  - stage: PublishToPublicFeed
+    displayName: Publish to Public Feed
+    jobs:
+      - job: PublishNuGetJob
+        displayName: Publish to Public Feed
+        steps:
+          - checkout: none
+          - download: current
+            artifact: Capgemini.PowerApps.Deployment
+            displayName: Download NuGet package artifact
+          - task: NuGetCommand@2
+            displayName: Push to public feed
+            inputs:
+              command: push
+              packagesToPush: '$(Pipeline.Workspace)/Capgemini.PowerApps.Deployment/*.nupkg'
+              nuGetFeedType: external
+              publishFeedCredentials: CapgeminiUkKey              
