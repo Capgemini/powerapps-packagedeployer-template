@@ -1,0 +1,107 @@
+trigger:
+  - master
+pool:
+  vmImage: 'windows-latest'
+variables:
+  solution: '**/*.sln'
+  buildPlatform: 'anycpu'
+  buildConfiguration: 'Release'
+stages:
+  - stage: Build
+    jobs:
+    - job: BuildJob
+      displayName: Build
+      steps:
+        - task: NuGetToolInstaller@1
+          displayName: Install NuGet
+        - task: NuGetCommand@2
+          displayName: Restore packages
+          inputs:
+            restoreSolution: '$(solution)'
+        - task: VSBuild@1
+          displayName: Build solution
+          inputs:
+            solution: '$(solution)'
+            platform: '$(buildPlatform)'
+            configuration: '$(buildConfiguration)'
+        - task: NuGetCommand@2
+          displayName: Pack NuGet package
+          inputs:
+            command: pack
+            packagesToPack: src/Capgemini.PowerApps.Deploment/Capgemini.PowerApps.Deployment.csproj
+            includeReferencedProjects: true
+            packDestination: '$(Build.ArtifactStagingDirectory)/out'
+        - task: CopyFiles@2
+          displayName: Copy unit tests to staging directory
+          inputs:
+            SourceFolder: tests/Capgemini.PowerApps.Deployment.UnitTests/bin/Release
+            TargetFolder: '$(Build.ArtifactStagingDirectory)/tests/unit'
+        - task: CopyFiles@2
+          displayName: Copy integration tests to staging directory
+          inputs:
+            SourceFolder: tests/Capgemini.PowerApps.Deployment.IntegrationTests/bin/Release
+            TargetFolder: '$(Build.ArtifactStagingDirectory)/tests/integration'
+        - publish: $(Build.ArtifactStagingDirectory)/out
+          displayName: Publish NuGet artifact
+          artifact: Capgemini.PowerApps.Deployment
+        - publish: $(Build.ArtifactStagingDirectory)/tests
+          displayName: Publish tests
+          artifact: Capgemini.PowerApps.Deployment.Tests
+  - stage: Test
+    dependsOn: Build
+    jobs:
+    - job: TestJob
+      displayName: Test
+      variables:
+        - group: Environment - CI
+      steps:
+        - checkout: none
+        - download: current
+          displayName: Download tests artifact
+          artifact: Capgemini.PowerApps.Deployment.Tests
+        - task: VSTest@2
+          env:
+            CAPGEMINI_PACKAGE_DEPLOYER_TESTS_URL: $(url)
+            CAPGEMINI_PACKAGE_DEPLOYER_TESTS_USERNAME: $(username)
+            CAPGEMINI_PACKAGE_DEPLOYER_TESTS_PASSWORD: $(password)
+          displayName: Run tests
+          inputs:
+            searchFolder: $(Pipeline.Workspace)/Capgemini.PowerApps.Deployment.Tests
+            platform: '$(buildPlatform)'
+            configuration: '$(buildConfiguration)'
+            codeCoverageEnabled: true
+            testAssemblyVer2: '**\*Tests.dll'
+  - stage: PublishtoPrivateFeed
+    displayName: Publish to Private Feed
+    jobs:
+      - job: PublishPrivateJob
+        displayName: Publish to Private Feed
+        steps:
+          - checkout: none
+          - download: current
+            displayName: Download NuGet package artifact
+            artifact: Capgemini.PowerApps.Deployment
+          - task: NuGetCommand@2
+            displayName: 'Push to private feed'
+            inputs:
+              command: push
+              packagesToPush: '$(Pipeline.Workspace)/Capgemini.PowerApps.Deployment/*.nupkg'
+              publishVstsFeed: 'e64f1ace-b73a-42b0-8b8e-4b2fdbdac2c9'
+  # - stage: PublishToPublicFeed
+  #   displayName: Publish to Public Feed
+  #   jobs:
+  #     - job: PublishNuGetJob
+  #       displayName: Publish to Public Feed
+  #       steps:
+  #         - checkout: none
+  #         - download: current
+  #           artifact: Capgemini.PowerApps.Deployment
+  #           displayName: Download NuGet package artifact
+  #         - task: NuGetCommand@2
+  #           displayName: Push to public feed
+  #           inputs:
+  #             command: push
+  #             packagesToPush: '$(Pipeline.Workspace)/Capgemini.PowerApps.Deployment/*.nupkg'
+  #             nuGetFeedType: external
+  #             publishFeedCredentials: CapgeminiUkKey              
+                  

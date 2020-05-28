@@ -1,0 +1,19 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "restore",
+            "command": "nuget",
+            "type": "process",
+            "args": [
+                "restore"
+            ],
+        },
+        {
+            "label": "build",
+            "command": "msbuild",
+            "type": "process",
+            "problemMatcher": "$msCompile"
+        }
+    ]
+}
