@@ -91,21 +91,22 @@ stages:
             inputs:
               command: push
               packagesToPush: '$(Pipeline.Workspace)/Capgemini.PowerApps.Deployment/*.nupkg'
-              publishVstsFeed: 'e64f1ace-b73a-42b0-8b8e-4b2fdbdac2c9'
+              publishVstsFeed: 'e64f1ace-b73a-42b0-8b8e-4b2fdbdac2c9'         
   - stage: PublishToPublicFeed
     displayName: Publish to Public Feed
+    dependsOn: PublishToPublicFeed
+    condition: succeeded()
     jobs:
-      - job: PublishNuGetJob
-        displayName: Publish to Public Feed
-        steps:
-          - checkout: none
-          - download: current
-            artifact: Capgemini.PowerApps.Deployment
-            displayName: Download NuGet package artifact
-          - task: NuGetCommand@2
-            displayName: Push to public feed
-            inputs:
-              command: push
-              packagesToPush: '$(Pipeline.Workspace)/Capgemini.PowerApps.Deployment/*.nupkg'
-              nuGetFeedType: external
-              publishFeedCredentials: CapgeminiUkKey              
+      - deployment:
+        environment: 'nuget-org'
+        strategy:
+          runOnce:
+            deploy:
+              steps:
+              - task: NuGetCommand@2
+                displayName: 'Push NuGet Package'
+                inputs:
+                  command: push
+                  packagesToPush: $(Pipeline.Workspace)/Capgemini.PowerApps.Deployment/*.nupkg
+                  nuGetFeedType: external
+                  publishFeedCredentials: CapgeminiUkKey
