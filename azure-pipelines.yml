@@ -89,7 +89,7 @@ stages:
               publishVstsFeed: 'e64f1ace-b73a-42b0-8b8e-4b2fdbdac2c9'         
   - stage: PublishToPublicFeed
     displayName: Publish to Public Feed
-    dependsOn: PublishToPublicFeed
+    dependsOn: PublishtoPrivateFeed
     condition: succeeded()
     jobs:
       - deployment:
