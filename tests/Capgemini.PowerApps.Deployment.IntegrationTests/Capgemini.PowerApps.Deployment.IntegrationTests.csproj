@@ -88,6 +88,9 @@
     </Reference>
     <Reference Include="System.ServiceModel" />
     <Reference Include="System.ServiceModel.Web" />
+    <Reference Include="System.ValueTuple, Version=4.0.3.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\System.ValueTuple.4.5.0\lib\net461\System.ValueTuple.dll</HintPath>
+    </Reference>
     <Reference Include="System.Web" />
     <Reference Include="System.Xml" />
     <Reference Include="System.Xml.Linq" />
@@ -121,9 +124,6 @@
     </Reference>
     <Reference Include="xunit.execution.desktop, Version=2.4.1.0, Culture=neutral, PublicKeyToken=8d05b1bb7a6fdb6c, processorArchitecture=MSIL">
       <HintPath>..\..\packages\xunit.extensibility.execution.2.4.1\lib\net452\xunit.execution.desktop.dll</HintPath>
-    </Reference>
-    <Reference Include="System.ValueTuple">
-      <HintPath>..\..\packages\System.ValueTuple.4.4.0\lib\net461\System.ValueTuple.dll</HintPath>
     </Reference>
     <Reference Include="FluentAssertions">
       <HintPath>..\..\packages\FluentAssertions.5.10.3\lib\net45\FluentAssertions.dll</HintPath>
@@ -159,10 +159,10 @@
   <ItemGroup>
     <PackageDeployer Visible="False" Include="..\..\packages\Microsoft.CrmSdk.XrmTooling.PackageDeployment.PowerShell*\tools\**\*" />
   </ItemGroup>
-  <Target Name="CopyPackageDeployerToOutput" AfterTargets="Build">
+  <!--<Target Name="CopyPackageDeployerToOutput" AfterTargets="Build">
     <RemoveDir Directories="./bin/PackageDeployer" />
     <Copy SourceFiles="@(PackageDeployer)" DestinationFolder="bin/PackageDeployer" />
-  </Target>
+  </Target>-->
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
     <PropertyGroup>

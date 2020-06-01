@@ -41,11 +41,6 @@ stages:
           inputs:
             SourceFolder: tests/Capgemini.PowerApps.Deployment.IntegrationTests/bin/$(buildConfiguration)
             TargetFolder: '$(Build.ArtifactStagingDirectory)/tests/integration'
-        - task: CopyFiles@2
-          displayName: Copy package deployer to staging directory
-          inputs:
-            SourceFolder: tests/Capgemini.PowerApps.Deployment.IntegrationTests/bin/PackageDeployer
-            TargetFolder: '$(Build.ArtifactStagingDirectory)/tests/packagedeployer'
         - publish: $(Build.ArtifactStagingDirectory)/out
           displayName: Publish NuGet artifact
           artifact: Capgemini.PowerApps.Deployment
