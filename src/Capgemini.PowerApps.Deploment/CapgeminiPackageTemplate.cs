@@ -41,7 +41,7 @@ namespace Capgemini.PowerApps.Deployment
             this.ActivateSlas(this.ConfigDataStorage.DefaultSlas);
             this.DeactivateProcesses(this.ConfigDataStorage.ProcessesToDeactivate);
             this.DeactivateSdkMessageProcessingSteps(this.ConfigDataStorage.SdkStepsToDeactivate);
-            this.ImportData(this.ConfigDataStorage.DataImports.Where(c => !c.ImportBeforeSolutions));
+            this.ImportData(this.ConfigDataStorage.DataImports?.Where(c => !c.ImportBeforeSolutions));
             this.ImportWordTemplates(this.ConfigDataStorage.WordTemplates);
 
             return true;
@@ -111,6 +111,12 @@ namespace Capgemini.PowerApps.Deployment
 
         private void DeactivateSdkMessageProcessingSteps(IEnumerable<string> sdkStepsToDeactivate)
         {
+            if (sdkStepsToDeactivate is null || !sdkStepsToDeactivate.Any())
+            {
+                this.PackageLog.Log("No SDK steps to deactivate have been configured.");
+                return;
+            }
+
             var executeMultipleResponse = this.CrmSvc.SetRecordStateByAttribute("sdkmessageprocessingstep", 1, 2, "name", sdkStepsToDeactivate);
             if (executeMultipleResponse.IsFaulted)
             {
@@ -121,6 +127,12 @@ namespace Capgemini.PowerApps.Deployment
         
         private void DeactivateProcesses(IEnumerable<string> processesToDeactivate)
         {
+            if (processesToDeactivate is null || !processesToDeactivate.Any())
+            {
+                this.PackageLog.Log("No processes to deactivate have been configured.");
+                return;
+            }
+
             var executeMultipleResponse = this.CrmSvc.SetRecordStateByAttribute("workflow", 0, 1, "name", processesToDeactivate);
             if (executeMultipleResponse.IsFaulted)
             {
@@ -152,17 +164,12 @@ namespace Capgemini.PowerApps.Deployment
 
             // Previously in the BeforeImportStage method but this does not run before solution import.
             this.DeactivateSlas();
-            this.ImportData(this.ConfigDataStorage.DataImports.Where(c => c.ImportBeforeSolutions));
+            this.ImportData(this.ConfigDataStorage.DataImports?.Where(c => c.ImportBeforeSolutions));
         }
 
         private void ImportData(IEnumerable<DataImportConfig> dataImportConfigs)
         {
-            if (dataImportConfigs is null)
-            {
-                throw new ArgumentNullException(nameof(dataImportConfigs));
-            }
-
-            if (!dataImportConfigs.Any())
+            if (dataImportConfigs is null || !dataImportConfigs.Any())
             {
                 this.PackageLog.Log("No imports have been configured.");
 
