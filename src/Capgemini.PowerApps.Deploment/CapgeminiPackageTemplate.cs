@@ -92,14 +92,17 @@ namespace Capgemini.PowerApps.Deployment
                 this.PackageLog.Log($"Error activating SLAs.", TraceEventType.Error);
                 this.PackageLog.LogExecuteMultipleErrors(executeMultipleResponse);
             }
-            
-            if(defaultSlas?.Count() == 0)
+
+            if (defaultSlas == null || defaultSlas?.Count() == 0)
             {
                 return;
             }
 
-            var defaultSlasQuery = new QueryByAttribute("sla") { Attributes = { "name" }, ColumnSet = new ColumnSet(false) };
-            defaultSlasQuery.Values.AddRange(defaultSlas);
+            var defaultSlasQuery = new QueryByAttribute("sla") { ColumnSet = new ColumnSet(false) };
+            foreach (var sla in defaultSlas)
+            {
+                defaultSlasQuery.AddAttributeValue("name", sla);
+            }
             var retrieveMultipleResponse = this.CrmSvc.RetrieveMultiple(defaultSlasQuery);
 
             foreach (var defaultSla in retrieveMultipleResponse.Entities)
@@ -124,7 +127,7 @@ namespace Capgemini.PowerApps.Deployment
                 this.PackageLog.LogExecuteMultipleErrors(executeMultipleResponse);
             }
         }
-        
+
         private void DeactivateProcesses(IEnumerable<string> processesToDeactivate)
         {
             if (processesToDeactivate is null || !processesToDeactivate.Any())
@@ -156,10 +159,11 @@ namespace Capgemini.PowerApps.Deployment
             this.PackageLog.Log($"Initializing {nameof(CapgeminiPackageTemplate)} extension.");
 
             this.ConfigDataStorage = ConfigDataStorage.Load(this.ImportConfigFilePath);
+            IOrganizationService svc = this.CrmSvc.OrganizationWebProxyClient;
             this.DataImporter = new DataImporter(
                 this.PackageLog,
                 new EntityRepository(
-                    this.CrmSvc.OrganizationServiceProxy,
+                    (IOrganizationService)this.CrmSvc.OrganizationWebProxyClient ?? CrmSvc.OrganizationServiceProxy,
                     new ServiceRetryExecutor()));
 
             // Previously in the BeforeImportStage method but this does not run before solution import.
