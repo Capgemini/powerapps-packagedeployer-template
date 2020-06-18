@@ -159,7 +159,7 @@ namespace Capgemini.PowerApps.Deployment
             this.PackageLog.Log($"Initializing {nameof(CapgeminiPackageTemplate)} extension.");
 
             this.ConfigDataStorage = ConfigDataStorage.Load(this.ImportConfigFilePath);
-            IOrganizationService svc = this.CrmSvc.OrganizationWebProxyClient;
+
             this.DataImporter = new DataImporter(
                 this.PackageLog,
                 new EntityRepository(
