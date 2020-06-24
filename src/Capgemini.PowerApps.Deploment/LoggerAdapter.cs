@@ -14,29 +14,29 @@ namespace Capgemini.PowerApps.Deployment
             this.traceLogger = traceLogger;
         }
 
-        public void Error(string message)
+        public void LogError(string message)
         {
             this.traceLogger.Log(message, TraceEventType.Error);
         }
 
-        public void Error(string message, Exception ex)
+        public void LogError(string message, Exception ex)
         {
             this.traceLogger.Log(message, TraceEventType.Error, ex);
         }
 
-        public void Info(string message)
+        public void LogInfo(string message)
         {
             this.traceLogger.Log(message);
         }
 
-        public void Verbose(string message)
+        public void LogVerbose(string message)
         {
-            this.traceLogger.Log(message, TraceEventType.Verbose);
+            traceLogger.Log(message, TraceEventType.Verbose);
         }
 
-        public void Warning(string message)
+        public void LogWarning(string message)
         {
-            this.traceLogger.Log(message, TraceEventType.Warning);
+            traceLogger.Log(message, TraceEventType.Warning);
         }
     }
 }
