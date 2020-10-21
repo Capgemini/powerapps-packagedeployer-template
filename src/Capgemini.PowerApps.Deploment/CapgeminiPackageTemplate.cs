@@ -38,7 +38,10 @@ namespace Capgemini.PowerApps.Deployment
 
         public override bool AfterPrimaryImport()
         {
-            this.ActivateSlas(this.ConfigDataStorage.DefaultSlas);
+            if(this.ConfigDataStorage.ActivateDeactivateSLAs) 
+            {
+                this.ActivateSlas(this.ConfigDataStorage.DefaultSlas);
+            }
             this.DeactivateProcesses(this.ConfigDataStorage.ProcessesToDeactivate);
             this.DeactivateSdkMessageProcessingSteps(this.ConfigDataStorage.SdkStepsToDeactivate);
             this.ImportData(this.ConfigDataStorage.DataImports?.Where(c => !c.ImportBeforeSolutions));
@@ -167,7 +170,10 @@ namespace Capgemini.PowerApps.Deployment
                     new ServiceRetryExecutor()));
 
             // Previously in the BeforeImportStage method but this does not run before solution import.
-            this.DeactivateSlas();
+            if(this.ConfigDataStorage.ActivateDeactivateSLAs)
+            {
+                this.DeactivateSlas();
+            }
             this.ImportData(this.ConfigDataStorage.DataImports?.Where(c => c.ImportBeforeSolutions));
         }
 

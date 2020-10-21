@@ -30,6 +30,12 @@ namespace Capgemini.PowerApps.Deployment.Config
         public bool UseUpdateForPatchVersions { get; set; }
 
         /// <summary>
+        /// Whether to activate/deactivate SLAs before/after deployment.
+        /// </summary>
+        [XmlAttribute("activatedeactivateslas")]
+        public bool ActivateDeactivateSLAs { get; set; } = true;
+
+        /// <summary>
         /// A list of processes to deactivate after deployment.
         /// </summary>
         [XmlArray("processestodeactivate")]

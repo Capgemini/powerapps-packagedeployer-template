@@ -155,6 +155,7 @@
   <ItemGroup />
   <ItemGroup>
     <None Include="app.config" />
+    <None Include="Capgemini.PowerApps.Deployment.nuspec" />
     <None Include="packages.config">
       <SubType>Designer</SubType>
     </None>

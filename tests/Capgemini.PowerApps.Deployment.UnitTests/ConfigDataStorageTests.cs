@@ -61,6 +61,12 @@ namespace Capgemini.PowerApps.Deployment.UnitTests
                 element.ImportConfigPath == expected.ImportConfigPath);
         }
 
+        [Fact]
+        public void Load_ActivateDeactivateSLAsPopulated_ActivateDeactivateSLAsDeserialized()
+        {
+            this.config.ActivateDeactivateSLAs.Should().BeFalse();
+        }
+
         private ConfigDataStorage LoadConfig(string path)
         {
             return ConfigDataStorage.Load(TestUtilities.GetResourcePath(path));
