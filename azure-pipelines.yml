@@ -53,7 +53,7 @@ stages:
     - job: TestJob
       displayName: Test
       variables:
-        - group: Environment - CI
+        - group: Cap Dev - CI
       steps:
         - checkout: none
         - download: current
@@ -61,9 +61,9 @@ stages:
           artifact: Capgemini.PowerApps.Deployment.Tests
         - task: VSTest@2
           env:
-            CAPGEMINI_PACKAGE_DEPLOYER_TESTS_URL: $(url)
-            CAPGEMINI_PACKAGE_DEPLOYER_TESTS_USERNAME: $(username)
-            CAPGEMINI_PACKAGE_DEPLOYER_TESTS_PASSWORD: $(password)
+            CAPGEMINI_PACKAGE_DEPLOYER_TESTS_URL: $(URL)
+            CAPGEMINI_PACKAGE_DEPLOYER_TESTS_USERNAME: $(User ADO Integration Username)
+            CAPGEMINI_PACKAGE_DEPLOYER_TESTS_PASSWORD: $(User ADO Integration Password)
           displayName: Run tests
           inputs:
             searchFolder: $(Pipeline.Workspace)/Capgemini.PowerApps.Deployment.Tests
