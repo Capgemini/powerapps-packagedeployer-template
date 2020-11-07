@@ -45,6 +45,7 @@ namespace Capgemini.PowerApps.Deployment
             this.DeactivateProcesses(this.ConfigDataStorage.ProcessesToDeactivate);
             this.DeactivateSdkMessageProcessingSteps(this.ConfigDataStorage.SdkStepsToDeactivate);
             this.ImportData(this.ConfigDataStorage.DataImports?.Where(c => !c.ImportBeforeSolutions));
+            this.ActivateProcesses(this.ConfigDataStorage.ProcessesToActivate);
             this.ImportWordTemplates(this.ConfigDataStorage.WordTemplates);
 
             return true;
@@ -143,6 +144,22 @@ namespace Capgemini.PowerApps.Deployment
             if (executeMultipleResponse.IsFaulted)
             {
                 this.PackageLog.Log($"Error deactivating processes.", TraceEventType.Error);
+                this.PackageLog.LogExecuteMultipleErrors(executeMultipleResponse);
+            }
+        }
+
+        private void ActivateProcesses(IEnumerable<string> processesToActivate)
+        {
+            if (processesToActivate is null || !processesToActivate.Any())
+            {
+                this.PackageLog.Log("No processes to activate have been configured.");
+                return;
+            }
+
+            var executeMultipleResponse = this.CrmSvc.SetRecordStateByAttribute("workflow", 1, 2, "name", processesToActivate);
+            if (executeMultipleResponse.IsFaulted)
+            {
+                this.PackageLog.Log($"Error activating processes.", TraceEventType.Error);
                 this.PackageLog.LogExecuteMultipleErrors(executeMultipleResponse);
             }
         }

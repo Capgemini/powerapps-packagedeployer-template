@@ -28,6 +28,12 @@ namespace Capgemini.PowerApps.Deployment.UnitTests
         }
 
         [Fact]
+        public void Load_ProcessesToActivatePopulated_ProcessesToActivateIsDeserialized()
+        {
+            this.config.ProcessesToActivate.Should().Contain("Case: Set Name Activate");
+        }
+
+        [Fact]
         public void Load_SdkStepsToDeactivatePopulated_SdkStepsToDeactivateIsDeserialized()
         {
             this.config.SdkStepsToDeactivate.Should().Contain("Case: Publish Update of Case Reference to ASB");

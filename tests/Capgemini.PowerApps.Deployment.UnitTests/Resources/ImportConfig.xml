@@ -6,6 +6,9 @@
     <sdkstepstodeactivate>
         <sdksteptodeactivate>Case: Publish Update of Case Reference to ASB</sdksteptodeactivate>
     </sdkstepstodeactivate>
+    <processestoactivate>
+        <processtoactivate>Case: Set Name Activate</processtoactivate>
+    </processestoactivate>
     <defaultslas>
         <defaultsla>Standard Case SLA</defaultsla>
     </defaultslas>

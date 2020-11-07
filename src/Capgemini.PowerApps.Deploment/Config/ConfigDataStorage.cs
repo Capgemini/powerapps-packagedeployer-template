@@ -43,6 +43,13 @@ namespace Capgemini.PowerApps.Deployment.Config
         public string[] ProcessesToDeactivate { get; set; }
 
         /// <summary>
+        /// A list of processes to activate after deployment and data import.
+        /// </summary>
+        [XmlArray("processestoactivate")]
+        [XmlArrayItem("processtoactivate")]
+        public string[] ProcessesToActivate { get; set; }
+
+        /// <summary>
         /// A list of SDK Message Processing Steps to deactivate after deployment.
         /// </summary>
         [XmlArray("sdkstepstodeactivate")]
