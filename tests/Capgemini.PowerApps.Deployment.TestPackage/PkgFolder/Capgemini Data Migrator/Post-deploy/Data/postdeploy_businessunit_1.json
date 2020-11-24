@@ -1,0 +1,36 @@
+{
+  "RecordsCount": 1,
+  "ExportedEntities": [
+    {
+      "LogicalName": "businessunit",
+      "Id": "932ecbf3-5031-e911-a978-0022480149c2",
+      "IsManyToMany": false,
+      "Attributes": [
+        {
+          "AttributeName": "parentbusinessunitid",
+          "AttributeValue": {
+            "Id": "c3c05d68-993b-e911-a99f-00224800375d",
+            "LogicalName": "businessunit",
+            "Name": "swcrmastrodevelop",
+            "KeyAttributes": []
+          },
+          "AttributeType": "Microsoft.Xrm.Sdk.EntityReference"
+        },
+        {
+          "AttributeName": "name",
+          "AttributeValue": "Package Deployer Template Test BU",
+          "AttributeType": "System.String"
+        },
+        {
+          "AttributeName": "map.parentbusinessunitid.isRootBU.name",
+          "AttributeValue": {
+            "AttributeLogicalName": "name",
+            "EntityLogicalName": "businessunit",
+            "Value": "swcrmastrodevelop"
+          },
+          "AttributeType": "Microsoft.Xrm.Sdk.AliasedValue"
+        }
+      ]
+    }
+  ]
+}
