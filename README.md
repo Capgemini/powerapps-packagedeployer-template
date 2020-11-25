@@ -1,20 +1,24 @@
-# Capgemini Xrm Data Deployment and Package Deployer
+# Power Apps Enhanced Package Deployer
 
-The Capgemini Package Deployer template provides a base Package Deployer package template class with additional functionality when deploying packages with the Package Deployer. 
+[![Build Status](https://dev.azure.com/capgeminiuk/GitHub%20Support/_apis/build/status/CI-Builds/NuGet%20Packages/Capgemini.PowerApps.Deployment?branchName=master)](https://dev.azure.com/capgeminiuk/GitHub%20Support/_build/latest?definitionId=203&branchName=master) [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=Capgemini_xrm-packagedeployer&metric=alert_status)](https://sonarcloud.io/dashboard?id=Capgemini_xrm-packagedeployer) [![Coverage](https://sonarcloud.io/api/project_badges/measure?project=Capgemini_xrm-packagedeployer&metric=coverage)](https://sonarcloud.io/dashboard?id=Capgemini_xrm-packagedeployer)
 
-Build status **Capgemini.Xrm.Deployment** 
-[![Build status](https://capgeminiuk.visualstudio.com/Capgemini%20Reusable%20IP/_apis/build/status/NUGET%20CI%20Builds/Capgemini%20Deployment%20V9%20NUGET)](https://capgeminiuk.visualstudio.com/Capgemini%20Reusable%20IP/_build/latest?definitionId=75)
+An enhanced extension of Microsoft's Package Deployer for Power Apps.
 
-Build status **Capgemini.Xrm.Deployment.PackageDeployer**
-[![Build status](https://capgeminiuk.visualstudio.com/Capgemini%20Reusable%20IP/_apis/build/status/NUGET%20CI%20Builds/Capgemini%20Deployment%20PackageDeployer%20V9%20NUGET)](https://capgeminiuk.visualstudio.com/Capgemini%20Reusable%20IP/_build/latest?definitionId=76)
+This projects aim is to build an all-in-one configurable tool for deploying to a Power App environment. This is achieved by extending Microsoft existing Package Deployer with useful features which can be easily configured providing simple local or automated deployments within the ALM lifecycle. 
 
-## Description
+## Table of Contents
 
-**Capgemini.Xrm.Deployment**
-- Capgemini Deployment for Dynamics 365 (v9 SDK) - used by package deployer to implement custom deployment logic
-
-**Capgemini.Xrm.Deployment.PackageDeployer**
-- Capgemini Dynamics 365 PackageDeployerExtensions (v9 SDK) - contains custom deployment from and CapgeminiPackageTemplate, wrapper for Capgemini.Xrm.Deployment library
+- [Installation](#Installation)
+- [Usage](#Usage)
+  - [Deactivate SLAs during import](#Deactivate-SLAs-during-import)
+  - [Deactivate/activate processes](#Deactivateactivate-processes)
+  - [Deactivate/activate plug-ins steps](#Deactivateactivate-plug-ins-steps)
+  - [Migrate data](#Migrate-data)
+  - [Deploying word templates](#Deploying-word-templates)
+  - [Setting SLAs as default](#Setting-SLAs-as-default)
+  - [Upgrade or update based on solution version](#Upgrade-or-update-based-on-solution-version)
+- [Contributing](#Contributing)
+- [Licence](#Licence)
 
 ## Installation
 
