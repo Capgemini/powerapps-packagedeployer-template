@@ -7,8 +7,10 @@ stages:
   - stage: BuildAndTest
     jobs:
     - job: BuildAndTestJob
-      displayName: Build
+      displayName: Build and Test
       variables:
+        - name: GitVersion.SemVer
+          value: ''
         - name: solution
           value: '**/*.sln'
         - name: buildPlatform
@@ -17,6 +19,19 @@ stages:
           value: 'Release'
         - group: Cap Dev - CI
       steps:
+        - task: gitversion/setup@0
+          displayName: Install GitVersion
+          inputs:
+            versionSpec: '5.x'
+        - task: gitversion/execute@0
+          displayName: Execute GitVersion
+          inputs:
+            useConfigFile: true
+            configFilePath: '$(Build.SourcesDirectory)\GitVersion.yml'
+            updateAssemblyInfo: false
+        - pwsh: Write-Host "##vso[task.setvariable variable=SemVer;isOutput=true]$(GitVersion.SemVer)"
+          name: OutputSemVerTask
+          
         - task: NuGetToolInstaller@1
           displayName: Install NuGet
         - task: NuGetCommand@2
