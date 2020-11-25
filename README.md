@@ -119,7 +119,7 @@ You can configure the template to either update or upgrade based on a semantic s
 
 ## Contributing
 
-To contribute to this project, report any bugs, submit new feature requests, submit changes via pull requests or even join in the overall design of the tool.
+Please refer to the [Contributing](./CONTRIBUTING.md) guide.
 
 ## Credits
 
