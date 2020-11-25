@@ -1,3 +1,4 @@
+name: $(GITVERSION_FullSemVer)
 trigger: none
 pr:
   - master
@@ -38,6 +39,16 @@ stages:
           displayName: Restore NuGet packages
           inputs:
             restoreSolution: '$(solution)'
+        - task: SonarCloudPrepare@1
+          displayName: Prepare SonarCloud
+          inputs:
+            SonarCloud: 'SonarCloud'
+            organization: 'capgemini-1' 
+            scannerMode: 'MSBuild'
+            projectKey: 'Capgemini_xrm-packagedeployer'
+            projectName: 'xrm-packagedeployer'
+            projectVersion: '$(GitVersion.SemVer)'
+
         - task: VSBuild@1
           displayName: Build solution
           inputs:
@@ -57,6 +68,13 @@ stages:
             configuration: '$(buildConfiguration)'
             testAssemblyVer2: '**\*Tests.dll' 
             searchFolder: tests
+
+        - task: SonarCloudAnalyze@1
+          displayName: Analyse with SonarCloud
+        - task: SonarCloudPublish@1
+          displayName: Publish SonarCloud results
+          inputs:
+            pollingTimeoutSec: '300'
         
         - task: NuGetCommand@2
           displayName: Pack NuGet package
