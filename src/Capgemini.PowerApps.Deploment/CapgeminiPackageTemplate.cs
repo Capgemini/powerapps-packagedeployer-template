@@ -15,12 +15,14 @@ namespace Capgemini.PowerApps.Deployment
 {
     public abstract class CapgeminiPackageTemplate : ImportExtension
     {
-        /// <summary>
-        /// Required or Polly does not get copied when referenced via project reference (e.g. in the TestPackage project)
-        /// </summary>
+
+        [System.Diagnostics.CodeAnalysis.SuppressMessage(
+            "Major Code Smell",
+            "S1144:Unused private types or members should be removed", 
+            Justification = "Required or Polly does not get copied when referenced via project reference (e.g. in the TestPackage project)")]
         private readonly Polly.Policy _policy;
 
-        public CapgeminiPackageTemplate()
+        protected CapgeminiPackageTemplate()
         {
         }
 
