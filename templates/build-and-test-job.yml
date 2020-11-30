@@ -1,0 +1,94 @@
+jobs:
+- job: BuildAndTestJob
+  displayName: Build and Test
+  variables:
+    - name: GitVersion.SemVer
+      value: ''
+    - name: solution
+      value: '**/*.sln'
+    - name: buildPlatform
+      value: 'anycpu'
+    - name: buildConfiguration
+      value: 'Release'
+    - group: Cap Dev - CI
+  steps:
+
+    - task: gitversion/setup@0
+      displayName: Install GitVersion
+      inputs:
+        versionSpec: '5.x'
+
+    - task: gitversion/execute@0
+      displayName: Execute GitVersion
+      inputs:
+        useConfigFile: true
+        configFilePath: '$(Build.SourcesDirectory)\GitVersion.yml'
+        updateAssemblyInfo: false
+
+    - pwsh: Write-Host "##vso[task.setvariable variable=SemVer;isOutput=true]$(GitVersion.SemVer)"
+      displayName: Output SemVer
+
+    - task: NuGetToolInstaller@1
+      displayName: Install NuGet
+
+    - task: NuGetCommand@2
+      displayName: Restore NuGet packages
+      inputs:
+        restoreSolution: '$(solution)'
+
+    - task: SonarCloudPrepare@1
+      displayName: Prepare SonarCloud
+      inputs:
+        SonarCloud: 'SonarCloud'
+        organization: 'capgemini-1' 
+        scannerMode: 'MSBuild'
+        projectKey: 'Capgemini_xrm-packagedeployer'
+        projectName: 'xrm-packagedeployer'
+        projectVersion: '$(GitVersion.SemVer)'
+        extraProperties: |
+          sonar.exclusions=**\*.css
+
+    - task: VSBuild@1
+      displayName: Build solution
+      inputs:
+        solution: '$(solution)'
+        platform: '$(buildPlatform)'
+        configuration: '$(buildConfiguration)'
+    
+    - task: VSTest@2
+      displayName: Run tests
+      env:
+        CAPGEMINI_PACKAGE_DEPLOYER_TESTS_URL: $(URL)
+        CAPGEMINI_PACKAGE_DEPLOYER_TESTS_USERNAME: $(User ADO Integration Username)
+        CAPGEMINI_PACKAGE_DEPLOYER_TESTS_PASSWORD: $(User ADO Integration Password)
+      inputs:
+        codeCoverageEnabled: true
+        platform: '$(buildPlatform)'
+        configuration: '$(buildConfiguration)'
+        testAssemblyVer2: '**\*Tests.dll' 
+        searchFolder: tests
+
+    - task: SonarCloudAnalyze@1
+      displayName: Analyse with SonarCloud
+
+    - task: SonarCloudPublish@1
+      displayName: Publish SonarCloud results
+      inputs:
+        pollingTimeoutSec: '300'
+
+    - task: WhiteSource Bolt@20
+      displayName: Detect security and licence issues
+      inputs:
+        cwd: '$(Build.SourcesDirectory)'
+    
+    - task: NuGetCommand@2
+      displayName: Pack NuGet package
+      inputs:
+        command: pack
+        packagesToPack: src/Capgemini.PowerApps.Deploment/Capgemini.PowerApps.Deployment.csproj
+        includeReferencedProjects: true
+        packDestination: '$(Build.ArtifactStagingDirectory)/out'
+
+    - publish: $(Build.ArtifactStagingDirectory)/out
+      displayName: Publish NuGet artifact
+      artifact: Capgemini.PowerApps.Deployment
