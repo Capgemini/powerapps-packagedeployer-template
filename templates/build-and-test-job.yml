@@ -80,14 +80,22 @@ jobs:
       displayName: Detect security and licence issues
       inputs:
         cwd: '$(Build.SourcesDirectory)'
-    
+
+    # Using custom because pack produces legacy symbols packages
     - task: NuGetCommand@2
       displayName: Pack NuGet package
       inputs:
-        command: pack
-        packagesToPack: src/Capgemini.PowerApps.Deploment/Capgemini.PowerApps.Deployment.csproj
-        includeReferencedProjects: true
-        packDestination: '$(Build.ArtifactStagingDirectory)/out'
+        command: custom
+        arguments: 'pack ".\src\Capgemini.PowerApps.Deployment\Capgemini.PowerApps.Deployment.csproj" -Prop "Configuration=$(buildConfiguration)" -Version "$(GitVersion.NuGetVersionV2)" -OutputDirectory "$(Build.ArtifactStagingDirectory)/out" -Symbols -SymbolPackageFormat snupkg'
+        
+    - task: PowerShell@2
+      displayName: Remove invalid symbols package files
+      inputs:
+        targetType: filePath
+        filePath: scripts/Remove-InvalidSymbolsPackageFiles.ps1
+        arguments: '-SymbolPackageDirectory "$(Build.ArtifactStagingDirectory)/out"'
+        errorActionPreference: stop
+        failOnStderr: true
 
     - publish: $(Build.ArtifactStagingDirectory)/out
       displayName: Publish NuGet artifact

@@ -2,7 +2,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.28307.1082
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Capgemini.PowerApps.Deployment", "src\Capgemini.PowerApps.Deploment\Capgemini.PowerApps.Deployment.csproj", "{6E076053-5DF7-4546-BDCB-7062729330C1}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Capgemini.PowerApps.Deployment", "src\Capgemini.PowerApps.Deployment\Capgemini.PowerApps.Deployment.csproj", "{6E076053-5DF7-4546-BDCB-7062729330C1}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{49F293E5-4702-4ECF-BE31-F0E7A16E88FA}"
 EndProject

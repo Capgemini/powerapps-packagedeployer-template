@@ -168,7 +168,7 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\src\Capgemini.PowerApps.Deploment\Capgemini.PowerApps.Deployment.csproj">
+    <ProjectReference Include="..\..\src\Capgemini.PowerApps.Deployment\Capgemini.PowerApps.Deployment.csproj">
       <Project>{6E076053-5DF7-4546-BDCB-7062729330C1}</Project>
       <Name>Capgemini.PowerApps.Deployment</Name>
     </ProjectReference>
