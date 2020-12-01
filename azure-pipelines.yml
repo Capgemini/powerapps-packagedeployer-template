@@ -52,6 +52,5 @@ stages:
               tag: 'v$(SemVer)'
               releaseNotesSource: 'inline'
               assets: '$(Pipeline.Workspace)/Capgemini.PowerApps.PackageDeployerTemplate/*'
-              isPreRelease: true
               changeLogCompareToRelease: 'lastNonDraftRelease'
               changeLogType: commitBased

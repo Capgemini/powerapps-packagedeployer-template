@@ -26,6 +26,7 @@ jobs:
         updateAssemblyInfo: false
 
     - pwsh: Write-Host "##vso[task.setvariable variable=SemVer;isOutput=true]$(GitVersion.SemVer)"
+      name: OutputSemVerTask
       displayName: Output SemVer
 
     - task: NuGetToolInstaller@1
