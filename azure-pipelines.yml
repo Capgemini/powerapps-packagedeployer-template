@@ -1,0 +1,57 @@
+name: $(GITVERSION_FullSemVer)
+trigger:
+ batch: true
+ branches:
+  include:
+    - master
+pr: none
+pool:
+  vmImage: 'windows-latest'
+variables:
+- name: GitVersion.SemVer
+  value: ''
+- name: solution
+  value: '**/*.sln'
+- name: buildPlatform
+  value: 'anycpu'
+- name: buildConfiguration
+  value: 'Release'
+stages:
+  - stage: BuildAndTest
+    displayName: Build and Test
+    jobs:
+    - template: templates/build-and-test-job.yml    
+  - stage: Publish
+    displayName: Publish
+    jobs:
+      - job: PublishJob
+        displayName: Publish 
+        variables: 
+          SemVer: $[ stageDependencies.BuildAndTest.BuildJob.outputs['OutputSemVerTask.SemVer'] ]
+        steps:
+          - checkout: none
+          - download: current
+            displayName: Download NuGet package artifact
+            artifact: Capgemini.PowerApps.Deployment
+          - task: NuGetCommand@2
+            displayName: Push to NuGet.org
+            inputs:
+              command: push
+              packagesToPush: '$(Pipeline.Workspace)/Capgemini.PowerApps.Deployment/*.nupkg'
+              nuGetFeedType: external
+              publishFeedCredentials: Capgemini_UK
+          - task: GitHubRelease@1
+            displayName: Create GitHub releaes
+            condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/master'))
+            inputs:
+              gitHubConnection: 'Github Capgemini'
+              repositoryName: '$(Build.Repository.Name)'
+              action: 'create'
+              target: '$(Build.SourceVersion)'
+              tagSource: 'userSpecifiedTag'
+              tag: 'v$(SemVer)'
+              releaseNotesSource: 'inline'
+              assets: '$(Pipeline.Workspace)/Capgemini.PowerApps.Deployment/*'
+              isPreRelease: true
+              changeLogCompareToRelease: 'lastNonDraftRelease'
+              changeLogType: commitBased

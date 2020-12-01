@@ -1,0 +1,52 @@
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.28307.1082
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Capgemini.PowerApps.Deployment", "src\Capgemini.PowerApps.Deployment\Capgemini.PowerApps.Deployment.csproj", "{6E076053-5DF7-4546-BDCB-7062729330C1}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{49F293E5-4702-4ECF-BE31-F0E7A16E88FA}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{419B3DE1-9E57-49AF-AF98-5613BE061C28}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Capgemini.PowerApps.Deployment.IntegrationTests", "tests\Capgemini.PowerApps.Deployment.IntegrationTests\Capgemini.PowerApps.Deployment.IntegrationTests.csproj", "{F8B9DC51-E931-488A-A88E-CD0A82693851}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Capgemini.PowerApps.Deployment.UnitTests", "tests\Capgemini.PowerApps.Deployment.UnitTests\Capgemini.PowerApps.Deployment.UnitTests.csproj", "{16429F4F-ABF0-4E7C-9BB3-7719D4CFF564}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Capgemini.PowerApps.Deployment.TestPackage", "tests\Capgemini.PowerApps.Deployment.TestPackage\Capgemini.PowerApps.Deployment.TestPackage.csproj", "{170C0103-3F94-4896-9062-6314167F596A}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|anycpu = Debug|anycpu
+		Release|anycpu = Release|anycpu
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{6E076053-5DF7-4546-BDCB-7062729330C1}.Debug|anycpu.ActiveCfg = Debug|Any CPU
+		{6E076053-5DF7-4546-BDCB-7062729330C1}.Debug|anycpu.Build.0 = Debug|Any CPU
+		{6E076053-5DF7-4546-BDCB-7062729330C1}.Release|anycpu.ActiveCfg = Release|Any CPU
+		{6E076053-5DF7-4546-BDCB-7062729330C1}.Release|anycpu.Build.0 = Release|Any CPU
+		{F8B9DC51-E931-488A-A88E-CD0A82693851}.Debug|anycpu.ActiveCfg = Debug|Any CPU
+		{F8B9DC51-E931-488A-A88E-CD0A82693851}.Debug|anycpu.Build.0 = Debug|Any CPU
+		{F8B9DC51-E931-488A-A88E-CD0A82693851}.Release|anycpu.ActiveCfg = Release|Any CPU
+		{F8B9DC51-E931-488A-A88E-CD0A82693851}.Release|anycpu.Build.0 = Release|Any CPU
+		{16429F4F-ABF0-4E7C-9BB3-7719D4CFF564}.Debug|anycpu.ActiveCfg = Debug|Any CPU
+		{16429F4F-ABF0-4E7C-9BB3-7719D4CFF564}.Debug|anycpu.Build.0 = Debug|Any CPU
+		{16429F4F-ABF0-4E7C-9BB3-7719D4CFF564}.Release|anycpu.ActiveCfg = Release|Any CPU
+		{16429F4F-ABF0-4E7C-9BB3-7719D4CFF564}.Release|anycpu.Build.0 = Release|Any CPU
+		{170C0103-3F94-4896-9062-6314167F596A}.Debug|anycpu.ActiveCfg = Debug|Any CPU
+		{170C0103-3F94-4896-9062-6314167F596A}.Debug|anycpu.Build.0 = Debug|Any CPU
+		{170C0103-3F94-4896-9062-6314167F596A}.Release|anycpu.ActiveCfg = Release|Any CPU
+		{170C0103-3F94-4896-9062-6314167F596A}.Release|anycpu.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{6E076053-5DF7-4546-BDCB-7062729330C1} = {49F293E5-4702-4ECF-BE31-F0E7A16E88FA}
+		{F8B9DC51-E931-488A-A88E-CD0A82693851} = {419B3DE1-9E57-49AF-AF98-5613BE061C28}
+		{16429F4F-ABF0-4E7C-9BB3-7719D4CFF564} = {419B3DE1-9E57-49AF-AF98-5613BE061C28}
+		{170C0103-3F94-4896-9062-6314167F596A} = {419B3DE1-9E57-49AF-AF98-5613BE061C28}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {6C72021D-4BC0-44FB-A2CD-AABA1D22E29F}
+	EndGlobalSection
+EndGlobal

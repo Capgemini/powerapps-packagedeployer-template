@@ -1,0 +1,21 @@
+﻿<?xml version="1.0"?>
+<configdatastorage xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" installsampledata="false" waitforsampledatatoinstall="true" agentdesktopzipfile="" agentdesktopexename="" crmmigdataimportfile="" activatedeactivateslas="false">
+    <processestodeactivate>
+        <processtodeactivate>Case: Set Name</processtodeactivate>
+    </processestodeactivate>
+    <sdkstepstodeactivate>
+        <sdksteptodeactivate>Case: Publish Update of Case Reference to ASB</sdksteptodeactivate>
+    </sdkstepstodeactivate>
+    <processestoactivate>
+        <processtoactivate>Case: Set Name Activate</processtoactivate>
+    </processestoactivate>
+    <defaultslas>
+        <defaultsla>Standard Case SLA</defaultsla>
+    </defaultslas>
+    <wordtemplates>
+        <wordtemplate>Case Survey</wordtemplate>
+    </wordtemplates>
+    <dataimports>
+        <dataimport datafolderpath="Data/Reference/PreDeploy/Extract" importconfigpath="Data/Reference/PreDeploy/ImportConfig.json" importbeforesolutions="true" />
+    </dataimports>
+</configdatastorage>
