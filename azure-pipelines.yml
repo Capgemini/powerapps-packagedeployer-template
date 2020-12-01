@@ -32,12 +32,12 @@ stages:
           - checkout: none
           - download: current
             displayName: Download NuGet package artifact
-            artifact: Capgemini.PowerApps.Deployment
+            artifact: Capgemini.PowerApps.PackageDeployerTemplate
           - task: NuGetCommand@2
             displayName: Push to NuGet.org
             inputs:
               command: push
-              packagesToPush: '$(Pipeline.Workspace)/Capgemini.PowerApps.Deployment/*.nupkg'
+              packagesToPush: '$(Pipeline.Workspace)/Capgemini.PowerApps.PackageDeployerTemplate/*.nupkg'
               nuGetFeedType: external
               publishFeedCredentials: Capgemini_UK
           - task: GitHubRelease@1
@@ -51,7 +51,7 @@ stages:
               tagSource: 'userSpecifiedTag'
               tag: 'v$(SemVer)'
               releaseNotesSource: 'inline'
-              assets: '$(Pipeline.Workspace)/Capgemini.PowerApps.Deployment/*'
+              assets: '$(Pipeline.Workspace)/Capgemini.PowerApps.PackageDeployerTemplate/*'
               isPreRelease: true
               changeLogCompareToRelease: 'lastNonDraftRelease'
               changeLogType: commitBased

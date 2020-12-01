@@ -1,6 +1,6 @@
-# Power Apps Package Deployer Template <img src="assets/Capgemini.PowerApps.PackageDeployer.svg" alt="Logo" height="32" />
+# Power Apps Package Deployer Template <img src="assets/Capgemini.PowerApps.PackageDeployerTemplate.svg" alt="Logo" height="32" />
 
-[![Build Status](https://dev.azure.com/capgeminiuk/GitHub%20Support/_apis/build/status/CI-Builds/NuGet%20Packages/Capgemini.PowerApps.Deployment?branchName=master)](https://dev.azure.com/capgeminiuk/GitHub%20Support/_build/latest?definitionId=203&branchName=master) [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=Capgemini_xrm-packagedeployer&metric=alert_status)](https://sonarcloud.io/dashboard?id=Capgemini_xrm-packagedeployer) [![Coverage](https://sonarcloud.io/api/project_badges/measure?project=Capgemini_xrm-packagedeployer&metric=coverage)](https://sonarcloud.io/dashboard?id=Capgemini_xrm-packagedeployer)
+[![Build Status](https://dev.azure.com/capgeminiuk/GitHub%20Support/_apis/build/status/CI-Builds/NuGet%20Packages/Capgemini.PowerApps.PackageDeployerTemplate?branchName=master)](https://dev.azure.com/capgeminiuk/GitHub%20Support/_build/latest?definitionId=203&branchName=master) [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=Capgemini_xrm-packagedeployer&metric=alert_status)](https://sonarcloud.io/dashboard?id=Capgemini_xrm-packagedeployer) [![Coverage](https://sonarcloud.io/api/project_badges/measure?project=Capgemini_xrm-packagedeployer&metric=coverage)](https://sonarcloud.io/dashboard?id=Capgemini_xrm-packagedeployer)
 
 A base template that introduces additional functionality when deploying Power Apps packages with the Package Deployer.
 
@@ -22,7 +22,7 @@ This project's aim is to build a powerful base Package Deployer template that si
 
 ## Installation
 
-Add a NuGet reference to the [Capgemini.PowerApps.Deployment](https://www.nuget.org/packages/Capgemini.PowerApps.Deployment) package in your Package Deployer package project. For more information on how to create the project, refer to Microsoft [documentation](https://docs.microsoft.com/en-us/powerapps/developer/common-data-service/package-deployer/create-packages-package-deployer#step-1-create-a-project-using-the-template)
+Add a NuGet reference to the [Capgemini.PowerApps.PackageDeployerTemplate](https://www.nuget.org/packages/Capgemini.PowerApps.PackageDeployerTemplate) package in your Package Deployer package project. For more information on how to create the project, refer to Microsoft [documentation](https://docs.microsoft.com/en-us/powerapps/developer/common-data-service/package-deployer/create-packages-package-deployer#step-1-create-a-project-using-the-template)
 
 Update your `PackageTemplate` file (created by following the Microsoft documentation) to inherit from `CapgeminiPackageTemplate` e.g.
 

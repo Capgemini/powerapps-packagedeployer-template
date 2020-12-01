@@ -86,7 +86,7 @@ jobs:
       displayName: Pack NuGet package
       inputs:
         command: custom
-        arguments: 'pack ".\src\Capgemini.PowerApps.Deployment\Capgemini.PowerApps.Deployment.csproj" -Prop "Configuration=$(buildConfiguration)" -Version "$(GitVersion.NuGetVersionV2)" -OutputDirectory "$(Build.ArtifactStagingDirectory)/out" -Symbols -SymbolPackageFormat snupkg'
+        arguments: 'pack ".\src\Capgemini.PowerApps.PackageDeployerTemplate\Capgemini.PowerApps.PackageDeployerTemplate.csproj" -Prop "Configuration=$(buildConfiguration)" -Version "$(GitVersion.NuGetVersionV2)" -OutputDirectory "$(Build.ArtifactStagingDirectory)/out" -Symbols -SymbolPackageFormat snupkg'
         
     - task: PowerShell@2
       displayName: Remove invalid symbols package files
@@ -99,4 +99,4 @@ jobs:
 
     - publish: $(Build.ArtifactStagingDirectory)/out
       displayName: Publish NuGet artifact
-      artifact: Capgemini.PowerApps.Deployment
+      artifact: Capgemini.PowerApps.PackageDeployerTemplate
