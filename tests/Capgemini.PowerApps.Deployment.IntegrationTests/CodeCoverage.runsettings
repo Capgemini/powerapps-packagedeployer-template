@@ -9,7 +9,6 @@
                         <ModulePaths>
                             <Include>
                                 <ModulePath>.*\.Deployment.dll</ModulePath>
-                                <ModulePath>.*\.TestPackage.dll</ModulePath>
                             </Include>
                         </ModulePaths>
                     </CodeCoverage>
