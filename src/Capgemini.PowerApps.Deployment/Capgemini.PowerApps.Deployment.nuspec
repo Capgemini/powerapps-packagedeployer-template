@@ -6,6 +6,7 @@
     <title>Capgemini PackageDeployer Template</title>
     <authors>Capgemini</authors>
     <owners>Capgemini</owners>
+    <iconUrl>https://raw.githubusercontent.com/Capgemini/xrm-packagedeployer/master/assets/Capgemini.PowerApps.PackageDeployer.svg</iconUrl>
     <licenseUrl>https://github.com/Capgemini/xrm-packagedeployer/blob/master/LICENSE</licenseUrl>
     <requireLicenseAcceptance>true</requireLicenseAcceptance>
     <projectUrl>https://github.com/Capgemini/xrm-packagedeployer</projectUrl>
