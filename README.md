@@ -1,10 +1,10 @@
-# Power Apps Enhanced Package Deployer <img src="assets/Capgemini.PowerApps.PackageDeployer.svg" alt="Logo" height="32" />
+# Power Apps Package Deployer Template <img src="assets/Capgemini.PowerApps.PackageDeployer.svg" alt="Logo" height="32" />
 
 [![Build Status](https://dev.azure.com/capgeminiuk/GitHub%20Support/_apis/build/status/CI-Builds/NuGet%20Packages/Capgemini.PowerApps.Deployment?branchName=master)](https://dev.azure.com/capgeminiuk/GitHub%20Support/_build/latest?definitionId=203&branchName=master) [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=Capgemini_xrm-packagedeployer&metric=alert_status)](https://sonarcloud.io/dashboard?id=Capgemini_xrm-packagedeployer) [![Coverage](https://sonarcloud.io/api/project_badges/measure?project=Capgemini_xrm-packagedeployer&metric=coverage)](https://sonarcloud.io/dashboard?id=Capgemini_xrm-packagedeployer)
 
-An enhanced extension of Microsoft's Package Deployer for Power Apps.
+A base template that introduces additional functionality when deploying Power Apps packages with the Package Deployer.
 
-This projects aim is to build an all-in-one configurable tool for deploying to a Power App environment. This is achieved by extending Microsoft existing Package Deployer with useful features which can be easily configured providing simple local or automated deployments within the ALM lifecycle. 
+This project's aim is to build a powerful base Package Deployer template that simplifies common Power Apps package deployment tasks.
 
 ## Table of Contents
 
@@ -121,10 +121,6 @@ You can configure the template to either update or upgrade based on a semantic s
 
 Please refer to the [Contributing](./CONTRIBUTING.md) guide.
 
-## Credits
-
-Special thanks to the entire Capgemini community for their support in developing this tool.
-
 ## License
 
-The Xrm Deployment and Xrm Deployment Package Deployer are released under the [MIT](LICENSE) license.
+The Power Apps Package Deployer Template is released under the [MIT](./LICENSE) license.
