@@ -1,4 +1,4 @@
-# Power Apps Enhanced Package Deployer
+# Power Apps Enhanced Package Deployer <img src="assets/Capgemini.PowerApps.PackageDeployer.svg" alt="Logo" height="32" />
 
 [![Build Status](https://dev.azure.com/capgeminiuk/GitHub%20Support/_apis/build/status/CI-Builds/NuGet%20Packages/Capgemini.PowerApps.Deployment?branchName=master)](https://dev.azure.com/capgeminiuk/GitHub%20Support/_build/latest?definitionId=203&branchName=master) [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=Capgemini_xrm-packagedeployer&metric=alert_status)](https://sonarcloud.io/dashboard?id=Capgemini_xrm-packagedeployer) [![Coverage](https://sonarcloud.io/api/project_badges/measure?project=Capgemini_xrm-packagedeployer&metric=coverage)](https://sonarcloud.io/dashboard?id=Capgemini_xrm-packagedeployer)
 
