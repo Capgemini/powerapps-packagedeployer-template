@@ -1,28 +1,50 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Threading;
+using Capgemini.DataMigration.Resiliency.Polly;
 using Capgemini.PowerApps.PackageDeployerTemplate.Config;
 using Capgemini.Xrm.DataMigration.CrmStore.Config;
 using Capgemini.Xrm.DataMigration.Engine;
 using Capgemini.Xrm.DataMigration.Repositories;
+using Microsoft.Xrm.Sdk;
+using Microsoft.Xrm.Tooling.Connector;
 using Microsoft.Xrm.Tooling.PackageDeployment.CrmPackageExtentionBase;
 
-namespace Capgemini.PowerApps.PackageDeployerTemplate
+namespace Capgemini.PowerApps.PackageDeployerTemplate.Services
 {
-    public class DataImporter
+    public class DataImporterService
     {
         private readonly TraceLogger packageLog;
-        private readonly EntityRepository entityRepository;
         private readonly LoggerAdapter loggerAdapter;
+        private readonly EntityRepository entityRepository;
 
-        public DataImporter(TraceLogger packageLog, EntityRepository entityRepository)
+        public DataImporterService(TraceLogger packageLog, CrmServiceClient crmSvc)
         {
             this.packageLog = packageLog ?? throw new ArgumentNullException(nameof(packageLog));
-            this.entityRepository = entityRepository ?? throw new ArgumentNullException(nameof(entityRepository));
             this.loggerAdapter = new LoggerAdapter(this.packageLog);
+
+            var organisationService = (IOrganizationService)crmSvc.OrganizationWebProxyClient ?? crmSvc.OrganizationServiceProxy ?? throw new ArgumentNullException(nameof(crmSvc));
+            this.entityRepository = new EntityRepository(organisationService, new ServiceRetryExecutor());
         }
 
-        public void Import(DataImportConfig dataImportConfig, string packageFolderPath)
+        public void ImportData(IEnumerable<DataImportConfig> dataImportConfigs, string packageFolderPath)
+        {
+            if (dataImportConfigs is null || !dataImportConfigs.Any())
+            {
+                this.packageLog.Log("No imports have been configured.");
+
+                return;
+            }
+
+            foreach (var dataImportConfig in dataImportConfigs)
+            {
+                this.Import(dataImportConfig, packageFolderPath);
+            }
+        }
+
+        private void Import(DataImportConfig dataImportConfig, string packageFolderPath)
         {
             this.packageLog.Log($"Importing data at {dataImportConfig.DataFolderPath} using import config at {dataImportConfig.ImportConfigPath}.");
 

@@ -3,7 +3,7 @@ using System.Diagnostics;
 using Capgemini.DataMigration.Core;
 using Microsoft.Xrm.Tooling.PackageDeployment.CrmPackageExtentionBase;
 
-namespace Capgemini.PowerApps.PackageDeployerTemplate
+namespace Capgemini.PowerApps.PackageDeployerTemplate.Services
 {
     public class LoggerAdapter : ILogger
     {

@@ -1,14 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.IO;
+﻿using System.IO;
 using System.Linq;
-using Capgemini.DataMigration.Resiliency.Polly;
 using Capgemini.PowerApps.PackageDeployerTemplate.Config;
-using Capgemini.PowerApps.PackageDeployerTemplate.Extensions;
-using Capgemini.Xrm.DataMigration.Repositories;
-using Microsoft.Xrm.Sdk;
-using Microsoft.Xrm.Sdk.Query;
+using Capgemini.PowerApps.PackageDeployerTemplate.Services;
 using Microsoft.Xrm.Tooling.PackageDeployment.CrmPackageExtentionBase;
 
 namespace Capgemini.PowerApps.PackageDeployerTemplate
@@ -22,12 +15,21 @@ namespace Capgemini.PowerApps.PackageDeployerTemplate
             Justification = "Required or Polly does not get copied when referenced via project reference (e.g. in the TestPackage project)")]
         private readonly Polly.Policy _policy;
 
-        protected string ImportConfigFilePath
+        protected string PackageFolderPath
         {
-            get => Path.Combine(this.CurrentPackageLocation, GetImportPackageFolderName, "ImportConfig.xml");
+            get => Path.Combine(this.CurrentPackageLocation, GetImportPackageFolderName);
         }
 
-        protected DataImporter DataImporter { get; private set; }
+        protected string ImportConfigFilePath
+        {
+            get => Path.Combine(this.PackageFolderPath, "ImportConfig.xml");
+        }
+
+        protected DataImporterService DataImporter { get; private set; }
+        protected ProcessActivatorService ProcessActivatorService { get; private set; }
+        protected SlaActivatorService SlaActivatorService { get; private set; }
+        protected WordTemplateImporterService WordTemplateImporterService { get; private set; }
+        protected SdkStepsActivatorService SdkStepsActivatorService { get; private set; }
 
         protected ConfigDataStorage ConfigDataStorage;
 
@@ -37,147 +39,42 @@ namespace Capgemini.PowerApps.PackageDeployerTemplate
 
             this.ConfigDataStorage = ConfigDataStorage.Load(this.ImportConfigFilePath);
 
-            this.DataImporter = new DataImporter(
-                this.PackageLog,
-                new EntityRepository(
-                    (IOrganizationService)this.CrmSvc.OrganizationWebProxyClient ?? CrmSvc.OrganizationServiceProxy,
-                    new ServiceRetryExecutor()));
+            this.DataImporter = new DataImporterService(this.PackageLog, this.CrmSvc);
+            this.ProcessActivatorService = new ProcessActivatorService(this.PackageLog, this.CrmSvc);
+            this.SlaActivatorService = new SlaActivatorService(this.PackageLog, this.CrmSvc);
+            this.WordTemplateImporterService = new WordTemplateImporterService(this.PackageLog, this.CrmSvc);
+            this.SdkStepsActivatorService = new SdkStepsActivatorService(this.PackageLog, this.CrmSvc);
         }
 
         public override void PreSolutionImport(string solutionName, bool solutionOverwriteUnmanagedCustomizations, bool solutionPublishWorkflowsAndActivatePlugins, out bool overwriteUnmanagedCustomizations, out bool publishWorkflowsAndActivatePlugins)
         {
             if (this.ConfigDataStorage.ActivateDeactivateSLAs)
             {
-                this.DeactivateSlas();
+                this.SlaActivatorService.Deactivate();
             }
-            this.ImportData(this.ConfigDataStorage.DataImports?.Where(c => c.ImportBeforeSolutions));
+            this.DataImporter.ImportData(this.ConfigDataStorage.DataImports?.Where(c => c.ImportBeforeSolutions), this.PackageFolderPath);
 
             base.PreSolutionImport(solutionName, solutionOverwriteUnmanagedCustomizations, solutionPublishWorkflowsAndActivatePlugins, out overwriteUnmanagedCustomizations, out publishWorkflowsAndActivatePlugins);
+        }
+
+        public override bool BeforeImportStage()
+        {
+            return true;
         }
 
         public override bool AfterPrimaryImport()
         {
             if(this.ConfigDataStorage.ActivateDeactivateSLAs) 
             {
-                this.ActivateSlas(this.ConfigDataStorage.DefaultSlas);
+                this.SlaActivatorService.Activate(this.ConfigDataStorage.DefaultSlas);
             }
-            this.DeactivateProcesses(this.ConfigDataStorage.ProcessesToDeactivate);
-            this.DeactivateSdkMessageProcessingSteps(this.ConfigDataStorage.SdkStepsToDeactivate);
-            this.ImportData(this.ConfigDataStorage.DataImports?.Where(c => !c.ImportBeforeSolutions));
-            this.ActivateProcesses(this.ConfigDataStorage.ProcessesToActivate);
-            this.ImportWordTemplates(this.ConfigDataStorage.WordTemplates);
+            this.ProcessActivatorService.Deactivate(this.ConfigDataStorage.ProcessesToDeactivate);
+            this.SdkStepsActivatorService.Deactivate(this.ConfigDataStorage.SdkStepsToDeactivate);
+            this.DataImporter.ImportData(this.ConfigDataStorage.DataImports?.Where(c => !c.ImportBeforeSolutions), this.PackageFolderPath);
+            this.ProcessActivatorService.Activate(this.ConfigDataStorage.ProcessesToActivate);
+            this.WordTemplateImporterService.ImportWordTemplates(this.ConfigDataStorage.WordTemplates, this.PackageFolderPath);
 
             return true;
-        }
-
-        private void ImportWordTemplates(IEnumerable<string> wordTemplates)
-        {
-            foreach (var wordTemplate in wordTemplates)
-            {
-                this.CrmSvc.ImportWordTemplate(
-                    Path.Combine(this.CurrentPackageLocation, this.GetImportPackageDataFolderName, wordTemplate));
-            }
-        }
-
-        private void ActivateSlas(IEnumerable<string> defaultSlas = null)
-        {
-            var executeMultipleResponse = this.CrmSvc.SetRecordStateByAttribute("sla", 1, 2, "statecode", new object[] { 0 });
-            if (executeMultipleResponse.IsFaulted)
-            {
-                this.PackageLog.Log($"Error activating SLAs.", TraceEventType.Error);
-                this.PackageLog.LogExecuteMultipleErrors(executeMultipleResponse);
-            }
-
-            if (defaultSlas == null || defaultSlas?.Count() == 0)
-            {
-                return;
-            }
-
-            var defaultSlasQuery = new QueryByAttribute("sla") { ColumnSet = new ColumnSet(false) };
-            foreach (var sla in defaultSlas)
-            {
-                defaultSlasQuery.AddAttributeValue("name", sla);
-            }
-            var retrieveMultipleResponse = this.CrmSvc.RetrieveMultiple(defaultSlasQuery);
-
-            foreach (var defaultSla in retrieveMultipleResponse.Entities)
-            {
-                defaultSla["isdefault"] = true;
-                this.CrmSvc.Update(defaultSla);
-            }
-        }
-
-        private void DeactivateSdkMessageProcessingSteps(IEnumerable<string> sdkStepsToDeactivate)
-        {
-            if (sdkStepsToDeactivate is null || !sdkStepsToDeactivate.Any())
-            {
-                this.PackageLog.Log("No SDK steps to deactivate have been configured.");
-                return;
-            }
-
-            var executeMultipleResponse = this.CrmSvc.SetRecordStateByAttribute("sdkmessageprocessingstep", 1, 2, "name", sdkStepsToDeactivate);
-            if (executeMultipleResponse.IsFaulted)
-            {
-                this.PackageLog.Log($"Error deactivating SDK Message Processing Steps.", TraceEventType.Error);
-                this.PackageLog.LogExecuteMultipleErrors(executeMultipleResponse);
-            }
-        }
-
-        private void DeactivateProcesses(IEnumerable<string> processesToDeactivate)
-        {
-            if (processesToDeactivate is null || !processesToDeactivate.Any())
-            {
-                this.PackageLog.Log("No processes to deactivate have been configured.");
-                return;
-            }
-
-            var executeMultipleResponse = this.CrmSvc.SetRecordStateByAttribute("workflow", 0, 1, "name", processesToDeactivate);
-            if (executeMultipleResponse.IsFaulted)
-            {
-                this.PackageLog.Log($"Error deactivating processes.", TraceEventType.Error);
-                this.PackageLog.LogExecuteMultipleErrors(executeMultipleResponse);
-            }
-        }
-
-        private void ActivateProcesses(IEnumerable<string> processesToActivate)
-        {
-            if (processesToActivate is null || !processesToActivate.Any())
-            {
-                this.PackageLog.Log("No processes to activate have been configured.");
-                return;
-            }
-
-            var executeMultipleResponse = this.CrmSvc.SetRecordStateByAttribute("workflow", 1, 2, "name", processesToActivate);
-            if (executeMultipleResponse.IsFaulted)
-            {
-                this.PackageLog.Log($"Error activating processes.", TraceEventType.Error);
-                this.PackageLog.LogExecuteMultipleErrors(executeMultipleResponse);
-            }
-        }
-
-        private void DeactivateSlas()
-        {
-            var executeMultipleResponse = this.CrmSvc.SetRecordStateByAttribute("sla", 0, 1, "statecode", new object[] { 1 });
-            if (executeMultipleResponse.IsFaulted)
-            {
-                this.PackageLog.Log($"Error deactivating SLAs.", TraceEventType.Error);
-                this.PackageLog.LogExecuteMultipleErrors(executeMultipleResponse);
-            }
-        }
-
-        private void ImportData(IEnumerable<DataImportConfig> dataImportConfigs)
-        {
-            if (dataImportConfigs is null || !dataImportConfigs.Any())
-            {
-                this.PackageLog.Log("No imports have been configured.");
-
-                return;
-            }
-
-            foreach (var dataImportConfig in dataImportConfigs)
-            {
-                this.DataImporter.Import(dataImportConfig, Path.Combine(this.CurrentPackageLocation, this.GetImportPackageDataFolderName));
-            }
         }
     }
 }

@@ -181,8 +181,12 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="PackageTemplateBase.cs" />
-    <Compile Include="DataImporter.cs" />
-    <Compile Include="LoggerAdapter.cs" />
+    <Compile Include="Services\DataImporterService.cs" />
+    <Compile Include="Services\LoggerAdapter.cs" />
+    <Compile Include="Services\ProcessActivatorService.cs" />
+    <Compile Include="Services\SdkStepsActivatorService.cs" />
+    <Compile Include="Services\SlaActivatorService.cs" />
+    <Compile Include="Services\WordTemplateImporterService.cs" />
     <Compile Include="WordTemplateUtilities.cs" />
     <Compile Include="ZipFileUtilities.cs" />
     <Compile Include="Config\DataImportConfig.cs" />
