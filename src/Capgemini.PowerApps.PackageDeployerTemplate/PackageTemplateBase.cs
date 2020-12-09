@@ -22,21 +22,38 @@ namespace Capgemini.PowerApps.PackageDeployerTemplate
             Justification = "Required or Polly does not get copied when referenced via project reference (e.g. in the TestPackage project)")]
         private readonly Polly.Policy _policy;
 
-        protected PackageTemplateBase()
-        {
-        }
-
         protected string ImportConfigFilePath
         {
-            get
-            {
-                return Path.Combine(this.CurrentPackageLocation, GetImportPackageFolderName, "ImportConfig.xml");
-            }
+            get => Path.Combine(this.CurrentPackageLocation, GetImportPackageFolderName, "ImportConfig.xml");
         }
 
         protected DataImporter DataImporter { get; private set; }
 
         protected ConfigDataStorage ConfigDataStorage;
+
+        public override void InitializeCustomExtension()
+        {
+            this.PackageLog.Log($"Initializing {nameof(PackageTemplateBase)} extension.");
+
+            this.ConfigDataStorage = ConfigDataStorage.Load(this.ImportConfigFilePath);
+
+            this.DataImporter = new DataImporter(
+                this.PackageLog,
+                new EntityRepository(
+                    (IOrganizationService)this.CrmSvc.OrganizationWebProxyClient ?? CrmSvc.OrganizationServiceProxy,
+                    new ServiceRetryExecutor()));
+        }
+
+        public override void PreSolutionImport(string solutionName, bool solutionOverwriteUnmanagedCustomizations, bool solutionPublishWorkflowsAndActivatePlugins, out bool overwriteUnmanagedCustomizations, out bool publishWorkflowsAndActivatePlugins)
+        {
+            if (this.ConfigDataStorage.ActivateDeactivateSLAs)
+            {
+                this.DeactivateSlas();
+            }
+            this.ImportData(this.ConfigDataStorage.DataImports?.Where(c => c.ImportBeforeSolutions));
+
+            base.PreSolutionImport(solutionName, solutionOverwriteUnmanagedCustomizations, solutionPublishWorkflowsAndActivatePlugins, out overwriteUnmanagedCustomizations, out publishWorkflowsAndActivatePlugins);
+        }
 
         public override bool AfterPrimaryImport()
         {
@@ -74,11 +91,6 @@ namespace Capgemini.PowerApps.PackageDeployerTemplate
             }
 
             return base.OverrideSolutionImportDecision(solutionUniqueName, organizationVersion, packageSolutionVersion, inboundSolutionVersion, deployedSolutionVersion, systemSelectedImportAction);
-        }
-
-        public override bool BeforeImportStage()
-        {
-            return true;
         }
 
         private void ImportWordTemplates(IEnumerable<string> wordTemplates)
@@ -174,26 +186,6 @@ namespace Capgemini.PowerApps.PackageDeployerTemplate
                 this.PackageLog.Log($"Error deactivating SLAs.", TraceEventType.Error);
                 this.PackageLog.LogExecuteMultipleErrors(executeMultipleResponse);
             }
-        }
-
-        public override void InitializeCustomExtension()
-        {
-            this.PackageLog.Log($"Initializing {nameof(PackageTemplateBase)} extension.");
-
-            this.ConfigDataStorage = ConfigDataStorage.Load(this.ImportConfigFilePath);
-
-            this.DataImporter = new DataImporter(
-                this.PackageLog,
-                new EntityRepository(
-                    (IOrganizationService)this.CrmSvc.OrganizationWebProxyClient ?? CrmSvc.OrganizationServiceProxy,
-                    new ServiceRetryExecutor()));
-
-            // Previously in the BeforeImportStage method but this does not run before solution import.
-            if(this.ConfigDataStorage.ActivateDeactivateSLAs)
-            {
-                this.DeactivateSlas();
-            }
-            this.ImportData(this.ConfigDataStorage.DataImports?.Where(c => c.ImportBeforeSolutions));
         }
 
         private void ImportData(IEnumerable<DataImportConfig> dataImportConfigs)
