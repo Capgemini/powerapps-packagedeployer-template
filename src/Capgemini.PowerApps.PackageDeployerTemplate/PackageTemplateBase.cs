@@ -70,29 +70,6 @@ namespace Capgemini.PowerApps.PackageDeployerTemplate
             return true;
         }
 
-        public override UserRequestedImportAction OverrideSolutionImportDecision(string solutionUniqueName, Version organizationVersion, Version packageSolutionVersion, Version inboundSolutionVersion, Version deployedSolutionVersion, ImportAction systemSelectedImportAction)
-        {
-            if (systemSelectedImportAction != ImportAction.Import)
-            {
-                return UserRequestedImportAction.Default;
-            }
-
-            if (packageSolutionVersion.Major > organizationVersion.Major)
-            {
-                return this.ConfigDataStorage.UseUpdateForMajorVersions ? UserRequestedImportAction.ForceUpdate : UserRequestedImportAction.Default;
-            }
-            else if (packageSolutionVersion.Minor > organizationVersion.Minor)
-            {
-                return this.ConfigDataStorage.UseUpdateForMinorVersions ? UserRequestedImportAction.ForceUpdate : UserRequestedImportAction.Default;
-            }
-            else if (packageSolutionVersion.Revision > organizationVersion.Revision)
-            {
-                return this.ConfigDataStorage.UseUpdateForPatchVersions ? UserRequestedImportAction.ForceUpdate : UserRequestedImportAction.Default;
-            }
-
-            return base.OverrideSolutionImportDecision(solutionUniqueName, organizationVersion, packageSolutionVersion, inboundSolutionVersion, deployedSolutionVersion, systemSelectedImportAction);
-        }
-
         private void ImportWordTemplates(IEnumerable<string> wordTemplates)
         {
             foreach (var wordTemplate in wordTemplates)
