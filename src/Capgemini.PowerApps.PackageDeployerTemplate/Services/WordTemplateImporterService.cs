@@ -23,6 +23,7 @@ namespace Capgemini.PowerApps.PackageDeployerTemplate.Services
             foreach (var wordTemplate in wordTemplates)
             {
                 this.crmSvc.ImportWordTemplate(Path.Combine(packageFolderPath, wordTemplate));
+                packageLog.Log($"{nameof(WordTemplateImporterService)}: Word Template imported - {wordTemplate}");
             }
         }
 
