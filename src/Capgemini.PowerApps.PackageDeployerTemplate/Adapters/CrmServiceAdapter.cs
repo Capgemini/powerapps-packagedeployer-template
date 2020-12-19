@@ -1,17 +1,24 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using Microsoft.Xrm.Sdk;
+﻿using Microsoft.Xrm.Sdk;
 using Microsoft.Xrm.Sdk.Messages;
 using Microsoft.Xrm.Sdk.Query;
 using Microsoft.Xrm.Tooling.Connector;
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
 
-namespace Capgemini.PowerApps.PackageDeployerTemplate.Extensions
+namespace Capgemini.PowerApps.PackageDeployerTemplate.Adapters
 {
-    public static class CrmServiceClientExtensions
+    public class CrmServiceAdapter
     {
-        public static ExecuteMultipleResponse SetRecordStateByAttribute(this CrmServiceClient svcClient, string entity, int statecode, int statuscode, string attribute, IEnumerable<object> values)
+        private readonly CrmServiceClient crmSvc;
+
+        public CrmServiceAdapter(CrmServiceClient crmSvc)
+        {
+            this.crmSvc = crmSvc;
+        }
+
+        public ExecuteMultipleResponse SetRecordStateByAttribute(string entity, int statecode, int statuscode, string attribute, IEnumerable<object> values)
         {
             if (string.IsNullOrEmpty(entity))
             {
@@ -40,22 +47,22 @@ namespace Capgemini.PowerApps.PackageDeployerTemplate.Extensions
                 query.AddAttributeValue("type", 1);
             }
 
-            var retrieveMultipleResponse = svcClient.RetrieveMultiple(query);
+            var retrieveMultipleResponse = crmSvc.RetrieveMultiple(query);
             if (retrieveMultipleResponse.Entities.Count == 0)
             {
                 return new ExecuteMultipleResponse();
             }
 
-            var batchId = svcClient.CreateBatchOperationRequest($"Set state of {entity}", true, true);
+            var batchId = crmSvc.CreateBatchOperationRequest($"Set state of {entity}", true, true);
             foreach (var matchingRecord in retrieveMultipleResponse.Entities)
             {
-                svcClient.UpdateStateAndStatusForEntity(entity, matchingRecord.Id, statecode, statuscode, batchId);
+                crmSvc.UpdateStateAndStatusForEntity(entity, matchingRecord.Id, statecode, statuscode, batchId);
             }
 
-            return svcClient.ExecuteBatch(batchId);
+            return crmSvc.ExecuteBatch(batchId);
         }
 
-        public static void ImportWordTemplate(this CrmServiceClient svcClient, string filePath)
+        public void ImportWordTemplate(string filePath)
         {
             var fileInfo = new FileInfo(filePath);
             var templateType = new OptionSetValue(fileInfo.Extension.Equals("xlsx", StringComparison.OrdinalIgnoreCase) ? 1 : 2);
@@ -66,7 +73,7 @@ namespace Capgemini.PowerApps.PackageDeployerTemplate.Extensions
             }
 
             var logicalName = WordTemplateUtilities.GetEntityLogicalName(filePath);
-            var targetEntityTypeCode = svcClient.GetEntityTypeCode(logicalName);
+            var targetEntityTypeCode = crmSvc.GetEntityTypeCode(logicalName);
             var entityTypeCode = WordTemplateUtilities.GetEntityTypeCode(filePath);
 
             if (targetEntityTypeCode != entityTypeCode)
@@ -74,7 +81,7 @@ namespace Capgemini.PowerApps.PackageDeployerTemplate.Extensions
                 WordTemplateUtilities.SetEntity(filePath, logicalName, targetEntityTypeCode);
             }
 
-            var retrieveMultipleResponse = svcClient.RetrieveMultiple(
+            var retrieveMultipleResponse = crmSvc.RetrieveMultiple(
                 new QueryByAttribute("documenttemplate") { Attributes = { "name" }, Values = { Path.GetFileNameWithoutExtension(fileInfo.Name) } });
 
             var documentTemplate = retrieveMultipleResponse.Entities.FirstOrDefault();
@@ -89,12 +96,18 @@ namespace Capgemini.PowerApps.PackageDeployerTemplate.Extensions
 
             if (documentTemplate.Id == Guid.Empty)
             {
-                svcClient.Create(documentTemplate);
+                crmSvc.Create(documentTemplate);
             }
             else
             {
-                svcClient.Update(documentTemplate);
+                crmSvc.Update(documentTemplate);
             }
         }
+
+        public IOrganizationService GetOrganizationService() => (IOrganizationService)crmSvc.OrganizationWebProxyClient ?? crmSvc.OrganizationServiceProxy;
+
+        public EntityCollection RetrieveMultiple(QueryByAttribute query) => crmSvc.RetrieveMultiple(query);
+
+        public void Update(Entity record) => crmSvc.Update(record);
     }
 }

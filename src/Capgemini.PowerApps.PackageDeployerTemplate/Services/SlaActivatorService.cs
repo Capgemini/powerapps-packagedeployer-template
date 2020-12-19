@@ -1,6 +1,6 @@
-﻿using Capgemini.PowerApps.PackageDeployerTemplate.Extensions;
+﻿using Capgemini.PowerApps.PackageDeployerTemplate.Adapters;
+using Capgemini.PowerApps.PackageDeployerTemplate.Extensions;
 using Microsoft.Xrm.Sdk.Query;
-using Microsoft.Xrm.Tooling.Connector;
 using Microsoft.Xrm.Tooling.PackageDeployment.CrmPackageExtentionBase;
 using System;
 using System.Collections.Generic;
@@ -12,9 +12,9 @@ namespace Capgemini.PowerApps.PackageDeployerTemplate.Services
     public class SlaActivatorService
     {
         private readonly TraceLogger packageLog;
-        private readonly CrmServiceClient crmSvc;
+        private readonly CrmServiceAdapter crmSvc;
 
-        public SlaActivatorService(TraceLogger packageLog, CrmServiceClient crmSvc)
+        public SlaActivatorService(TraceLogger packageLog, CrmServiceAdapter crmSvc)
         {
             this.packageLog = packageLog ?? throw new ArgumentNullException(nameof(packageLog));
             this.crmSvc = crmSvc ?? throw new ArgumentNullException(nameof(crmSvc));

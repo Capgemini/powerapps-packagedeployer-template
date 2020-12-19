@@ -1,5 +1,4 @@
-﻿using Capgemini.PowerApps.PackageDeployerTemplate.Extensions;
-using Microsoft.Xrm.Tooling.Connector;
+﻿using Capgemini.PowerApps.PackageDeployerTemplate.Adapters;
 using Microsoft.Xrm.Tooling.PackageDeployment.CrmPackageExtentionBase;
 using System;
 using System.Collections.Generic;
@@ -11,9 +10,9 @@ namespace Capgemini.PowerApps.PackageDeployerTemplate.Services
     {
 
         private readonly TraceLogger packageLog;
-        private readonly CrmServiceClient crmSvc;
+        private readonly CrmServiceAdapter crmSvc;
 
-        public WordTemplateImporterService(TraceLogger packageLog, CrmServiceClient crmSvc)
+        public WordTemplateImporterService(TraceLogger packageLog, CrmServiceAdapter crmSvc)
         {
             this.packageLog = packageLog ?? throw new ArgumentNullException(nameof(packageLog));
             this.crmSvc = crmSvc ?? throw new ArgumentNullException(nameof(crmSvc));

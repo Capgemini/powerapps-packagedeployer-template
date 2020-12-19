@@ -1,5 +1,7 @@
-﻿using System.IO;
+﻿using System.Diagnostics;
+using System.IO;
 using System.Linq;
+using Capgemini.PowerApps.PackageDeployerTemplate.Adapters;
 using Capgemini.PowerApps.PackageDeployerTemplate.Config;
 using Capgemini.PowerApps.PackageDeployerTemplate.Services;
 using Microsoft.Xrm.Tooling.PackageDeployment.CrmPackageExtentionBase;
@@ -25,7 +27,7 @@ namespace Capgemini.PowerApps.PackageDeployerTemplate
             get => Path.Combine(this.PackageFolderPath, "ImportConfig.xml");
         }
 
-        protected DataImporterService DataImporter { get; private set; }
+        protected DataImporterService DataImporterService { get; private set; }
         protected ProcessActivatorService ProcessActivatorService { get; private set; }
         protected SlaActivatorService SlaActivatorService { get; private set; }
         protected WordTemplateImporterService WordTemplateImporterService { get; private set; }
@@ -39,41 +41,51 @@ namespace Capgemini.PowerApps.PackageDeployerTemplate
 
             this.ConfigDataStorage = ConfigDataStorage.Load(this.ImportConfigFilePath);
 
-            this.DataImporter = new DataImporterService(this.PackageLog, this.CrmSvc);
-            this.ProcessActivatorService = new ProcessActivatorService(this.PackageLog, this.CrmSvc);
-            this.SlaActivatorService = new SlaActivatorService(this.PackageLog, this.CrmSvc);
-            this.WordTemplateImporterService = new WordTemplateImporterService(this.PackageLog, this.CrmSvc);
-            this.SdkStepsActivatorService = new SdkStepsActivatorService(this.PackageLog, this.CrmSvc);
+            var crmServiceAdapter = new CrmServiceAdapter(this.CrmSvc);
+
+            this.DataImporterService = new DataImporterService(this.PackageLog, crmServiceAdapter);
+            this.ProcessActivatorService = new ProcessActivatorService(this.PackageLog, crmServiceAdapter);
+            this.SlaActivatorService = new SlaActivatorService(this.PackageLog, crmServiceAdapter);
+            this.WordTemplateImporterService = new WordTemplateImporterService(this.PackageLog, crmServiceAdapter);
+            this.SdkStepsActivatorService = new SdkStepsActivatorService(this.PackageLog, crmServiceAdapter);
+
+            this.BeforeAnything();
         }
 
-        public override void PreSolutionImport(string solutionName, bool solutionOverwriteUnmanagedCustomizations, bool solutionPublishWorkflowsAndActivatePlugins, out bool overwriteUnmanagedCustomizations, out bool publishWorkflowsAndActivatePlugins)
+        public void BeforeAnything()
         {
+            this.PackageLog.Log($"{nameof(PackageTemplateBase)}.{nameof(BeforeAnything)} running...", TraceEventType.Information);
+
             if (this.ConfigDataStorage.ActivateDeactivateSLAs)
             {
                 this.SlaActivatorService.Deactivate();
             }
-            this.DataImporter.ImportData(this.ConfigDataStorage.DataImports?.Where(c => c.ImportBeforeSolutions), this.PackageFolderPath);
+            this.DataImporterService.Import(this.ConfigDataStorage.DataImports?.Where(c => c.ImportBeforeSolutions), this.PackageFolderPath);
 
-            base.PreSolutionImport(solutionName, solutionOverwriteUnmanagedCustomizations, solutionPublishWorkflowsAndActivatePlugins, out overwriteUnmanagedCustomizations, out publishWorkflowsAndActivatePlugins);
+            this.PackageLog.Log($"{nameof(PackageTemplateBase)}.{nameof(BeforeAnything)} completed.", TraceEventType.Information);
         }
 
         public override bool BeforeImportStage()
         {
+            this.PackageLog.Log($"{nameof(PackageTemplateBase)}.{nameof(BeforeImportStage)} running...", TraceEventType.Information);
+            this.PackageLog.Log($"{nameof(PackageTemplateBase)}.{nameof(BeforeImportStage)} completed.", TraceEventType.Information);
             return true;
         }
 
         public override bool AfterPrimaryImport()
         {
-            if(this.ConfigDataStorage.ActivateDeactivateSLAs) 
+            this.PackageLog.Log($"{nameof(PackageTemplateBase)}.{nameof(AfterPrimaryImport)} running...", TraceEventType.Information);
+            if (this.ConfigDataStorage.ActivateDeactivateSLAs) 
             {
                 this.SlaActivatorService.Activate(this.ConfigDataStorage.DefaultSlas);
             }
             this.ProcessActivatorService.Deactivate(this.ConfigDataStorage.ProcessesToDeactivate);
             this.SdkStepsActivatorService.Deactivate(this.ConfigDataStorage.SdkStepsToDeactivate);
-            this.DataImporter.ImportData(this.ConfigDataStorage.DataImports?.Where(c => !c.ImportBeforeSolutions), this.PackageFolderPath);
+            this.DataImporterService.Import(this.ConfigDataStorage.DataImports?.Where(c => !c.ImportBeforeSolutions), this.PackageFolderPath);
             this.ProcessActivatorService.Activate(this.ConfigDataStorage.ProcessesToActivate);
             this.WordTemplateImporterService.ImportWordTemplates(this.ConfigDataStorage.WordTemplates, this.PackageFolderPath);
 
+            this.PackageLog.Log($"{nameof(PackageTemplateBase)}.{nameof(AfterPrimaryImport)} completed.", TraceEventType.Information);
             return true;
         }
     }

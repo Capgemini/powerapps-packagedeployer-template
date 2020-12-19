@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Threading;
 using Capgemini.DataMigration.Resiliency.Polly;
+using Capgemini.PowerApps.PackageDeployerTemplate.Adapters;
 using Capgemini.PowerApps.PackageDeployerTemplate.Config;
 using Capgemini.Xrm.DataMigration.CrmStore.Config;
 using Capgemini.Xrm.DataMigration.Engine;
@@ -20,16 +21,16 @@ namespace Capgemini.PowerApps.PackageDeployerTemplate.Services
         private readonly LoggerAdapter loggerAdapter;
         private readonly EntityRepository entityRepository;
 
-        public DataImporterService(TraceLogger packageLog, CrmServiceClient crmSvc)
+        public DataImporterService(TraceLogger packageLog, CrmServiceAdapter crmSvc)
         {
             this.packageLog = packageLog ?? throw new ArgumentNullException(nameof(packageLog));
             this.loggerAdapter = new LoggerAdapter(this.packageLog);
 
-            var organisationService = (IOrganizationService)crmSvc.OrganizationWebProxyClient ?? crmSvc.OrganizationServiceProxy ?? throw new ArgumentNullException(nameof(crmSvc));
+            var organisationService = crmSvc.GetOrganizationService() ?? throw new ArgumentNullException(nameof(crmSvc));
             this.entityRepository = new EntityRepository(organisationService, new ServiceRetryExecutor());
         }
 
-        public void ImportData(IEnumerable<DataImportConfig> dataImportConfigs, string packageFolderPath)
+        public void Import(IEnumerable<DataImportConfig> dataImportConfigs, string packageFolderPath)
         {
             if (dataImportConfigs is null || !dataImportConfigs.Any())
             {
