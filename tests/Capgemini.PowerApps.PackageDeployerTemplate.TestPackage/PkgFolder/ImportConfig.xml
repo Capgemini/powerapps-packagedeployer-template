@@ -6,9 +6,6 @@
   <processestodeactivate>
     <processtodeactivate>Case: Set Name</processtodeactivate>
   </processestodeactivate>
-  <processestoactivate>
-    <processtoactivate>Case: Set Name</processtoactivate>
-  </processestoactivate>
   <sdkstepstodeactivate>
     <sdksteptodeactivate>Case: Publish Update of Case Reference to ASB</sdksteptodeactivate>
   </sdkstepstodeactivate>
