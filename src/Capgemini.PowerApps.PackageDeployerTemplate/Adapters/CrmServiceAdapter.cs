@@ -18,7 +18,7 @@ namespace Capgemini.PowerApps.PackageDeployerTemplate.Adapters
             this.crmSvc = crmSvc;
         }
 
-        public ExecuteMultipleResponse SetRecordStateByAttribute(string entity, int statecode, int statuscode, string attribute, IEnumerable<object> values)
+        public EntityCollection QueryRecordsBySingleAttributeValue(string entity, string attribute, IEnumerable<object> values)
         {
             if (string.IsNullOrEmpty(entity))
             {
@@ -42,21 +42,40 @@ namespace Capgemini.PowerApps.PackageDeployerTemplate.Adapters
             };
             query.Values.AddRange(values);
 
-            if (entity.Equals("workflow", StringComparison.OrdinalIgnoreCase))
+            return crmSvc.RetrieveMultiple(query);
+        }
+
+        public ExecuteMultipleResponse SetRecordsStateInBatch(EntityCollection queryResponse, int statecode, int statuscode)
+        {
+            if (queryResponse is null)
             {
-                query.AddAttributeValue("type", 1);
+                throw new ArgumentNullException(nameof(queryResponse));
             }
 
-            var retrieveMultipleResponse = crmSvc.RetrieveMultiple(query);
-            if (retrieveMultipleResponse.Entities.Count == 0)
+            if (string.IsNullOrEmpty(queryResponse.EntityName))
+            {
+                throw new ArgumentException($"{nameof(EntityCollection.EntityName)} must have a value.", nameof(queryResponse));
+            }
+
+            if (queryResponse.Entities.Count == 0)
             {
                 return new ExecuteMultipleResponse();
             }
 
-            var batchId = crmSvc.CreateBatchOperationRequest($"Set state of {entity}", true, true);
-            foreach (var matchingRecord in retrieveMultipleResponse.Entities)
+            if (statecode < 0)
             {
-                crmSvc.UpdateStateAndStatusForEntity(entity, matchingRecord.Id, statecode, statuscode, batchId);
+                throw new ArgumentException("You must provide a value greater than or equal to 0.", nameof(statecode));
+            }
+
+            if (statuscode < 0)
+            {
+                throw new ArgumentException("You must provide a value greater than or equal to 0.", nameof(statuscode));
+            }
+
+            var batchId = crmSvc.CreateBatchOperationRequest($"Set state of {queryResponse.EntityName}", true, true);
+            foreach (var matchingRecord in queryResponse.Entities)
+            {
+                crmSvc.UpdateStateAndStatusForEntity(queryResponse.EntityName, matchingRecord.Id, statecode, statuscode, batchId);
             }
 
             return crmSvc.ExecuteBatch(batchId);

@@ -23,6 +23,11 @@ namespace Capgemini.PowerApps.PackageDeployerTemplate.IntegrationTests
             process.Start();
             process.WaitForExit();
 
+            if (process.ExitCode != 0)
+            {
+                throw new Exception("Script `DeployPackage.ps1` failed");
+            }
+
             ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
             this.ServiceClient = new CrmServiceClient(
                 $"Url={Environment.GetEnvironmentVariable("CAPGEMINI_PACKAGE_DEPLOYER_TESTS_URL")}; Username={Environment.GetEnvironmentVariable("CAPGEMINI_PACKAGE_DEPLOYER_TESTS_USERNAME")}; Password={Environment.GetEnvironmentVariable("CAPGEMINI_PACKAGE_DEPLOYER_TESTS_PASSWORD")}; authtype=Office365");

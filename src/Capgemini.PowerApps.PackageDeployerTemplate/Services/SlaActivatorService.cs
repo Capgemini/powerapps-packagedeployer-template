@@ -23,7 +23,8 @@ namespace Capgemini.PowerApps.PackageDeployerTemplate.Services
 
         public void Activate(IEnumerable<string> defaultSlas = null)
         {
-            var executeMultipleResponse = this.crmSvc.SetRecordStateByAttribute("sla", 1, 2, "statecode", new object[] { 0 });
+            var queryResponse = this.crmSvc.QueryRecordsBySingleAttributeValue("sla", "statecode", new object[] { 0 });
+            var executeMultipleResponse = this.crmSvc.SetRecordsStateInBatch(queryResponse, 1, 2);
             if (executeMultipleResponse.IsFaulted)
             {
                 this.packageLog.Log($"Error activating SLAs.", TraceEventType.Error);
@@ -51,7 +52,8 @@ namespace Capgemini.PowerApps.PackageDeployerTemplate.Services
 
         public void Deactivate()
         {
-            var executeMultipleResponse = this.crmSvc.SetRecordStateByAttribute("sla", 0, 1, "statecode", new object[] { 1 });
+            var queryResponse = this.crmSvc.QueryRecordsBySingleAttributeValue("sla", "statecode", new object[] { 1 });
+            var executeMultipleResponse = this.crmSvc.SetRecordsStateInBatch(queryResponse, 0, 1);
             if (executeMultipleResponse.IsFaulted)
             {
                 this.packageLog.Log($"Error deactivating SLAs.", TraceEventType.Error);

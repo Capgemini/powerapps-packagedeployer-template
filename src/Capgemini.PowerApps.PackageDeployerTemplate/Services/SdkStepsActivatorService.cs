@@ -27,7 +27,8 @@ namespace Capgemini.PowerApps.PackageDeployerTemplate.Services
                 return;
             }
 
-            var executeMultipleResponse = this.crmSvc.SetRecordStateByAttribute("sdkmessageprocessingstep", 1, 2, "name", sdkStepsToDeactivate);
+            var queryResponse = this.crmSvc.QueryRecordsBySingleAttributeValue("sdkmessageprocessingstep", "name", sdkStepsToDeactivate);
+            var executeMultipleResponse = this.crmSvc.SetRecordsStateInBatch(queryResponse, 1, 2);
             if (executeMultipleResponse.IsFaulted)
             {
                 this.packageLog.Log($"Error deactivating SDK Message Processing Steps.", TraceEventType.Error);

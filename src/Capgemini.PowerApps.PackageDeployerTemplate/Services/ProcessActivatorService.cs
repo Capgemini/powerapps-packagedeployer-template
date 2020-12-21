@@ -1,5 +1,7 @@
 ﻿using Capgemini.PowerApps.PackageDeployerTemplate.Adapters;
 using Capgemini.PowerApps.PackageDeployerTemplate.Extensions;
+using Microsoft.Xrm.Sdk;
+using Microsoft.Xrm.Sdk.Query;
 using Microsoft.Xrm.Tooling.PackageDeployment.CrmPackageExtentionBase;
 using System;
 using System.Collections.Generic;
@@ -27,7 +29,8 @@ namespace Capgemini.PowerApps.PackageDeployerTemplate.Services
                 return;
             }
 
-            var executeMultipleResponse = this.crmSvc.SetRecordStateByAttribute("workflow", 1, 2, "name", processesToActivate);
+            var queryResponse = QueryWorkflowsByName(processesToActivate);
+            var executeMultipleResponse = this.crmSvc.SetRecordsStateInBatch(queryResponse, 1, 2);
             if (executeMultipleResponse.IsFaulted)
             {
                 this.packageLog.Log($"Error activating processes.", TraceEventType.Error);
@@ -43,12 +46,26 @@ namespace Capgemini.PowerApps.PackageDeployerTemplate.Services
                 return;
             }
 
-            var executeMultipleResponse = this.crmSvc.SetRecordStateByAttribute("workflow", 0, 1, "name", processesToDeactivate);
+            var queryResponse = QueryWorkflowsByName(processesToDeactivate);
+            var executeMultipleResponse = this.crmSvc.SetRecordsStateInBatch(queryResponse, 1, 2);
             if (executeMultipleResponse.IsFaulted)
             {
                 this.packageLog.Log($"Error deactivating processes.", TraceEventType.Error);
                 this.packageLog.LogExecuteMultipleErrors(executeMultipleResponse);
             }
-        }     
+        }
+
+        public EntityCollection QueryWorkflowsByName(IEnumerable<object> values)
+        {
+            var query = new QueryByAttribute("workflow")
+            {
+                Attributes = { "name" },
+                ColumnSet = new ColumnSet(false)
+            };
+            query.Values.AddRange(values);
+            query.AddAttributeValue("type", 1);
+
+            return crmSvc.RetrieveMultiple(query);
+        }
     }
 }
