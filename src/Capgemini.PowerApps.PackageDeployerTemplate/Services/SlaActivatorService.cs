@@ -1,7 +1,7 @@
 ﻿using Capgemini.PowerApps.PackageDeployerTemplate.Adapters;
 using Capgemini.PowerApps.PackageDeployerTemplate.Extensions;
+using Microsoft.Extensions.Logging;
 using Microsoft.Xrm.Sdk.Query;
-using Microsoft.Xrm.Tooling.PackageDeployment.CrmPackageExtentionBase;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -11,15 +11,14 @@ namespace Capgemini.PowerApps.PackageDeployerTemplate.Services
 {
     public class SlaActivatorService
     {
-        private readonly TraceLogger packageLog;
-        private readonly CrmServiceAdapter crmSvc;
+        private readonly ILogger logger;
+        private readonly ICrmServiceAdapter crmSvc;
 
-        public SlaActivatorService(TraceLogger packageLog, CrmServiceAdapter crmSvc)
+        public SlaActivatorService(ILogger logger, ICrmServiceAdapter crmSvc)
         {
-            this.packageLog = packageLog ?? throw new ArgumentNullException(nameof(packageLog));
+            this.logger = logger ?? throw new ArgumentNullException(nameof(logger));
             this.crmSvc = crmSvc ?? throw new ArgumentNullException(nameof(crmSvc));
         }
-
 
         public void Activate(IEnumerable<string> defaultSlas = null)
         {
@@ -27,8 +26,8 @@ namespace Capgemini.PowerApps.PackageDeployerTemplate.Services
             var executeMultipleResponse = this.crmSvc.SetRecordsStateInBatch(queryResponse, 1, 2);
             if (executeMultipleResponse.IsFaulted)
             {
-                this.packageLog.Log($"Error activating SLAs.", TraceEventType.Error);
-                this.packageLog.LogExecuteMultipleErrors(executeMultipleResponse);
+                this.logger.LogInformation($"Error activating SLAs.", TraceEventType.Error);
+                this.logger.LogExecuteMultipleErrors(executeMultipleResponse);
             }
 
             if (defaultSlas == null || defaultSlas?.Count() == 0)
@@ -56,8 +55,8 @@ namespace Capgemini.PowerApps.PackageDeployerTemplate.Services
             var executeMultipleResponse = this.crmSvc.SetRecordsStateInBatch(queryResponse, 0, 1);
             if (executeMultipleResponse.IsFaulted)
             {
-                this.packageLog.Log($"Error deactivating SLAs.", TraceEventType.Error);
-                this.packageLog.LogExecuteMultipleErrors(executeMultipleResponse);
+                this.logger.LogInformation($"Error deactivating SLAs.", TraceEventType.Error);
+                this.logger.LogExecuteMultipleErrors(executeMultipleResponse);
             }
         }
     }

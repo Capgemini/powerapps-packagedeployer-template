@@ -1,17 +1,17 @@
 ﻿using System.Diagnostics;
 using System.Linq;
+using Microsoft.Extensions.Logging;
 using Microsoft.Xrm.Sdk.Messages;
-using Microsoft.Xrm.Tooling.PackageDeployment.CrmPackageExtentionBase;
 
 namespace Capgemini.PowerApps.PackageDeployerTemplate.Extensions
 {
-    public static class TraceLoggerExtensions
+    public static class ILoggerExtensions
     {
-        public static void LogExecuteMultipleErrors(this TraceLogger traceLogger, ExecuteMultipleResponse executeMultipleResponse)
+        public static void LogExecuteMultipleErrors(this ILogger logger, ExecuteMultipleResponse executeMultipleResponse)
         {
             foreach (var response in executeMultipleResponse.Responses.Where(r => r.Fault != null).Select(r => r.Fault))
             {
-                traceLogger.Log(response.Message, TraceEventType.Error);
+                logger.LogInformation(response.Message, TraceEventType.Error);
             }
         }
     }

@@ -42,12 +42,13 @@ namespace Capgemini.PowerApps.PackageDeployerTemplate
             this.ConfigDataStorage = ConfigDataStorage.Load(this.ImportConfigFilePath);
 
             var crmServiceAdapter = new CrmServiceAdapter(this.CrmSvc);
+            var logger = new TraceLoggerAdapter(this.PackageLog);
 
-            this.DataImporterService = new DataImporterService(this.PackageLog, crmServiceAdapter);
-            this.ProcessActivatorService = new ProcessActivatorService(this.PackageLog, crmServiceAdapter);
-            this.SlaActivatorService = new SlaActivatorService(this.PackageLog, crmServiceAdapter);
-            this.WordTemplateImporterService = new WordTemplateImporterService(this.PackageLog, crmServiceAdapter);
-            this.SdkStepsActivatorService = new SdkStepsActivatorService(this.PackageLog, crmServiceAdapter);
+            this.DataImporterService = new DataImporterService(logger, crmServiceAdapter);
+            this.ProcessActivatorService = new ProcessActivatorService(logger, crmServiceAdapter);
+            this.SlaActivatorService = new SlaActivatorService(logger, crmServiceAdapter);
+            this.WordTemplateImporterService = new WordTemplateImporterService(logger, crmServiceAdapter);
+            this.SdkStepsActivatorService = new SdkStepsActivatorService(logger, crmServiceAdapter);
 
             this.BeforeAnything();
         }

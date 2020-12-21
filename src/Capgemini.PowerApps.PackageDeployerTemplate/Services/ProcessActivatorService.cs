@@ -1,8 +1,8 @@
 ﻿using Capgemini.PowerApps.PackageDeployerTemplate.Adapters;
 using Capgemini.PowerApps.PackageDeployerTemplate.Extensions;
+using Microsoft.Extensions.Logging;
 using Microsoft.Xrm.Sdk;
 using Microsoft.Xrm.Sdk.Query;
-using Microsoft.Xrm.Tooling.PackageDeployment.CrmPackageExtentionBase;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -12,12 +12,12 @@ namespace Capgemini.PowerApps.PackageDeployerTemplate.Services
 {
     public class ProcessActivatorService
     {
-        private readonly TraceLogger packageLog;
-        private readonly CrmServiceAdapter crmSvc;
+        private readonly ILogger logger;
+        private readonly ICrmServiceAdapter crmSvc;
 
-        public ProcessActivatorService(TraceLogger packageLog, CrmServiceAdapter crmSvc)
+        public ProcessActivatorService(ILogger logger, ICrmServiceAdapter crmSvc)
         {
-            this.packageLog = packageLog ?? throw new ArgumentNullException(nameof(packageLog));
+            this.logger = logger ?? throw new ArgumentNullException(nameof(logger));
             this.crmSvc = crmSvc ?? throw new ArgumentNullException(nameof(crmSvc));
         }
 
@@ -25,7 +25,7 @@ namespace Capgemini.PowerApps.PackageDeployerTemplate.Services
         {
             if (processesToActivate is null || !processesToActivate.Any())
             {
-                this.packageLog.Log("No processes to activate have been configured.");
+                this.logger.LogInformation("No processes to activate have been configured.");
                 return;
             }
 
@@ -33,8 +33,8 @@ namespace Capgemini.PowerApps.PackageDeployerTemplate.Services
             var executeMultipleResponse = this.crmSvc.SetRecordsStateInBatch(queryResponse, 1, 2);
             if (executeMultipleResponse.IsFaulted)
             {
-                this.packageLog.Log($"Error activating processes.", TraceEventType.Error);
-                this.packageLog.LogExecuteMultipleErrors(executeMultipleResponse);
+                this.logger.LogInformation($"Error activating processes.", TraceEventType.Error);
+                this.logger.LogExecuteMultipleErrors(executeMultipleResponse);
             }
         }
 
@@ -42,16 +42,16 @@ namespace Capgemini.PowerApps.PackageDeployerTemplate.Services
         {
             if (processesToDeactivate is null || !processesToDeactivate.Any())
             {
-                this.packageLog.Log("No processes to deactivate have been configured.");
+                this.logger.LogInformation("No processes to deactivate have been configured.");
                 return;
             }
 
             var queryResponse = QueryWorkflowsByName(processesToDeactivate);
-            var executeMultipleResponse = this.crmSvc.SetRecordsStateInBatch(queryResponse, 1, 2);
+            var executeMultipleResponse = this.crmSvc.SetRecordsStateInBatch(queryResponse, 0, 1);
             if (executeMultipleResponse.IsFaulted)
             {
-                this.packageLog.Log($"Error deactivating processes.", TraceEventType.Error);
-                this.packageLog.LogExecuteMultipleErrors(executeMultipleResponse);
+                this.logger.LogInformation($"Error deactivating processes.", TraceEventType.Error);
+                this.logger.LogExecuteMultipleErrors(executeMultipleResponse);
             }
         }
 
@@ -65,7 +65,9 @@ namespace Capgemini.PowerApps.PackageDeployerTemplate.Services
             query.Values.AddRange(values);
             query.AddAttributeValue("type", 1);
 
-            return crmSvc.RetrieveMultiple(query);
+            var results = crmSvc.RetrieveMultiple(query);
+            this.logger.LogInformation($"Found {results.Entities.Count} of {values.Count()} workflows found.");
+            return results;
         }
     }
 }

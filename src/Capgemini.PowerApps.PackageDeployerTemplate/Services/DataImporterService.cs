@@ -9,22 +9,23 @@ using Capgemini.PowerApps.PackageDeployerTemplate.Config;
 using Capgemini.Xrm.DataMigration.CrmStore.Config;
 using Capgemini.Xrm.DataMigration.Engine;
 using Capgemini.Xrm.DataMigration.Repositories;
-using Microsoft.Xrm.Tooling.PackageDeployment.CrmPackageExtentionBase;
+using Microsoft.Extensions.Logging;
 
 namespace Capgemini.PowerApps.PackageDeployerTemplate.Services
 {
     public class DataImporterService
     {
-        private readonly TraceLogger packageLog;
-        private readonly LoggerAdapter loggerAdapter;
+        private readonly ILogger logger;
+        private readonly DataMigratorLoggerAdapter loggerAdapter;
         private readonly EntityRepository entityRepository;
 
-        public DataImporterService(TraceLogger packageLog, CrmServiceAdapter crmSvc)
+        public DataImporterService(ILogger logger, ICrmServiceAdapter crmSvc)
         {
-            this.packageLog = packageLog ?? throw new ArgumentNullException(nameof(packageLog));
-            this.loggerAdapter = new LoggerAdapter(this.packageLog);
+            this.logger = logger ?? throw new ArgumentNullException(nameof(logger));
+            this.loggerAdapter = new DataMigratorLoggerAdapter(this.logger);
 
-            var organisationService = crmSvc.GetOrganizationService() ?? throw new ArgumentNullException(nameof(crmSvc));
+            if (crmSvc is null) throw new ArgumentNullException(nameof(crmSvc));
+            var organisationService = crmSvc.GetOrganizationService() ?? throw new ArgumentException("Could not get Organisation Service.", nameof(crmSvc));
             this.entityRepository = new EntityRepository(organisationService, new ServiceRetryExecutor());
         }
 
@@ -32,7 +33,7 @@ namespace Capgemini.PowerApps.PackageDeployerTemplate.Services
         {
             if (dataImportConfigs is null || !dataImportConfigs.Any())
             {
-                this.packageLog.Log("No imports have been configured.");
+                this.logger.LogInformation("No imports have been configured.");
 
                 return;
             }
@@ -45,7 +46,7 @@ namespace Capgemini.PowerApps.PackageDeployerTemplate.Services
 
         private void Import(DataImportConfig dataImportConfig, string packageFolderPath)
         {
-            this.packageLog.Log($"Importing data at {dataImportConfig.DataFolderPath} using import config at {dataImportConfig.ImportConfigPath}.");
+            this.logger.LogInformation($"Importing data at {dataImportConfig.DataFolderPath} using import config at {dataImportConfig.ImportConfigPath}.");
 
             new CrmFileDataImporter(
                 this.loggerAdapter,
@@ -54,7 +55,7 @@ namespace Capgemini.PowerApps.PackageDeployerTemplate.Services
                 new CancellationToken(false))
                 .MigrateData();
 
-            this.packageLog.Log($"Finished importing data at {dataImportConfig.DataFolderPath}.");
+            this.logger.LogInformation($"Finished importing data at {dataImportConfig.DataFolderPath}.");
         }
 
         private static CrmImportConfig GetImportConfig(DataImportConfig dataImportConfig, string packageFolderPath)

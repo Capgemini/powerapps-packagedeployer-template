@@ -9,7 +9,7 @@ using System.Linq;
 
 namespace Capgemini.PowerApps.PackageDeployerTemplate.Adapters
 {
-    public class CrmServiceAdapter
+    public class CrmServiceAdapter : ICrmServiceAdapter
     {
         private readonly CrmServiceClient crmSvc;
 

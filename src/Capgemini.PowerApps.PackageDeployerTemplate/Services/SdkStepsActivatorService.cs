@@ -1,6 +1,6 @@
 ﻿using Capgemini.PowerApps.PackageDeployerTemplate.Adapters;
 using Capgemini.PowerApps.PackageDeployerTemplate.Extensions;
-using Microsoft.Xrm.Tooling.PackageDeployment.CrmPackageExtentionBase;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -10,12 +10,12 @@ namespace Capgemini.PowerApps.PackageDeployerTemplate.Services
 {
     public class SdkStepsActivatorService
     {
-        private readonly TraceLogger packageLog;
-        private readonly CrmServiceAdapter crmSvc;
+        private readonly ILogger logger;
+        private readonly ICrmServiceAdapter crmSvc;
 
-        public SdkStepsActivatorService(TraceLogger packageLog, CrmServiceAdapter crmSvc)
+        public SdkStepsActivatorService(ILogger logger, ICrmServiceAdapter crmSvc)
         {
-            this.packageLog = packageLog ?? throw new ArgumentNullException(nameof(packageLog));
+            this.logger = logger ?? throw new ArgumentNullException(nameof(logger));
             this.crmSvc = crmSvc ?? throw new ArgumentNullException(nameof(crmSvc));
         }
 
@@ -23,7 +23,7 @@ namespace Capgemini.PowerApps.PackageDeployerTemplate.Services
         {
             if (sdkStepsToDeactivate is null || !sdkStepsToDeactivate.Any())
             {
-                this.packageLog.Log("No SDK steps to deactivate have been configured.");
+                this.logger.LogInformation("No SDK steps to deactivate have been configured.");
                 return;
             }
 
@@ -31,8 +31,8 @@ namespace Capgemini.PowerApps.PackageDeployerTemplate.Services
             var executeMultipleResponse = this.crmSvc.SetRecordsStateInBatch(queryResponse, 1, 2);
             if (executeMultipleResponse.IsFaulted)
             {
-                this.packageLog.Log($"Error deactivating SDK Message Processing Steps.", TraceEventType.Error);
-                this.packageLog.LogExecuteMultipleErrors(executeMultipleResponse);
+                this.logger.LogInformation($"Error deactivating SDK Message Processing Steps.", TraceEventType.Error);
+                this.logger.LogExecuteMultipleErrors(executeMultipleResponse);
             }
         }
 
