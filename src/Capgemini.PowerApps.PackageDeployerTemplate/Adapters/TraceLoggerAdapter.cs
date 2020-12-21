@@ -1,12 +1,24 @@
 ﻿using Microsoft.Extensions.Logging;
 using Microsoft.Xrm.Tooling.PackageDeployment.CrmPackageExtentionBase;
 using System;
+using System.Collections.Generic;
+using System.Diagnostics;
 
 namespace Capgemini.PowerApps.PackageDeployerTemplate.Adapters
 {
     internal class TraceLoggerAdapter : ILogger
     {
         private readonly TraceLogger traceLogger;
+
+        private readonly Dictionary<LogLevel, TraceEventType> logLevelMap = new Dictionary<LogLevel, TraceEventType>
+        {
+            { LogLevel.Trace, TraceEventType.Verbose },
+            { LogLevel.Debug, TraceEventType.Verbose },
+            { LogLevel.Information,  TraceEventType.Information },
+            { LogLevel.Warning, TraceEventType.Warning },
+            { LogLevel.Error, TraceEventType.Error },
+            { LogLevel.Critical, TraceEventType.Critical },
+        };
 
         public TraceLoggerAdapter(TraceLogger traceLogger)
         {
@@ -30,9 +42,10 @@ namespace Capgemini.PowerApps.PackageDeployerTemplate.Adapters
                 return;
             }
 
-            var logRecord = string.Format("{0} [{1}] {2} {3}", "[" + DateTimeOffset.UtcNow.ToString("yyyy-MM-dd HH:mm:ss+00:00") + "]", logLevel.ToString(), formatter(state, exception), exception != null ? exception.StackTrace : "");
+            var logMessage = string.Format("{0} {1}", formatter(state, exception), exception != null ? exception.StackTrace : "");
+            var traceEventType = logLevelMap[logLevel];
 
-            traceLogger.Log(logRecord);
+            traceLogger.Log(logMessage, traceEventType);
         }
     }
 }
