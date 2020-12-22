@@ -20,7 +20,7 @@ namespace Capgemini.PowerApps.PackageDeployerTemplate.Services
 
         public void Activate(IEnumerable<string> defaultSlas)
         {
-            if (defaultSlas == null || defaultSlas.Any())
+            if (defaultSlas == null || !defaultSlas.Any())
             {
                 this.logger.LogInformation("No default SLAs have been configured.");
                 return;
