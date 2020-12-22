@@ -1,10 +1,8 @@
 ﻿using Capgemini.PowerApps.PackageDeployerTemplate.Adapters;
 using Capgemini.PowerApps.PackageDeployerTemplate.Extensions;
 using Microsoft.Extensions.Logging;
-using Microsoft.Xrm.Sdk.Query;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 
 namespace Capgemini.PowerApps.PackageDeployerTemplate.Services
@@ -20,28 +18,24 @@ namespace Capgemini.PowerApps.PackageDeployerTemplate.Services
             this.crmSvc = crmSvc ?? throw new ArgumentNullException(nameof(crmSvc));
         }
 
-        public void Activate(IEnumerable<string> defaultSlas = null)
+        public void Activate(IEnumerable<string> defaultSlas)
         {
+            if (defaultSlas == null || defaultSlas.Any())
+            {
+                this.logger.LogInformation("No default SLAs have been configured.");
+                return;
+            }
+
             var queryResponse = this.crmSvc.QueryRecordsBySingleAttributeValue("sla", "statecode", new object[] { 0 });
             var executeMultipleResponse = this.crmSvc.SetRecordsStateInBatch(queryResponse, 1, 2);
             if (executeMultipleResponse.IsFaulted)
             {
-                this.logger.LogInformation($"Error activating SLAs.", TraceEventType.Error);
+                this.logger.LogError($"Error activating SLAs.");
                 this.logger.LogExecuteMultipleErrors(executeMultipleResponse);
-            }
-
-            if (defaultSlas == null || defaultSlas?.Count() == 0)
-            {
                 return;
             }
 
-            var defaultSlasQuery = new QueryByAttribute("sla") { ColumnSet = new ColumnSet(false) };
-            foreach (var sla in defaultSlas)
-            {
-                defaultSlasQuery.AddAttributeValue("name", sla);
-            }
-            var retrieveMultipleResponse = this.crmSvc.RetrieveMultiple(defaultSlasQuery);
-
+            var retrieveMultipleResponse = this.crmSvc.QueryRecordsBySingleAttributeValue("sla", "name", defaultSlas);
             foreach (var defaultSla in retrieveMultipleResponse.Entities)
             {
                 defaultSla["isdefault"] = true;
@@ -55,9 +49,10 @@ namespace Capgemini.PowerApps.PackageDeployerTemplate.Services
             var executeMultipleResponse = this.crmSvc.SetRecordsStateInBatch(queryResponse, 0, 1);
             if (executeMultipleResponse.IsFaulted)
             {
-                this.logger.LogInformation($"Error deactivating SLAs.", TraceEventType.Error);
+                this.logger.LogError($"Error deactivating SLAs.");
                 this.logger.LogExecuteMultipleErrors(executeMultipleResponse);
             }
         }
+
     }
 }

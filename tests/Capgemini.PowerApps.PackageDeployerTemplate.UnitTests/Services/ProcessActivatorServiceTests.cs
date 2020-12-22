@@ -55,7 +55,7 @@ namespace Capgemini.PowerApps.PackageDeployerTemplate.UnitTests.Services
         [Fact]
         public void Activate_EmptyProcessesToActivate_LogsNoConfig()
         {
-            processActivatorService.Activate(new string[] { });
+            processActivatorService.Activate(Array.Empty<string>());
 
             loggerMock.VerifyLog(x => x.LogInformation("No processes to activate have been configured."));
         }
@@ -69,8 +69,10 @@ namespace Capgemini.PowerApps.PackageDeployerTemplate.UnitTests.Services
                 .Setup(x => x.RetrieveMultiple(It.IsAny<QueryByAttribute>()))
                 .Returns((QueryByAttribute query) =>
                 {
-                    var entityCollection = new EntityCollection();
-                    entityCollection.EntityName = query.EntityName;
+                    var entityCollection = new EntityCollection
+                    {
+                        EntityName = query.EntityName
+                    };
                     entityCollection.Entities.AddRange(query.Values.Select(value => new Entity(query.EntityName, Guid.NewGuid())));
                     return entityCollection;
                 })
@@ -80,9 +82,11 @@ namespace Capgemini.PowerApps.PackageDeployerTemplate.UnitTests.Services
                 .Setup(x => x.SetRecordsStateInBatch(It.IsAny<EntityCollection>(), It.IsAny<int>(), It.IsAny<int>()))
                 .Returns(() =>
                 {
-                    var responseItemCollection = new ExecuteMultipleResponseItemCollection();
-                    responseItemCollection.Add(new ExecuteMultipleResponseItem { });
-                    responseItemCollection.Add(new ExecuteMultipleResponseItem { });
+                    var responseItemCollection = new ExecuteMultipleResponseItemCollection
+                    {
+                        new ExecuteMultipleResponseItem { },
+                        new ExecuteMultipleResponseItem { }
+                    };
 
                     var response = new ExecuteMultipleResponse();
                     response.Results.Add("Responses", responseItemCollection);
@@ -103,8 +107,10 @@ namespace Capgemini.PowerApps.PackageDeployerTemplate.UnitTests.Services
                 .Setup(x => x.RetrieveMultiple(It.IsAny<QueryByAttribute>()))
                 .Returns((QueryByAttribute query) =>
                 {
-                    var entityCollection = new EntityCollection();
-                    entityCollection.EntityName = query.EntityName;
+                    var entityCollection = new EntityCollection
+                    {
+                        EntityName = query.EntityName
+                    };
                     entityCollection.Entities.AddRange(query.Values.Select(value => new Entity(query.EntityName, Guid.NewGuid())));
                     return entityCollection;
                 });
@@ -113,15 +119,17 @@ namespace Capgemini.PowerApps.PackageDeployerTemplate.UnitTests.Services
                 .Setup(x => x.SetRecordsStateInBatch(It.IsAny<EntityCollection>(), It.IsAny<int>(), It.IsAny<int>()))
                 .Returns(() =>
                 {
-                    var responseItemCollection = new ExecuteMultipleResponseItemCollection();
-                    responseItemCollection.Add(new ExecuteMultipleResponseItem
+                    var responseItemCollection = new ExecuteMultipleResponseItemCollection
                     {
-                        Fault = new OrganizationServiceFault
+                        new ExecuteMultipleResponseItem
                         {
-                            Message = "Test fault response"
-                        }
-                    });
-                    responseItemCollection.Add(new ExecuteMultipleResponseItem { });
+                            Fault = new OrganizationServiceFault
+                            {
+                                Message = "Test fault response"
+                            }
+                        },
+                        new ExecuteMultipleResponseItem { }
+                    };
 
                     var response = new ExecuteMultipleResponse();
                     response.Results.Add("Responses", responseItemCollection);
@@ -147,7 +155,7 @@ namespace Capgemini.PowerApps.PackageDeployerTemplate.UnitTests.Services
         [Fact]
         public void Deactivate_EmptyProcessesToActivate_LogsNoConfig()
         {
-            processActivatorService.Deactivate(new string[] { });
+            processActivatorService.Deactivate(Array.Empty<string>());
 
             loggerMock.VerifyLog(x => x.LogInformation("No processes to deactivate have been configured."));
         }
@@ -161,8 +169,10 @@ namespace Capgemini.PowerApps.PackageDeployerTemplate.UnitTests.Services
                 .Setup(x => x.RetrieveMultiple(It.IsAny<QueryByAttribute>()))
                 .Returns((QueryByAttribute query) =>
                 {
-                    var entityCollection = new EntityCollection();
-                    entityCollection.EntityName = query.EntityName;
+                    var entityCollection = new EntityCollection
+                    {
+                        EntityName = query.EntityName
+                    };
                     entityCollection.Entities.AddRange(query.Values.Select(value => new Entity(query.EntityName, Guid.NewGuid())));
                     return entityCollection;
                 })
@@ -172,9 +182,11 @@ namespace Capgemini.PowerApps.PackageDeployerTemplate.UnitTests.Services
                 .Setup(x => x.SetRecordsStateInBatch(It.IsAny<EntityCollection>(), It.IsAny<int>(), It.IsAny<int>()))
                 .Returns(() =>
                 {
-                    var responseItemCollection = new ExecuteMultipleResponseItemCollection();
-                    responseItemCollection.Add(new ExecuteMultipleResponseItem { });
-                    responseItemCollection.Add(new ExecuteMultipleResponseItem { });
+                    var responseItemCollection = new ExecuteMultipleResponseItemCollection
+                    {
+                        new ExecuteMultipleResponseItem { },
+                        new ExecuteMultipleResponseItem { }
+                    };
 
                     var response = new ExecuteMultipleResponse();
                     response.Results.Add("Responses", responseItemCollection);
@@ -195,8 +207,10 @@ namespace Capgemini.PowerApps.PackageDeployerTemplate.UnitTests.Services
                 .Setup(x => x.RetrieveMultiple(It.IsAny<QueryByAttribute>()))
                 .Returns((QueryByAttribute query) =>
                 {
-                    var entityCollection = new EntityCollection();
-                    entityCollection.EntityName = query.EntityName;
+                    var entityCollection = new EntityCollection
+                    {
+                        EntityName = query.EntityName
+                    };
                     entityCollection.Entities.AddRange(query.Values.Select(value => new Entity(query.EntityName, Guid.NewGuid())));
                     return entityCollection;
                 });
@@ -205,15 +219,17 @@ namespace Capgemini.PowerApps.PackageDeployerTemplate.UnitTests.Services
                 .Setup(x => x.SetRecordsStateInBatch(It.IsAny<EntityCollection>(), It.IsAny<int>(), It.IsAny<int>()))
                 .Returns(() =>
                 {
-                    var responseItemCollection = new ExecuteMultipleResponseItemCollection();
-                    responseItemCollection.Add(new ExecuteMultipleResponseItem
+                    var responseItemCollection = new ExecuteMultipleResponseItemCollection
                     {
-                        Fault = new OrganizationServiceFault
+                        new ExecuteMultipleResponseItem
                         {
-                            Message = "Test fault response"
-                        }
-                    });
-                    responseItemCollection.Add(new ExecuteMultipleResponseItem { });
+                            Fault = new OrganizationServiceFault
+                            {
+                                Message = "Test fault response"
+                            }
+                        },
+                        new ExecuteMultipleResponseItem { }
+                    };
 
                     var response = new ExecuteMultipleResponse();
                     response.Results.Add("Responses", responseItemCollection);

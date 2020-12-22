@@ -3,6 +3,7 @@ using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 
 namespace Capgemini.PowerApps.PackageDeployerTemplate.Services
 {
@@ -20,6 +21,12 @@ namespace Capgemini.PowerApps.PackageDeployerTemplate.Services
 
         public void ImportWordTemplates(IEnumerable<string> wordTemplates, string packageFolderPath)
         {
+            if (wordTemplates is null || !wordTemplates.Any())
+            {
+                this.logger.LogInformation("No Work Template to import.");
+                return;
+            }
+
             foreach (var wordTemplate in wordTemplates)
             {
                 this.crmSvc.ImportWordTemplate(Path.Combine(packageFolderPath, wordTemplate));

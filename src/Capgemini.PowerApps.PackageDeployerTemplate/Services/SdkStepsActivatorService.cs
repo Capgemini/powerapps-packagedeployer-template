@@ -3,7 +3,6 @@ using Capgemini.PowerApps.PackageDeployerTemplate.Extensions;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 
 namespace Capgemini.PowerApps.PackageDeployerTemplate.Services
@@ -31,7 +30,7 @@ namespace Capgemini.PowerApps.PackageDeployerTemplate.Services
             var executeMultipleResponse = this.crmSvc.SetRecordsStateInBatch(queryResponse, 1, 2);
             if (executeMultipleResponse.IsFaulted)
             {
-                this.logger.LogInformation($"Error deactivating SDK Message Processing Steps.", TraceEventType.Error);
+                this.logger.LogError($"Error deactivating SDK Message Processing Steps.");
                 this.logger.LogExecuteMultipleErrors(executeMultipleResponse);
             }
         }
