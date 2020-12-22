@@ -5,7 +5,6 @@ using Microsoft.Xrm.Sdk;
 using Microsoft.Xrm.Sdk.Query;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 
 namespace Capgemini.PowerApps.PackageDeployerTemplate.Services
@@ -33,7 +32,7 @@ namespace Capgemini.PowerApps.PackageDeployerTemplate.Services
             var executeMultipleResponse = this.crmSvc.SetRecordsStateInBatch(queryResponse, 1, 2);
             if (executeMultipleResponse.IsFaulted)
             {
-                this.logger.LogInformation($"Error activating processes.", TraceEventType.Error);
+                this.logger.LogError($"Error activating processes.");
                 this.logger.LogExecuteMultipleErrors(executeMultipleResponse);
             }
         }
@@ -50,7 +49,7 @@ namespace Capgemini.PowerApps.PackageDeployerTemplate.Services
             var executeMultipleResponse = this.crmSvc.SetRecordsStateInBatch(queryResponse, 0, 1);
             if (executeMultipleResponse.IsFaulted)
             {
-                this.logger.LogInformation($"Error deactivating processes.", TraceEventType.Error);
+                this.logger.LogError($"Error deactivating processes.");
                 this.logger.LogExecuteMultipleErrors(executeMultipleResponse);
             }
         }

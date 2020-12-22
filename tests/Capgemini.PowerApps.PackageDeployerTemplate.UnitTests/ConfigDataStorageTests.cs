@@ -1,5 +1,4 @@
 ﻿using Capgemini.PowerApps.PackageDeployerTemplate.Config;
-using Capgemini.PowerApps.PackageDeployerTemplate.UnitTests;
 using FluentAssertions;
 
 using Xunit;

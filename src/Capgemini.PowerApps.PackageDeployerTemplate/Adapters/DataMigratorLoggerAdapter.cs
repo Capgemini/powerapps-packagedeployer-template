@@ -1,6 +1,5 @@
 ﻿using Microsoft.Extensions.Logging;
 using System;
-using System.Diagnostics;
 
 namespace Capgemini.PowerApps.PackageDeployerTemplate.Adapters
 {

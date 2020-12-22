@@ -1,5 +1,4 @@
-﻿using System.Diagnostics;
-using System.Linq;
+﻿using System.Linq;
 using Microsoft.Extensions.Logging;
 using Microsoft.Xrm.Sdk.Messages;
 
@@ -11,7 +10,7 @@ namespace Capgemini.PowerApps.PackageDeployerTemplate.Extensions
         {
             foreach (var response in executeMultipleResponse.Responses.Where(r => r.Fault != null).Select(r => r.Fault))
             {
-                logger.LogInformation(response.Message, TraceEventType.Error);
+                logger.LogError(response.Message);
             }
         }
     }

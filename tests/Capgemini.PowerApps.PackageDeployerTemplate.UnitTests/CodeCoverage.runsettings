@@ -8,7 +8,7 @@
                     <CodeCoverage>
                         <ModulePaths>
                             <Include>
-                                <ModulePath>.*\.Deployment.dll</ModulePath>
+                                <ModulePath>.*packagedeployertemplate.dll</ModulePath>
                             </Include>
                         </ModulePaths>
                     </CodeCoverage>
