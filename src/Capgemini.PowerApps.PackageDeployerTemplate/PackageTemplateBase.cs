@@ -28,10 +28,10 @@ namespace Capgemini.PowerApps.PackageDeployerTemplate
         }
 
         protected DataImporterService DataImporterService { get; private set; }
-        protected ProcessActivatorService ProcessActivatorService { get; private set; }
-        protected SlaActivatorService SlaActivatorService { get; private set; }
+        protected ProcessDeploymentService ProcessDeploymentService { get; private set; }
+        protected SlaDeploymentService SlaDeploymentService { get; private set; }
         protected WordTemplateImporterService WordTemplateImporterService { get; private set; }
-        protected SdkStepsActivatorService SdkStepsActivatorService { get; private set; }
+        protected SdkStepDeploymentService SdkStepsDeploymentService { get; private set; }
 
         protected ConfigDataStorage ConfigDataStorage;
 
@@ -45,21 +45,21 @@ namespace Capgemini.PowerApps.PackageDeployerTemplate
             var logger = new TraceLoggerAdapter(this.PackageLog);
 
             this.DataImporterService = new DataImporterService(logger, crmServiceAdapter);
-            this.ProcessActivatorService = new ProcessActivatorService(logger, crmServiceAdapter);
-            this.SlaActivatorService = new SlaActivatorService(logger, crmServiceAdapter);
+            this.ProcessDeploymentService = new ProcessDeploymentService(logger, crmServiceAdapter);
+            this.SlaDeploymentService = new SlaDeploymentService(logger, crmServiceAdapter);
             this.WordTemplateImporterService = new WordTemplateImporterService(logger, crmServiceAdapter);
-            this.SdkStepsActivatorService = new SdkStepsActivatorService(logger, crmServiceAdapter);
+            this.SdkStepsDeploymentService = new SdkStepDeploymentService(logger, crmServiceAdapter);
 
             this.BeforeAnything();
         }
 
-        public void BeforeAnything()
+        public virtual void BeforeAnything()
         {
             this.PackageLog.Log($"{nameof(PackageTemplateBase)}.{nameof(BeforeAnything)} running...", TraceEventType.Information);
 
             if (this.ConfigDataStorage.ActivateDeactivateSLAs)
             {
-                this.SlaActivatorService.Deactivate();
+                this.SlaDeploymentService.DeactivateAll();
             }
             this.DataImporterService.Import(this.ConfigDataStorage.DataImports?.Where(c => c.ImportBeforeSolutions), this.PackageFolderPath);
 
@@ -78,12 +78,13 @@ namespace Capgemini.PowerApps.PackageDeployerTemplate
             this.PackageLog.Log($"{nameof(PackageTemplateBase)}.{nameof(AfterPrimaryImport)} running...", TraceEventType.Information);
             if (this.ConfigDataStorage.ActivateDeactivateSLAs) 
             {
-                this.SlaActivatorService.Activate(this.ConfigDataStorage.DefaultSlas);
+                this.SlaDeploymentService.ActivateAll();
+                this.SlaDeploymentService.SetDefaultSlas(this.ConfigDataStorage.DefaultSlas);
             }
-            this.ProcessActivatorService.Deactivate(this.ConfigDataStorage.ProcessesToDeactivate);
-            this.SdkStepsActivatorService.Deactivate(this.ConfigDataStorage.SdkStepsToDeactivate);
+            this.ProcessDeploymentService.Deactivate(this.ConfigDataStorage.ProcessesToDeactivate);
+            this.SdkStepsDeploymentService.Deactivate(this.ConfigDataStorage.SdkStepsToDeactivate);
             this.DataImporterService.Import(this.ConfigDataStorage.DataImports?.Where(c => !c.ImportBeforeSolutions), this.PackageFolderPath);
-            this.ProcessActivatorService.Activate(this.ConfigDataStorage.ProcessesToActivate);
+            this.ProcessDeploymentService.Activate(this.ConfigDataStorage.ProcessesToActivate);
             this.WordTemplateImporterService.ImportWordTemplates(this.ConfigDataStorage.WordTemplates, this.PackageFolderPath);
 
             this.PackageLog.Log($"{nameof(PackageTemplateBase)}.{nameof(AfterPrimaryImport)} completed.", TraceEventType.Information);

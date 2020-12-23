@@ -9,7 +9,7 @@ using System.Linq;
 
 namespace Capgemini.PowerApps.PackageDeployerTemplate.Adapters
 {
-    public class CrmServiceAdapter : ICrmServiceAdapter
+    public class CrmServiceAdapter : ICrmServiceAdapter, IDisposable
     {
         private readonly CrmServiceClient crmSvc;
 
@@ -128,5 +128,10 @@ namespace Capgemini.PowerApps.PackageDeployerTemplate.Adapters
         public EntityCollection RetrieveMultiple(QueryByAttribute query) => crmSvc.RetrieveMultiple(query);
 
         public void Update(Entity record) => crmSvc.Update(record);
+
+        public void Dispose()
+        {
+            crmSvc.Dispose();
+        }
     }
 }

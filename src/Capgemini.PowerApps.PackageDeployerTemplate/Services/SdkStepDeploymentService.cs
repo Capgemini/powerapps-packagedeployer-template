@@ -7,12 +7,15 @@ using System.Linq;
 
 namespace Capgemini.PowerApps.PackageDeployerTemplate.Services
 {
-    public class SdkStepsActivatorService
+    public class SdkStepDeploymentService
     {
         private readonly ILogger logger;
         private readonly ICrmServiceAdapter crmSvc;
 
-        public SdkStepsActivatorService(ILogger logger, ICrmServiceAdapter crmSvc)
+        private const int STATECODE_INACTIVE = 1;
+        private const int STATUSCODE_INACTIVE = 2;
+
+        public SdkStepDeploymentService(ILogger logger, ICrmServiceAdapter crmSvc)
         {
             this.logger = logger ?? throw new ArgumentNullException(nameof(logger));
             this.crmSvc = crmSvc ?? throw new ArgumentNullException(nameof(crmSvc));
@@ -27,7 +30,7 @@ namespace Capgemini.PowerApps.PackageDeployerTemplate.Services
             }
 
             var queryResponse = this.crmSvc.QueryRecordsBySingleAttributeValue("sdkmessageprocessingstep", "name", sdkStepsToDeactivate);
-            var executeMultipleResponse = this.crmSvc.SetRecordsStateInBatch(queryResponse, 1, 2);
+            var executeMultipleResponse = this.crmSvc.SetRecordsStateInBatch(queryResponse, STATECODE_INACTIVE, STATUSCODE_INACTIVE);
             if (executeMultipleResponse.IsFaulted)
             {
                 this.logger.LogError($"Error deactivating SDK Message Processing Steps.");

@@ -16,14 +16,14 @@ namespace Capgemini.PowerApps.PackageDeployerTemplate.UnitTests.Services
         private readonly Mock<ILogger> loggerMock;
         private readonly Mock<ICrmServiceAdapter> crmServiceAdapterMock;
 
-        private readonly ProcessActivatorService processActivatorService;
+        private readonly ProcessDeploymentService processActivatorService;
 
         public ProcessActivatorServiceTests()
         {
             loggerMock = new Mock<ILogger>();
             crmServiceAdapterMock = new Mock<ICrmServiceAdapter>();
 
-            processActivatorService = new ProcessActivatorService(loggerMock.Object, crmServiceAdapterMock.Object);
+            processActivatorService = new ProcessDeploymentService(loggerMock.Object, crmServiceAdapterMock.Object);
         }
 
         [Fact]
@@ -31,7 +31,7 @@ namespace Capgemini.PowerApps.PackageDeployerTemplate.UnitTests.Services
         {
             Assert.Throws<ArgumentNullException>(() =>
             {
-                new ProcessActivatorService(null, crmServiceAdapterMock.Object);
+                new ProcessDeploymentService(null, crmServiceAdapterMock.Object);
             });
         }
 
@@ -40,7 +40,7 @@ namespace Capgemini.PowerApps.PackageDeployerTemplate.UnitTests.Services
         {
             Assert.Throws<ArgumentNullException>(() =>
             {
-                new ProcessActivatorService(loggerMock.Object, null);
+                new ProcessDeploymentService(loggerMock.Object, null);
             });
         }
 

@@ -10,7 +10,7 @@ namespace Capgemini.PowerApps.PackageDeployerTemplate.Adapters
     {
         private readonly TraceLogger traceLogger;
 
-        private readonly Dictionary<LogLevel, TraceEventType> logLevelMap = new Dictionary<LogLevel, TraceEventType>
+        private static readonly Dictionary<LogLevel, TraceEventType> logLevelMap = new Dictionary<LogLevel, TraceEventType>
         {
             { LogLevel.Trace, TraceEventType.Verbose },
             { LogLevel.Debug, TraceEventType.Verbose },

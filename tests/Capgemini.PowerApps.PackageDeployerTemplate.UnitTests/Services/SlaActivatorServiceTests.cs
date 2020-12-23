@@ -16,7 +16,7 @@ namespace Capgemini.PowerApps.PackageDeployerTemplate.UnitTests.Services
         private readonly Mock<ILogger> loggerMock;
         private readonly Mock<ICrmServiceAdapter> crmServiceAdapterMock;
 
-        private readonly SlaActivatorService slaActivatorService;
+        private readonly SlaDeploymentService slaActivatorService;
 
         public SlaActivatorServiceTests()
         {
@@ -25,7 +25,7 @@ namespace Capgemini.PowerApps.PackageDeployerTemplate.UnitTests.Services
             crmServiceAdapterMock.Setup(x => x.GetOrganizationService())
                 .Returns(() => new Mock<IOrganizationService>().Object);
 
-            slaActivatorService = new SlaActivatorService(loggerMock.Object, crmServiceAdapterMock.Object);
+            slaActivatorService = new SlaDeploymentService(loggerMock.Object, crmServiceAdapterMock.Object);
         }
 
         [Fact]
@@ -33,7 +33,7 @@ namespace Capgemini.PowerApps.PackageDeployerTemplate.UnitTests.Services
         {
             Assert.Throws<ArgumentNullException>(() =>
             {
-                new SlaActivatorService(null, crmServiceAdapterMock.Object);
+                new SlaDeploymentService(null, crmServiceAdapterMock.Object);
             });
         }
 
@@ -42,28 +42,12 @@ namespace Capgemini.PowerApps.PackageDeployerTemplate.UnitTests.Services
         {
             Assert.Throws<ArgumentNullException>(() =>
             {
-                new SlaActivatorService(loggerMock.Object, null);
+                new SlaDeploymentService(loggerMock.Object, null);
             });
         }
 
         [Fact]
-        public void Activate_NullDefaultSlas_LogsNoConfig()
-        {
-            slaActivatorService.Activate(null);
-
-            loggerMock.VerifyLog(x => x.LogInformation("No default SLAs have been configured."));
-        }
-
-        [Fact]
-        public void Activate_EmptyDefaultSlas_LogsNoConfig()
-        {
-            slaActivatorService.Activate(Array.Empty<string>());
-
-            loggerMock.VerifyLog(x => x.LogInformation("No default SLAs have been configured."));
-        }
-
-        [Fact]
-        public void Activate_QueryForAllSlas_Called()
+        public void ActivateAll_QueryForAllSlas_Called()
         {
             var allSlas = new List<Entity>
             {
@@ -100,25 +84,13 @@ namespace Capgemini.PowerApps.PackageDeployerTemplate.UnitTests.Services
                     return response;
                 });
 
-            crmServiceAdapterMock
-                .Setup(x => x.QueryRecordsBySingleAttributeValue("sla", "name", It.IsAny<string[]>()))
-                .Returns(() =>
-                {
-                    var entityCollection = new EntityCollection
-                    {
-                        EntityName = "sla"
-                    };
-                    entityCollection.Entities.Add(new Entity("sla", Guid.NewGuid()));
-                    return entityCollection;
-                });
-
-            slaActivatorService.Activate(new string[] { "default_sla_one" });
+            slaActivatorService.ActivateAll();
 
             crmServiceAdapterMock.Verify();
         }
 
         [Fact]
-        public void Activate_SetActiveStateForAllSlas_Called()
+        public void ActivateAll_SetActiveStateForAllSlas_Called()
         {
             var allSlas = new List<Entity>
             {
@@ -158,25 +130,13 @@ namespace Capgemini.PowerApps.PackageDeployerTemplate.UnitTests.Services
                 })
                 .Verifiable();
 
-            crmServiceAdapterMock
-                .Setup(x => x.QueryRecordsBySingleAttributeValue("sla", "name", It.IsAny<string[]>()))
-                .Returns(() =>
-                {
-                    var entityCollection = new EntityCollection
-                    {
-                        EntityName = "sla"
-                    };
-                    entityCollection.Entities.Add(new Entity("sla", Guid.NewGuid()));
-                    return entityCollection;
-                });
-
-            slaActivatorService.Activate(new string[] { "default_sla_one" });
+            slaActivatorService.ActivateAll();
 
             crmServiceAdapterMock.Verify();
         }
 
         [Fact]
-        public void Activate_SetActiveStateForAllSlasFail_LogsErrors()
+        public void ActivateAll_SetActiveStateForAllSlasFail_LogsErrors()
         {
             var allSlas = new List<Entity>
             {
@@ -222,156 +182,11 @@ namespace Capgemini.PowerApps.PackageDeployerTemplate.UnitTests.Services
                     return response;
                 });
 
-            crmServiceAdapterMock
-                .Setup(x => x.QueryRecordsBySingleAttributeValue("sla", "name", It.IsAny<string[]>()))
-                .Returns(() =>
-                {
-                    var entityCollection = new EntityCollection
-                    {
-                        EntityName = "sla"
-                    };
-                    entityCollection.Entities.Add(new Entity("sla", Guid.NewGuid()));
-                    return entityCollection;
-                });
-
-            slaActivatorService.Activate(new string[] { "default_sla_one" });
+            slaActivatorService.ActivateAll();
 
             loggerMock.VerifyLog(x => x.LogError(It.IsAny<string>()), Times.Exactly(2));
             loggerMock.VerifyLog(x => x.LogError("Error activating SLAs."));
             loggerMock.VerifyLog(x => x.LogError("Test fault response"));
-        }
-
-        [Fact]
-        public void Activate_QueryDefaultSlas_Called()
-        {
-            var allSlas = new List<Entity>
-            {
-                new Entity("sla", Guid.NewGuid()),
-                new Entity("sla", Guid.NewGuid()),
-                new Entity("sla", Guid.NewGuid())
-            };
-
-            var defaultSlaNames = new string[] { "default_sla_one", "default_sla_two" };
-
-            var defaultSlas = new List<Entity>
-            {
-                new Entity("sla", Guid.NewGuid()),
-                new Entity("sla", Guid.NewGuid())
-            };
-
-            crmServiceAdapterMock
-                .Setup(x => x.QueryRecordsBySingleAttributeValue("sla", "statecode", It.Is<object[]>(value => (int)value[0] == 0)))
-                .Returns(() =>
-                {
-                    var entityCollection = new EntityCollection
-                    {
-                        EntityName = "sla"
-                    };
-                    entityCollection.Entities.AddRange(allSlas);
-                    return entityCollection;
-                });
-
-            crmServiceAdapterMock
-                .Setup(x => x.SetRecordsStateInBatch(
-                    It.IsAny<EntityCollection>(),
-                    It.IsAny<int>(),
-                    It.IsAny<int>()))
-                .Returns((EntityCollection records, int statecode, int statuscode) =>
-                {
-                    var responseItemCollection = new ExecuteMultipleResponseItemCollection
-                    {
-                        new ExecuteMultipleResponseItem { },
-                        new ExecuteMultipleResponseItem { }
-                    };
-
-                    var response = new ExecuteMultipleResponse();
-                    response.Results.Add("Responses", responseItemCollection);
-                    return response;
-                });
-
-            crmServiceAdapterMock
-                .Setup(x => x.QueryRecordsBySingleAttributeValue("sla", "name", defaultSlaNames))
-                .Returns(() =>
-                {
-                    var entityCollection = new EntityCollection
-                    {
-                        EntityName = "sla"
-                    };
-                    entityCollection.Entities.AddRange(defaultSlas);
-                    return entityCollection;
-                }).Verifiable();
-
-            slaActivatorService.Activate(defaultSlaNames);
-
-            crmServiceAdapterMock.Verify();
-        }
-
-        [Fact]
-        public void Activate_SetDefaultForDefaultSlas_Called()
-        {
-            var allSlas = new List<Entity>
-            {
-                new Entity("sla", Guid.NewGuid()),
-                new Entity("sla", Guid.NewGuid()),
-                new Entity("sla", Guid.NewGuid())
-            };
-
-            var defaultSlaNames = new string[] { "default_sla_one", "default_sla_two" };
-
-            var defaultSlas = new List<Entity>
-            {
-                new Entity("sla", Guid.NewGuid()),
-                new Entity("sla", Guid.NewGuid())
-            };
-
-            crmServiceAdapterMock
-                .Setup(x => x.QueryRecordsBySingleAttributeValue("sla", "statecode", It.Is<object[]>(value => (int)value[0] == 0)))
-                .Returns(() =>
-                {
-                    var entityCollection = new EntityCollection
-                    {
-                        EntityName = "sla"
-                    };
-                    entityCollection.Entities.AddRange(allSlas);
-                    return entityCollection;
-                });
-
-            crmServiceAdapterMock
-                .Setup(x => x.SetRecordsStateInBatch(
-                    It.IsAny<EntityCollection>(),
-                    It.IsAny<int>(),
-                    It.IsAny<int>()))
-                .Returns((EntityCollection records, int statecode, int statuscode) =>
-                {
-                    var responseItemCollection = new ExecuteMultipleResponseItemCollection
-                    {
-                        new ExecuteMultipleResponseItem { },
-                        new ExecuteMultipleResponseItem { }
-                    };
-
-                    var response = new ExecuteMultipleResponse();
-                    response.Results.Add("Responses", responseItemCollection);
-                    return response;
-                });
-
-            crmServiceAdapterMock
-                .Setup(x => x.QueryRecordsBySingleAttributeValue("sla", "name", defaultSlaNames))
-                .Returns(() =>
-                {
-                    var entityCollection = new EntityCollection
-                    {
-                        EntityName = "sla"
-                    };
-                    entityCollection.Entities.AddRange(defaultSlas);
-                    return entityCollection;
-                });
-
-            slaActivatorService.Activate(defaultSlaNames);
-
-            crmServiceAdapterMock
-                .Verify(x => x.Update(It.Is<Entity>(
-                    entity => defaultSlas.Contains(entity) && entity.Attributes.Contains("isdefault") && (bool)entity.Attributes["isdefault"]
-                )), Times.Exactly(defaultSlas.Count));
         }
 
         [Fact]
@@ -412,7 +227,7 @@ namespace Capgemini.PowerApps.PackageDeployerTemplate.UnitTests.Services
                     return response;
                 });
 
-            slaActivatorService.Deactivate();
+            slaActivatorService.DeactivateAll();
 
             crmServiceAdapterMock.Verify();
         }
@@ -458,7 +273,7 @@ namespace Capgemini.PowerApps.PackageDeployerTemplate.UnitTests.Services
                 })
                 .Verifiable();
 
-            slaActivatorService.Deactivate();
+            slaActivatorService.DeactivateAll();
 
             crmServiceAdapterMock.Verify();
         }
@@ -510,11 +325,86 @@ namespace Capgemini.PowerApps.PackageDeployerTemplate.UnitTests.Services
                     return response;
                 });
 
-            slaActivatorService.Deactivate();
+            slaActivatorService.DeactivateAll();
 
             loggerMock.VerifyLog(x => x.LogError(It.IsAny<string>()), Times.Exactly(2));
             loggerMock.VerifyLog(x => x.LogError("Error deactivating SLAs."));
             loggerMock.VerifyLog(x => x.LogError("Test fault response"));
+        }
+
+        [Fact]
+        public void SetDefaultSlas_NullDefaultSlas_LogsNoConfig()
+        {
+            slaActivatorService.SetDefaultSlas(null);
+
+            loggerMock.VerifyLog(x => x.LogInformation("No default SLAs have been configured."));
+        }
+
+        [Fact]
+        public void SetDefaultSlas_EmptyDefaultSlas_LogsNoConfig()
+        {
+            slaActivatorService.SetDefaultSlas(Array.Empty<string>());
+
+            loggerMock.VerifyLog(x => x.LogInformation("No default SLAs have been configured."));
+        }
+
+        [Fact]
+        public void SetDefaultSlas_QueryDefaultSlas_Called()
+        {
+            var defaultSlaNames = new string[] { "default_sla_one", "default_sla_two" };
+
+            var defaultSlas = new List<Entity>
+            {
+                new Entity("sla", Guid.NewGuid()),
+                new Entity("sla", Guid.NewGuid())
+            };
+
+            crmServiceAdapterMock
+                .Setup(x => x.QueryRecordsBySingleAttributeValue("sla", "name", defaultSlaNames))
+                .Returns(() =>
+                {
+                    var entityCollection = new EntityCollection
+                    {
+                        EntityName = "sla"
+                    };
+                    entityCollection.Entities.AddRange(defaultSlas);
+                    return entityCollection;
+                }).Verifiable();
+
+            slaActivatorService.SetDefaultSlas(defaultSlaNames);
+
+            crmServiceAdapterMock.Verify();
+        }
+
+        [Fact]
+        public void SetDefaultSlas_SetDefaultForDefaultSlas_Called()
+        {
+            var defaultSlaNames = new string[] { "default_sla_one", "default_sla_two" };
+
+            var defaultSlas = new List<Entity>
+            {
+                new Entity("sla", Guid.NewGuid()),
+                new Entity("sla", Guid.NewGuid())
+            };
+
+            crmServiceAdapterMock
+                .Setup(x => x.QueryRecordsBySingleAttributeValue("sla", "name", defaultSlaNames))
+                .Returns(() =>
+                {
+                    var entityCollection = new EntityCollection
+                    {
+                        EntityName = "sla"
+                    };
+                    entityCollection.Entities.AddRange(defaultSlas);
+                    return entityCollection;
+                });
+
+            slaActivatorService.SetDefaultSlas(defaultSlaNames);
+
+            crmServiceAdapterMock
+                .Verify(x => x.Update(It.Is<Entity>(
+                    entity => defaultSlas.Contains(entity) && entity.Attributes.Contains("isdefault") && (bool)entity.Attributes["isdefault"]
+                )), Times.Exactly(defaultSlas.Count));
         }
 
     }

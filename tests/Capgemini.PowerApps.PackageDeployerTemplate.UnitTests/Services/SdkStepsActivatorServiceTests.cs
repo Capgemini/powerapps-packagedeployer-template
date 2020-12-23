@@ -15,7 +15,7 @@ namespace Capgemini.PowerApps.PackageDeployerTemplate.UnitTests.Services
         private readonly Mock<ILogger> loggerMock;
         private readonly Mock<ICrmServiceAdapter> crmServiceAdapterMock;
 
-        private readonly SdkStepsActivatorService sdkStepsActivatorService;
+        private readonly SdkStepDeploymentService sdkStepsActivatorService;
 
         public SdkStepsActivatorServiceTests()
         {
@@ -24,7 +24,7 @@ namespace Capgemini.PowerApps.PackageDeployerTemplate.UnitTests.Services
             crmServiceAdapterMock.Setup(x => x.GetOrganizationService())
                 .Returns(() => new Mock<IOrganizationService>().Object);
 
-            sdkStepsActivatorService = new SdkStepsActivatorService(loggerMock.Object, crmServiceAdapterMock.Object);
+            sdkStepsActivatorService = new SdkStepDeploymentService(loggerMock.Object, crmServiceAdapterMock.Object);
         }
 
         [Fact]
@@ -32,7 +32,7 @@ namespace Capgemini.PowerApps.PackageDeployerTemplate.UnitTests.Services
         {
             Assert.Throws<ArgumentNullException>(() =>
             {
-                new SdkStepsActivatorService(null, crmServiceAdapterMock.Object);
+                new SdkStepDeploymentService(null, crmServiceAdapterMock.Object);
             });
         }
 
@@ -41,7 +41,7 @@ namespace Capgemini.PowerApps.PackageDeployerTemplate.UnitTests.Services
         {
             Assert.Throws<ArgumentNullException>(() =>
             {
-                new SdkStepsActivatorService(loggerMock.Object, null);
+                new SdkStepDeploymentService(loggerMock.Object, null);
             });
         }
 
