@@ -11,6 +11,8 @@ Please first discuss the change you wish to make via an issue before making a ch
 
 ## Lifecycle Call
 
+Below is a summary of the different methods and when they are called during the lifecycle of the package deployer process. These details were taken from the microsoft docs found [here](https://docs.microsoft.com/en-us/power-platform/alm/package-deployer-tool#step-5-define-custom-code-for-your-package).
+
 `InitializeCustomExtension` - Called to Initialize any functions in the Custom Extension.
 `OverrideConfigurationDataFileLanguage` - Allows the currently selected language for data import to be overridden by a user selection.
 Per solution:

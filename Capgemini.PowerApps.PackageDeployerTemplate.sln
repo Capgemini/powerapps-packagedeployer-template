@@ -1,6 +1,6 @@
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 15
-VisualStudioVersion = 15.0.28307.1082
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.30611.23
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Capgemini.PowerApps.PackageDeployerTemplate", "src\Capgemini.PowerApps.PackageDeployerTemplate\Capgemini.PowerApps.PackageDeployerTemplate.csproj", "{6E076053-5DF7-4546-BDCB-7062729330C1}"
 EndProject
@@ -13,6 +13,12 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Capgemini.PowerApps.PackageDeployerTemplate.UnitTests", "tests\Capgemini.PowerApps.PackageDeployerTemplate.UnitTests\Capgemini.PowerApps.PackageDeployerTemplate.UnitTests.csproj", "{16429F4F-ABF0-4E7C-9BB3-7719D4CFF564}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Capgemini.PowerApps.PackageDeployerTemplate.TestPackage", "tests\Capgemini.PowerApps.PackageDeployerTemplate.TestPackage\Capgemini.PowerApps.PackageDeployerTemplate.TestPackage.csproj", "{170C0103-3F94-4896-9062-6314167F596A}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{310E899F-8746-4249-B754-652A627085A4}"
+	ProjectSection(SolutionItems) = preProject
+		CONTRIBUTING.md = CONTRIBUTING.md
+		README.md = README.md
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
