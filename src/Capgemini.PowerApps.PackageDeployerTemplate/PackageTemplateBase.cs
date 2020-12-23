@@ -18,7 +18,7 @@ namespace Capgemini.PowerApps.PackageDeployerTemplate
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage(
             "Major Code Smell",
-            "S1144:Unused private types or members should be removed", 
+            "S1144:Unused private types or members should be removed",
             Justification = "Required or Polly does not get copied when referenced via project reference (e.g. in the TestPackage project)")]
         private readonly Polly.Policy _policy;
 
@@ -40,7 +40,7 @@ namespace Capgemini.PowerApps.PackageDeployerTemplate
 
         public override bool AfterPrimaryImport()
         {
-            if(this.ConfigDataStorage.ActivateDeactivateSLAs) 
+            if (this.ConfigDataStorage.ActivateDeactivateSLAs)
             {
                 this.ActivateSlas(this.ConfigDataStorage.DefaultSlas);
             }
@@ -49,8 +49,17 @@ namespace Capgemini.PowerApps.PackageDeployerTemplate
             this.ImportData(this.ConfigDataStorage.DataImports?.Where(c => !c.ImportBeforeSolutions));
             this.ActivateProcesses(this.ConfigDataStorage.ProcessesToActivate);
             this.ImportWordTemplates(this.ConfigDataStorage.WordTemplates);
+            this.SetFlowConnections(this.ConfigDataStorage.FlowConnections);
 
             return true;
+        }
+
+        private void SetFlowConnections(IEnumerable<FlowConfig> flowConnections)
+        {
+            foreach (var flowConnection in flowConnections)
+            {               
+                this.CrmSvc.SetFlowConnection(flowConnection);
+            }
         }
 
         public override UserRequestedImportAction OverrideSolutionImportDecision(string solutionUniqueName, Version organizationVersion, Version packageSolutionVersion, Version inboundSolutionVersion, Version deployedSolutionVersion, ImportAction systemSelectedImportAction)
@@ -189,7 +198,7 @@ namespace Capgemini.PowerApps.PackageDeployerTemplate
                     new ServiceRetryExecutor()));
 
             // Previously in the BeforeImportStage method but this does not run before solution import.
-            if(this.ConfigDataStorage.ActivateDeactivateSLAs)
+            if (this.ConfigDataStorage.ActivateDeactivateSLAs)
             {
                 this.DeactivateSlas();
             }

@@ -78,6 +78,13 @@ namespace Capgemini.PowerApps.PackageDeployerTemplate.Config
         public DataImportConfig[] DataImports { get; set; }
 
         /// <summary>
+        /// A list of all flow connections that need to be setup after deployment. You can map from release variables or grab them from Dynamics environment variables.
+        /// </summary>
+        [XmlArray("flowconnections")]
+        [XmlArrayItem("flow")]
+        public FlowConfig[] FlowConnections { get; internal set; }
+
+        /// <summary>
         /// Load an <see cref="ImportConfig"/> from the specified path.
         /// </summary>
         /// <param name="importConfigPath">The path of the import config file.</param>

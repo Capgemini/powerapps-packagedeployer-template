@@ -180,6 +180,7 @@
     <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Config\FlowConfig.cs" />
     <Compile Include="PackageTemplateBase.cs" />
     <Compile Include="DataImporter.cs" />
     <Compile Include="LoggerAdapter.cs" />

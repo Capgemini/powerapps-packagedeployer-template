@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using Capgemini.PowerApps.PackageDeployerTemplate.Config;
 using Microsoft.Xrm.Sdk;
 using Microsoft.Xrm.Sdk.Messages;
 using Microsoft.Xrm.Sdk.Query;
@@ -96,5 +97,35 @@ namespace Capgemini.PowerApps.PackageDeployerTemplate.Extensions
                 svcClient.Update(documentTemplate);
             }
         }
+
+        /// <summary>
+        /// Sets the connection on a flow.
+        /// </summary>
+        /// <param name="workflowId">The ID of the flow.</param>
+        /// <param name="apiName">The API name (e.g. shared_sharepointonline).</param>
+        /// <param name="connectionName">The connection name.</param>
+        /// <param name="activate">Whether to activate after setting the connection.</param>
+        public static void SetFlowConnection(this CrmServiceClient svcClient, FlowConfig connection)
+        {
+            //if (string.IsNullOrEmpty(connection.FlowSharedConnectionName))
+            //{
+            //    throw new ArgumentException("You must provide an API name.", nameof(connection.FlowSharedConnectionName));
+            //}
+
+            //var flow = svcClient.Retrieve("workflow", workflowId, new ColumnSet("clientdata", "statecode", "statuscode"));
+           
+            //flow["clientdata"] = this.GetClientDataWithConnectionName(flow.GetAttributeValue<string>("clientdata"), apiName, connectionName);
+
+            //svcClient.Update(flow);
+
+            //if (connection.ActivateFlow)
+            //{
+            //    if (!svcClient.UpdateStateAndStatusForEntity("workflow", flowId, 1, 2))
+            //    {
+            //        throw new InvalidOperationException($"Failed to activatate flow {flowId}.");
+            //    }
+            //}
+        }
+
     }
 }
