@@ -7,6 +7,7 @@ using Microsoft.Xrm.Sdk;
 using Microsoft.Xrm.Sdk.Messages;
 using Microsoft.Xrm.Sdk.Query;
 using Microsoft.Xrm.Tooling.Connector;
+using Newtonsoft.Json.Linq;
 
 namespace Capgemini.PowerApps.PackageDeployerTemplate.Extensions
 {
@@ -107,24 +108,47 @@ namespace Capgemini.PowerApps.PackageDeployerTemplate.Extensions
         /// <param name="activate">Whether to activate after setting the connection.</param>
         public static void SetFlowConnection(this CrmServiceClient svcClient, FlowConfig connection)
         {
-            //if (string.IsNullOrEmpty(connection.FlowSharedConnectionName))
-            //{
-            //    throw new ArgumentException("You must provide an API name.", nameof(connection.FlowSharedConnectionName));
-            //}
+            var flow = svcClient.Retrieve("workflow", connection.WorkFlowId, new ColumnSet("clientdata", "statecode", "statuscode"));
 
-            //var flow = svcClient.Retrieve("workflow", workflowId, new ColumnSet("clientdata", "statecode", "statuscode"));
-           
-            //flow["clientdata"] = this.GetClientDataWithConnectionName(flow.GetAttributeValue<string>("clientdata"), apiName, connectionName);
+           // flow["clientdata"] = GetClientDataWithConnectionName(flow.GetAttributeValue<string>("clientdata"), apiName, connectionName);
+             svcClient.Update(flow);
 
-            //svcClient.Update(flow);
+            if (connection.ActivateFlow)
+            {
+                if (!svcClient.UpdateStateAndStatusForEntity("workflow", flow.Id, 1, 2))
+                {
+                    throw new InvalidOperationException($"Failed to activatate flow {flow.Id}.");
+                }
+            }
+        }
 
-            //if (connection.ActivateFlow)
-            //{
-            //    if (!svcClient.UpdateStateAndStatusForEntity("workflow", flowId, 1, 2))
-            //    {
-            //        throw new InvalidOperationException($"Failed to activatate flow {flowId}.");
-            //    }
-            //}
+        private static string GetClientDataWithConnectionName(string clientData, string apiName, string connectionName)
+        {
+            var clientDataObject = JObject.Parse(clientData);
+            var connectionReferences = (JObject)clientDataObject["properties"]["connectionReferences"];
+
+            if (!connectionReferences.ContainsKey(apiName))
+            {
+            //    PackageLog.Log($"Unable to set connection name for {apiName}. No connections matching {apiName} were found in the flow.");
+            }
+
+            var connection = connectionReferences[apiName].Value<JObject>("connection");
+            if (connection.ContainsKey("name") && connection["name"].ToString() != connectionName)
+            {
+          //      this.PackageLog.Log($"Updating existing connection name for {apiName}.");
+                connection["name"] = connectionName;
+            }
+            else if (!connection.ContainsKey("name"))
+            {
+            //    this.PackageLog.Log($"Setting new connection name for {apiName}.");
+                connection.Add("name", connectionName);
+            }
+            else
+            {
+              //  this.PackageLog.Log($"Connection name already set for {apiName}.");
+            }
+
+            return clientDataObject.ToString();
         }
 
     }

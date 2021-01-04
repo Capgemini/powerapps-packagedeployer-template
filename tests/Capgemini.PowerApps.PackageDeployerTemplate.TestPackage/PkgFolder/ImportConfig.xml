@@ -2,6 +2,7 @@
 <configdatastorage xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" installsampledata="false" waitforsampledatatoinstall="true" agentdesktopzipfile="" agentdesktopexename="" crmmigdataimportfile="">
     <solutions>
       <configsolutionfile solutionpackagefilename="cap_PackageDeployerTemplate_IntegrationTest_1_0_0_0_managed.zip"/>
+      <configsolutionfile solutionpackagefilename="cap_PackageDeployerTemplate_IntegrationTest_Flows_1_0_0_0_managed.zip"/>
     </solutions>
     <processestodeactivate>
       <processtodeactivate>Case: Set Name</processtodeactivate>
@@ -20,6 +21,6 @@
       <dataimport datafolderpath="Capgemini Data Migrator/Post-deploy/Data" importconfigpath="Capgemini Data Migrator/Post-deploy/Import.json" importbeforesolutions="false" />
     </dataimports>
     <flowconnections>
-      <flow useReleaseVariable="true" flowConnectionName="servicebus_example" activateFlow="true" environmentVariableName="MyVariable1"></flow>
+      <flow flowConnectionName="servicebus_example" activateFlow="true"></flow>
     </flowconnections>
 </configdatastorage>
