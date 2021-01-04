@@ -212,6 +212,7 @@
     <Compile Include="Adapters\CrmServiceAdapter.cs" />
     <Compile Include="Adapters\ICrmServiceAdapter.cs" />
     <Compile Include="Adapters\TraceLoggerAdapter.cs" />
+    <Compile Include="Config\FlowConfig.cs" />
     <Compile Include="PackageTemplateBase.cs" />
     <Compile Include="Services\DataImporterService.cs" />
     <Compile Include="Adapters\DataMigratorLoggerAdapter.cs" />
