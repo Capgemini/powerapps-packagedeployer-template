@@ -127,6 +127,8 @@ namespace Capgemini.PowerApps.PackageDeployerTemplate.Adapters
 
         public EntityCollection RetrieveMultiple(QueryByAttribute query) => crmSvc.RetrieveMultiple(query);
 
+        public EntityCollection RetrieveMultiple(QueryBase query) => crmSvc.RetrieveMultiple(query);
+
         public void Update(Entity record) => crmSvc.Update(record);
 
         public void Dispose()

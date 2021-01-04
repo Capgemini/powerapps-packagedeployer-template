@@ -11,6 +11,7 @@ namespace Capgemini.PowerApps.PackageDeployerTemplate.Adapters
         void ImportWordTemplate(string filePath);
         EntityCollection QueryRecordsBySingleAttributeValue(string entity, string attribute, IEnumerable<object> values);
         EntityCollection RetrieveMultiple(QueryByAttribute query);
+        EntityCollection RetrieveMultiple(QueryBase query);
         ExecuteMultipleResponse SetRecordsStateInBatch(EntityCollection queryResponse, int statecode, int statuscode);
         void Update(Entity record);
     }

@@ -56,11 +56,11 @@ namespace Capgemini.PowerApps.PackageDeployerTemplate.Services
             };
             query.Criteria.AddCondition("uniquename", ConditionOperator.Equal, solution);
 
-            //     var result = this.crmSvc.RetrieveMultiple(query).Entities.FirstOrDefault()?.Id;
-            //     this.logger.LogInformation($"Solution ID: {result}.");
+                 var result = this.crmSvc.RetrieveMultiple(query).Entities.FirstOrDefault()?.Id;
+                 this.logger.LogInformation($"Solution ID: {result}.");
 
-            //      return result;
-            return null;
+                  return result;
+     
         }
 
         public IEnumerable<Guid> GetSolutionComponentObjectIdsByType(Guid solutionId, int componentType)
@@ -75,12 +75,12 @@ namespace Capgemini.PowerApps.PackageDeployerTemplate.Services
             queryExpression.Criteria.AddCondition("componenttype", ConditionOperator.Equal, componentType);
             queryExpression.Criteria.AddCondition("solutionid", ConditionOperator.Equal, solutionId);
 
-            //    var results = this.crmSvc.RetrieveMultiple(queryExpression);
+                var results = this.crmSvc.RetrieveMultiple(queryExpression);
 
-            //    this.logger.LogInformation($"Found {results.Entities.Count} matching components.");
+                this.logger.LogInformation($"Found {results.Entities.Count} matching components.");
 
-            //        return results.Entities.Select(e => e.GetAttributeValue<Guid>("objectid")).ToArray();
-            return null;
+                   return results.Entities.Select(e => e.GetAttributeValue<Guid>("objectid")).ToArray();
+
         }
 
         public IEnumerable<Entity> GetDeployedFlows(IEnumerable<Guid> guids, ColumnSet columnSet)
@@ -104,12 +104,12 @@ namespace Capgemini.PowerApps.PackageDeployerTemplate.Services
             flowQuery.Criteria.AddCondition("category", ConditionOperator.Equal, 5);
             flowQuery.Criteria.AddCondition("workflowid", ConditionOperator.In, guids.Cast<object>().ToArray());
 
-            //   var results = this.crmSvc.RetrieveMultiple(flowQuery);
+               var results = this.crmSvc.RetrieveMultiple(flowQuery);
 
-            //    this.logger.LogInformation($"Found {results.Entities.Count} matching flows.");
+                this.logger.LogInformation($"Found {results.Entities.Count} matching flows.");
 
-            //      return results.Entities;
-            return null;
+                  return results.Entities;
+           
         }
 
 
