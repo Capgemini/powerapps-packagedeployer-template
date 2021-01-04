@@ -47,6 +47,9 @@
     <Reference Include="Microsoft.Crm.Sdk.Proxy, Version=9.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <HintPath>..\..\packages\Microsoft.CrmSdk.CoreAssemblies.9.0.2.24\lib\net462\Microsoft.Crm.Sdk.Proxy.dll</HintPath>
     </Reference>
+    <Reference Include="Microsoft.Extensions.Logging.Abstractions, Version=5.0.0.0, Culture=neutral, PublicKeyToken=adb9793829ddae60, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\Microsoft.Extensions.Logging.Abstractions.5.0.0\lib\net461\Microsoft.Extensions.Logging.Abstractions.dll</HintPath>
+    </Reference>
     <Reference Include="Microsoft.IdentityModel.Clients.ActiveDirectory, Version=5.2.7.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <HintPath>..\..\packages\Microsoft.IdentityModel.Clients.ActiveDirectory.5.2.7\lib\net45\Microsoft.IdentityModel.Clients.ActiveDirectory.dll</HintPath>
     </Reference>
@@ -70,6 +73,9 @@
     </Reference>
     <Reference Include="Moq, Version=4.14.0.0, Culture=neutral, PublicKeyToken=69f491c39445e920, processorArchitecture=MSIL">
       <HintPath>..\..\packages\Moq.4.14.1\lib\net45\Moq.dll</HintPath>
+    </Reference>
+    <Reference Include="Moq.ILogger, Version=1.1.8.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\ILogger.Moq.1.1.8\lib\net461\Moq.ILogger.dll</HintPath>
     </Reference>
     <Reference Include="Newtonsoft.Json, Version=12.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
       <HintPath>..\..\packages\Newtonsoft.Json.12.0.3\lib\net45\Newtonsoft.Json.dll</HintPath>
@@ -155,6 +161,11 @@
   <ItemGroup>
     <Compile Include="ConfigDataStorageTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Services\DataImporterServiceTests.cs" />
+    <Compile Include="Services\ProcessActivatorServiceTests.cs" />
+    <Compile Include="Services\SdkStepsActivatorServiceTests.cs" />
+    <Compile Include="Services\SlaActivatorServiceTests.cs" />
+    <Compile Include="Services\WordTemplateImporterServiceTests.cs" />
     <Compile Include="ZipFileUtilitiesTests.cs" />
     <Compile Include="TestUtilities.cs" />
   </ItemGroup>
