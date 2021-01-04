@@ -212,10 +212,12 @@
     <Compile Include="Adapters\CrmServiceAdapter.cs" />
     <Compile Include="Adapters\ICrmServiceAdapter.cs" />
     <Compile Include="Adapters\TraceLoggerAdapter.cs" />
-    <Compile Include="Config\FlowConfig.cs" />
+    <Compile Include="Config\ConnectionReference.cs" />
+    <Compile Include="Config\FlowConnection.cs" />
     <Compile Include="PackageTemplateBase.cs" />
     <Compile Include="Services\DataImporterService.cs" />
     <Compile Include="Adapters\DataMigratorLoggerAdapter.cs" />
+    <Compile Include="Services\FlowConnectionService.cs" />
     <Compile Include="Services\ProcessDeploymentService.cs" />
     <Compile Include="Services\SdkStepDeploymentService.cs" />
     <Compile Include="Services\SlaDeploymentService.cs" />

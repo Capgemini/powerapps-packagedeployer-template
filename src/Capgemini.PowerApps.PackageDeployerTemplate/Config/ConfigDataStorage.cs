@@ -76,6 +76,14 @@ namespace Capgemini.PowerApps.PackageDeployerTemplate.Config
         [XmlArray("dataimports")]
         [XmlArrayItem("dataimport")]
         public DataImportConfig[] DataImports { get; set; }
+             
+        [XmlArray("connectionreferences")]
+        [XmlArrayItem("connectionreference")]
+        public ConnectionReference[] ConnctionReferences { get; set; }
+
+        [XmlArray("flows")]
+        [XmlArrayItem("flow")]
+        public FlowConnection[] Flows { get; set; }
 
         /// <summary>
         /// Load an <see cref="ImportConfig"/> from the specified path.

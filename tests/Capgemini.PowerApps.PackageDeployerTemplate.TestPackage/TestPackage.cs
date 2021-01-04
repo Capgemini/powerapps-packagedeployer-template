@@ -49,8 +49,6 @@ namespace Capgemini.PowerApps.PackageDeployerTemplate.TestPackage
         {
             get { return "Package Long Name"; }
         }
-
-
         #endregion
 
     }

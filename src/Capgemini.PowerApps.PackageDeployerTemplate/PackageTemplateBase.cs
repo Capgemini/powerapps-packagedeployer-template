@@ -1,9 +1,11 @@
-﻿using System.Diagnostics;
+﻿using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using Capgemini.PowerApps.PackageDeployerTemplate.Adapters;
 using Capgemini.PowerApps.PackageDeployerTemplate.Config;
 using Capgemini.PowerApps.PackageDeployerTemplate.Services;
+using Microsoft.Extensions.Logging;
 using Microsoft.Xrm.Tooling.PackageDeployment.CrmPackageExtentionBase;
 
 namespace Capgemini.PowerApps.PackageDeployerTemplate
@@ -16,6 +18,8 @@ namespace Capgemini.PowerApps.PackageDeployerTemplate
             "S1144:Unused private types or members should be removed", 
             Justification = "Required or Polly does not get copied when referenced via project reference (e.g. in the TestPackage project)")]
         private readonly Polly.Policy _policy;
+
+        public List<string> _solutions { get; private set; }
 
         protected string PackageFolderPath
         {
@@ -32,23 +36,27 @@ namespace Capgemini.PowerApps.PackageDeployerTemplate
         protected SlaDeploymentService SlaDeploymentService { get; private set; }
         protected WordTemplateImporterService WordTemplateImporterService { get; private set; }
         protected SdkStepDeploymentService SdkStepsDeploymentService { get; private set; }
-
+        protected FlowConnectionService flowConnectionService { get; private set; }
         protected ConfigDataStorage ConfigDataStorage;
+        private ILogger logger;
 
         public override void InitializeCustomExtension()
         {
+            _solutions = new List<string>();
+
             this.PackageLog.Log($"Initializing {nameof(PackageTemplateBase)} extension.");
 
             this.ConfigDataStorage = ConfigDataStorage.Load(this.ImportConfigFilePath);
 
             var crmServiceAdapter = new CrmServiceAdapter(this.CrmSvc);
-            var logger = new TraceLoggerAdapter(this.PackageLog);
+            this.logger = new TraceLoggerAdapter(this.PackageLog);
 
             this.DataImporterService = new DataImporterService(logger, crmServiceAdapter);
             this.ProcessDeploymentService = new ProcessDeploymentService(logger, crmServiceAdapter);
             this.SlaDeploymentService = new SlaDeploymentService(logger, crmServiceAdapter);
             this.WordTemplateImporterService = new WordTemplateImporterService(logger, crmServiceAdapter);
             this.SdkStepsDeploymentService = new SdkStepDeploymentService(logger, crmServiceAdapter);
+            this.flowConnectionService = new FlowConnectionService(logger, crmServiceAdapter);
 
             this.BeforeAnything();
         }
@@ -86,9 +94,17 @@ namespace Capgemini.PowerApps.PackageDeployerTemplate
             this.DataImporterService.Import(this.ConfigDataStorage.DataImports?.Where(c => !c.ImportBeforeSolutions), this.PackageFolderPath);
             this.ProcessDeploymentService.Activate(this.ConfigDataStorage.ProcessesToActivate);
             this.WordTemplateImporterService.ImportWordTemplates(this.ConfigDataStorage.WordTemplates, this.PackageFolderPath);
+            this.flowConnectionService.SetFlowConnections(this.ConfigDataStorage.ConnctionReferences, this.ConfigDataStorage.Flows, _solutions);
 
             this.PackageLog.Log($"{nameof(PackageTemplateBase)}.{nameof(AfterPrimaryImport)} completed.", TraceEventType.Information);
             return true;
         }
+                
+        public override void PreSolutionImport(string solutionName, bool solutionOverwriteUnmanagedCustomizations, bool solutionPublishWorkflowsAndActivatePlugins, out bool overwriteUnmanagedCustomizations, out bool publishWorkflowsAndActivatePlugins)
+        {
+            _solutions.Add(solutionName);
+            base.PreSolutionImport(solutionName, solutionOverwriteUnmanagedCustomizations, solutionPublishWorkflowsAndActivatePlugins, out overwriteUnmanagedCustomizations, out publishWorkflowsAndActivatePlugins);
+        }
+
     }
 }

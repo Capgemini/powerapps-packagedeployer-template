@@ -122,5 +122,11 @@ namespace Capgemini.PowerApps.PackageDeployerTemplate.IntegrationTests
 
             workflow["statecode"].As<OptionSetValue>().Value.Should().Be(1);
         }
+
+        [Fact]
+        public void CapgeminiPackageTemplate_ConnectionReferencesAreSynched()
+        {
+
+        }
     }
 }
