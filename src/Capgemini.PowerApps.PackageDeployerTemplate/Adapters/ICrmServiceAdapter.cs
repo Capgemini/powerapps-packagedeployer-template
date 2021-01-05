@@ -1,6 +1,7 @@
 ﻿using Microsoft.Xrm.Sdk;
 using Microsoft.Xrm.Sdk.Messages;
 using Microsoft.Xrm.Sdk.Query;
+using System;
 using System.Collections.Generic;
 
 namespace Capgemini.PowerApps.PackageDeployerTemplate.Adapters
@@ -13,6 +14,9 @@ namespace Capgemini.PowerApps.PackageDeployerTemplate.Adapters
         EntityCollection RetrieveMultiple(QueryByAttribute query);
         EntityCollection RetrieveMultiple(QueryBase query);
         ExecuteMultipleResponse SetRecordsStateInBatch(EntityCollection queryResponse, int statecode, int statuscode);
+
+        bool UpdateStateAndStatusForEntity(string entityLogicalName, Guid EntityId, int statecode, int status);
+
         void Update(Entity record);
     }
 }

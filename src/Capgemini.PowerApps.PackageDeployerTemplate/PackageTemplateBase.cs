@@ -5,14 +5,12 @@ using System.Linq;
 using Capgemini.PowerApps.PackageDeployerTemplate.Adapters;
 using Capgemini.PowerApps.PackageDeployerTemplate.Config;
 using Capgemini.PowerApps.PackageDeployerTemplate.Services;
-using Microsoft.Extensions.Logging;
 using Microsoft.Xrm.Tooling.PackageDeployment.CrmPackageExtentionBase;
 
 namespace Capgemini.PowerApps.PackageDeployerTemplate
 {
     public abstract class PackageTemplateBase : ImportExtension
     {
-
         [System.Diagnostics.CodeAnalysis.SuppressMessage(
             "Major Code Smell",
             "S1144:Unused private types or members should be removed", 
@@ -38,7 +36,6 @@ namespace Capgemini.PowerApps.PackageDeployerTemplate
         protected SdkStepDeploymentService SdkStepsDeploymentService { get; private set; }
         protected FlowConnectionService flowConnectionService { get; private set; }
         protected ConfigDataStorage ConfigDataStorage;
-        private ILogger logger;
 
         public override void InitializeCustomExtension()
         {
@@ -49,7 +46,7 @@ namespace Capgemini.PowerApps.PackageDeployerTemplate
             this.ConfigDataStorage = ConfigDataStorage.Load(this.ImportConfigFilePath);
 
             var crmServiceAdapter = new CrmServiceAdapter(this.CrmSvc);
-            this.logger = new TraceLoggerAdapter(this.PackageLog);
+            var logger = new TraceLoggerAdapter(this.PackageLog);
 
             this.DataImporterService = new DataImporterService(logger, crmServiceAdapter);
             this.ProcessDeploymentService = new ProcessDeploymentService(logger, crmServiceAdapter);
@@ -105,6 +102,5 @@ namespace Capgemini.PowerApps.PackageDeployerTemplate
             _solutions.Add(solutionName);
             base.PreSolutionImport(solutionName, solutionOverwriteUnmanagedCustomizations, solutionPublishWorkflowsAndActivatePlugins, out overwriteUnmanagedCustomizations, out publishWorkflowsAndActivatePlugins);
         }
-
     }
 }
