@@ -123,10 +123,17 @@ namespace Capgemini.PowerApps.PackageDeployerTemplate.IntegrationTests
             workflow["statecode"].As<OptionSetValue>().Value.Should().Be(1);
         }
 
-        [Fact]
-        public void CapgeminiPackageTemplate_ConnectionReferencesAreSynched()
+        [Theory]
+        [InlineData("Account Creation Trigger -> Terminate", 0)]
+        [InlineData("Account Creation Trigger1 -> Terminate", 1)]
+        public void CapgeminiPackageTemplate_FlowsAreActivated(string workflowName, int stateCode)
         {
+            var subjectQuery = new QueryByAttribute("workflow");
+            subjectQuery.AddAttributeValue("name", workflowName);
+            subjectQuery.ColumnSet = new ColumnSet("statecode");
+            var workflow = this.fixture.ServiceClient.RetrieveMultiple(subjectQuery).Entities.FirstOrDefault();
 
+            workflow["statecode"].As<OptionSetValue>().Value.Should().Be(stateCode);
         }
     }
 }

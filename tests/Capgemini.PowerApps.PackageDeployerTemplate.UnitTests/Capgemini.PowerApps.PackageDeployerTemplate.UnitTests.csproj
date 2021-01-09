@@ -162,6 +162,7 @@
     <Compile Include="ConfigDataStorageTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Services\DataImporterServiceTests.cs" />
+    <Compile Include="Services\FlowActivatorServiceTests.cs" />
     <Compile Include="Services\ProcessActivatorServiceTests.cs" />
     <Compile Include="Services\SdkStepsActivatorServiceTests.cs" />
     <Compile Include="Services\SlaActivatorServiceTests.cs" />

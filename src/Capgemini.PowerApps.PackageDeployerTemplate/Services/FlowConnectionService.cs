@@ -5,6 +5,7 @@ using Microsoft.Xrm.Sdk;
 using Microsoft.Xrm.Sdk.Query;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 
 namespace Capgemini.PowerApps.PackageDeployerTemplate.Services
@@ -20,8 +21,8 @@ namespace Capgemini.PowerApps.PackageDeployerTemplate.Services
             this.crmSvc = crmSvc ?? throw new ArgumentNullException(nameof(crmSvc));
         }
 
-        public void SetFlowConnections(IEnumerable<ConnectionReference> connectionReferences, IEnumerable<FlowConnection> flows, List<string> solutions)
-        {
+        public void SetFlowConnections(IEnumerable<ConnectionReference> connectionReferences, IEnumerable<string> flowsToIgnore, List<string> solutions)
+        {         
             foreach (var item in solutions)
             {
                 var solutionId = GetSolutionIdByUniqueName(item);
@@ -31,11 +32,21 @@ namespace Capgemini.PowerApps.PackageDeployerTemplate.Services
                 if (!solutionWorkflowIds.Any()) return;
 
                 var solutionFlowIds = this.GetDeployedFlows(solutionWorkflowIds, new ColumnSet("name"));
-                foreach (var flowId in solutionFlowIds)
-                {                    
-                    if (!this.crmSvc.UpdateStateAndStatusForEntity("workflow", flowId.Id, 1, 2))
+
+                logger.LogInformation($"Flows found {solutionFlowIds.Count()}");
+
+                foreach (var solutionFlow in solutionFlowIds)
+                {
+                    var matchedFlow = flowsToIgnore.FirstOrDefault(f => f == solutionFlow.Attributes["name"].ToString());
+                    
+                    var stateCode =  matchedFlow == null ? 1 : 0;
+                    var statusCode = matchedFlow == null ? 2 : 1;
+
+                    logger.LogInformation($"Setting flow status for {solutionFlow["name"]} with statecode {stateCode} and statuscode {statusCode}");
+
+                    if (!this.crmSvc.UpdateStateAndStatusForEntity("workflow", solutionFlow.Id, stateCode, statusCode))
                     {
-                        throw new InvalidOperationException($"Failed to activatate flow {flowId}.");
+                        logger.LogInformation($"Status for flow {solutionFlow.Attributes["name"].ToString()} could not be set. Please ensure the connection is set in the environment as this can stop the flow from being activated / deactivated.");
                     }
                 }
             }
@@ -72,7 +83,7 @@ namespace Capgemini.PowerApps.PackageDeployerTemplate.Services
 
             var queryExpression = new QueryExpression("solutioncomponent")
             {
-                ColumnSet = new ColumnSet("objectid,name"),
+                ColumnSet = new ColumnSet(new string[] { "objectid" }),
                 Criteria = new FilterExpression(LogicalOperator.And),
             };
             queryExpression.Criteria.AddCondition("componenttype", ConditionOperator.Equal, componentType);

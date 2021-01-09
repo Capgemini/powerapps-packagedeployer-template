@@ -66,7 +66,7 @@ namespace Capgemini.PowerApps.PackageDeployerTemplate.IntegrationTests
                               Conditions =
                               {
                                 new ConditionExpression("uniquename", ConditionOperator.Equal, "cap_PackageDeployerTemplate_IntegrationTest"),
-                                new ConditionExpression("uniquename", ConditionOperator.Equal, "PackageDeployerTemplateIntegrationTestFlows"),
+                                new ConditionExpression("uniquename", ConditionOperator.Equal, "cap_PackageDeployerTemplate_IntegrationTest_Flows"),
                               }
                             }
                           }
