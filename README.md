@@ -105,6 +105,18 @@ You can configure which SLAs should be set as default after import by adding a `
 </configdatastorage>
 ```
 
+### Deactivate/Activate Flows
+
+You can configure which flows should be disabled after import by adding a `flowstodeactivate` element within the `configdatastorage` element of the `ImportConfig.xml`. Any flows not listed here will be enabled by default. 
+
+```xml
+<configdatastorage>
+    <flowstodeactivate>
+        <flowtodeactivate>Name of the flow to deactivate</flowtodeactivate>
+    </flowstodeactivate>
+</configdatastorage>
+```
+
 ### Upgrade or update based on solution version
 
 You can configure the template to either update or upgrade based on a semantic solution versioning scheme. This is done by adding the following attributes to the `configdatastorage` element. This may allow you to achieve faster deployment times if you only delete solution components on major version changes (for example).

@@ -2,6 +2,7 @@
 <configdatastorage xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" installsampledata="false" waitforsampledatatoinstall="true" agentdesktopzipfile="" agentdesktopexename="" crmmigdataimportfile="">
   <solutions>
     <configsolutionfile solutionpackagefilename="cap_PackageDeployerTemplate_IntegrationTest_1_0_0_0_managed.zip"/>
+    <configsolutionfile solutionpackagefilename="cap_PackageDeployerTemplate_IntegrationTest_Flows_1_0_0_0_managed.zip"></configsolutionfile>
   </solutions>
   <processestodeactivate>
     <processtodeactivate>Case: Set Name</processtodeactivate>
@@ -19,4 +20,7 @@
     <dataimport datafolderpath="Capgemini Data Migrator/Pre-deploy/Data" importconfigpath="Capgemini Data Migrator/Pre-deploy/Import.json" importbeforesolutions="true" />
     <dataimport datafolderpath="Capgemini Data Migrator/Post-deploy/Data" importconfigpath="Capgemini Data Migrator/Post-deploy/Import.json" importbeforesolutions="false" />
   </dataimports>
+  <flowstodeactivate>
+    <flowtodeactivate>Account Creation Trigger -> Terminate</flowtodeactivate>
+  </flowstodeactivate>
 </configdatastorage>

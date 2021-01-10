@@ -215,10 +215,12 @@
     <Compile Include="PackageTemplateBase.cs" />
     <Compile Include="Services\DataImporterService.cs" />
     <Compile Include="Adapters\DataMigratorLoggerAdapter.cs" />
+    <Compile Include="Services\FlowActivationService.cs" />
     <Compile Include="Services\ProcessDeploymentService.cs" />
     <Compile Include="Services\SdkStepDeploymentService.cs" />
     <Compile Include="Services\SlaDeploymentService.cs" />
     <Compile Include="Services\WordTemplateImporterService.cs" />
+    <Compile Include="Constants.cs" />
     <Compile Include="WordTemplateUtilities.cs" />
     <Compile Include="ZipFileUtilities.cs" />
     <Compile Include="Config\DataImportConfig.cs" />

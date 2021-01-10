@@ -54,14 +54,30 @@ namespace Capgemini.PowerApps.PackageDeployerTemplate.IntegrationTests
                 this.ServiceClient.UpdateStateAndStatusForEntity("sla", sla.Id, 0, 1);
             }
 
-            var solutionQuery = new QueryByAttribute("solution");
-            solutionQuery.AddAttributeValue("uniquename", "cap_PackageDeployerTemplate_IntegrationTest");
-            var solutionRecord = this.ServiceClient.RetrieveMultiple(solutionQuery).Entities.FirstOrDefault();
-
-            if (solutionRecord != null)
+            var solutionQuery = new QueryExpression("solution");
+            solutionQuery.Criteria = new FilterExpression
             {
-                this.ServiceClient.Delete("solution", solutionRecord.Id);
-            }
+                FilterOperator = LogicalOperator.Or,
+                Filters =
+                          {
+                            new FilterExpression
+                            {
+                              FilterOperator = LogicalOperator.Or,
+                              Conditions =
+                              {
+                                new ConditionExpression("uniquename", ConditionOperator.Equal, "cap_PackageDeployerTemplate_IntegrationTest"),
+                                new ConditionExpression("uniquename", ConditionOperator.Equal, "cap_PackageDeployerTemplate_IntegrationTest_Flows"),
+                              }
+                            }
+                          }
+            };
+
+            var solutionRecord = this.ServiceClient.RetrieveMultiple(solutionQuery).Entities;
+
+            solutionRecord.ToList().ForEach(solution =>
+            {
+                this.ServiceClient.Delete("solution", solution.Id);
+            });
         }
 
         private void DeleteData()

@@ -247,6 +247,9 @@
     <Content Include="PkgFolder\Capgemini Data Migrator\Pre-deploy\Data\predeploy_subject_1.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <Content Include="PkgFolder\cap_PackageDeployerTemplate_IntegrationTest_Flows_1_0_0_0_managed.zip">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\src\Capgemini.PowerApps.PackageDeployerTemplate\Capgemini.PowerApps.PackageDeployerTemplate.csproj">
