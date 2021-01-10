@@ -128,10 +128,10 @@ namespace Capgemini.PowerApps.PackageDeployerTemplate.IntegrationTests
         [InlineData("Account Creation Trigger1 -> Terminate", 1)]
         public void CapgeminiPackageTemplate_FlowsAreActivated(string workflowName, int stateCode)
         {
-            var subjectQuery = new QueryByAttribute("workflow");
-            subjectQuery.AddAttributeValue("name", workflowName);
-            subjectQuery.ColumnSet = new ColumnSet("statecode");
-            var workflow = this.fixture.ServiceClient.RetrieveMultiple(subjectQuery).Entities.FirstOrDefault();
+            var workflowQuery = new QueryByAttribute("workflow");
+            workflowQuery.AddAttributeValue("name", workflowName);
+            workflowQuery.ColumnSet = new ColumnSet("statecode");
+            var workflow = this.fixture.ServiceClient.RetrieveMultiple(workflowQuery).Entities.FirstOrDefault();
 
             workflow["statecode"].As<OptionSetValue>().Value.Should().Be(stateCode);
         }
