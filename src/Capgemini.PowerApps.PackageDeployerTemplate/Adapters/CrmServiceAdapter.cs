@@ -127,7 +127,7 @@ namespace Capgemini.PowerApps.PackageDeployerTemplate.Adapters
 
         public EntityCollection RetrieveMultiple(QueryByAttribute query) => crmSvc.RetrieveMultiple(query);
 
-        public EntityCollection RetrieveMultiple(QueryBase query) => crmSvc.RetrieveMultiple(query);
+        public EntityCollection RetrieveMultiple(QueryExpression query) => crmSvc.RetrieveMultiple(query);
 
         public bool UpdateStateAndStatusForEntity(string entityLogicalName, Guid EntityId, int statecode, int status) => crmSvc.UpdateStateAndStatusForEntity(entityLogicalName, EntityId, statecode, status);
 

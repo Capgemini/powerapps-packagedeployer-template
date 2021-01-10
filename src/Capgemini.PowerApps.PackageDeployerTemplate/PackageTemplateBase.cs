@@ -34,7 +34,7 @@ namespace Capgemini.PowerApps.PackageDeployerTemplate
         protected SlaDeploymentService SlaDeploymentService { get; private set; }
         protected WordTemplateImporterService WordTemplateImporterService { get; private set; }
         protected SdkStepDeploymentService SdkStepsDeploymentService { get; private set; }
-        protected FlowConnectionService flowConnectionService { get; private set; }
+        protected FlowActivationService flowConnectionService { get; private set; }
         protected ConfigDataStorage ConfigDataStorage;
 
         public override void InitializeCustomExtension()
@@ -53,7 +53,7 @@ namespace Capgemini.PowerApps.PackageDeployerTemplate
             this.SlaDeploymentService = new SlaDeploymentService(logger, crmServiceAdapter);
             this.WordTemplateImporterService = new WordTemplateImporterService(logger, crmServiceAdapter);
             this.SdkStepsDeploymentService = new SdkStepDeploymentService(logger, crmServiceAdapter);
-            this.flowConnectionService = new FlowConnectionService(logger, crmServiceAdapter);
+            this.flowConnectionService = new FlowActivationService(logger, crmServiceAdapter);
 
             this.BeforeAnything();
         }
@@ -91,7 +91,7 @@ namespace Capgemini.PowerApps.PackageDeployerTemplate
             this.DataImporterService.Import(this.ConfigDataStorage.DataImports?.Where(c => !c.ImportBeforeSolutions), this.PackageFolderPath);
             this.ProcessDeploymentService.Activate(this.ConfigDataStorage.ProcessesToActivate);
             this.WordTemplateImporterService.ImportWordTemplates(this.ConfigDataStorage.WordTemplates, this.PackageFolderPath);
-            this.flowConnectionService.SetFlowConnections(this.ConfigDataStorage.ConnctionReferences, this.ConfigDataStorage.Flows, _solutions);
+            this.flowConnectionService.ActivateFlows(this.ConfigDataStorage.Flows, _solutions);
 
             this.PackageLog.Log($"{nameof(PackageTemplateBase)}.{nameof(AfterPrimaryImport)} completed.", TraceEventType.Information);
             return true;

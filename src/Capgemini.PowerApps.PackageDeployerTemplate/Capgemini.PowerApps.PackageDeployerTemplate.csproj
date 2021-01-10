@@ -217,7 +217,7 @@
     <Compile Include="PackageTemplateBase.cs" />
     <Compile Include="Services\DataImporterService.cs" />
     <Compile Include="Adapters\DataMigratorLoggerAdapter.cs" />
-    <Compile Include="Services\FlowConnectionService.cs" />
+    <Compile Include="Services\FlowActivationService.cs" />
     <Compile Include="Services\ProcessDeploymentService.cs" />
     <Compile Include="Services\SdkStepDeploymentService.cs" />
     <Compile Include="Services\SlaDeploymentService.cs" />

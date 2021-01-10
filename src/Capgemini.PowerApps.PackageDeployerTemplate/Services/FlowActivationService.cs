@@ -1,28 +1,32 @@
 ﻿using Capgemini.PowerApps.PackageDeployerTemplate.Adapters;
-using Capgemini.PowerApps.PackageDeployerTemplate.Config;
 using Microsoft.Extensions.Logging;
 using Microsoft.Xrm.Sdk;
 using Microsoft.Xrm.Sdk.Query;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 
 namespace Capgemini.PowerApps.PackageDeployerTemplate.Services
 {
-    public class FlowConnectionService
+    public class FlowActivationService
     {
         private readonly ILogger logger;
         private readonly ICrmServiceAdapter crmSvc;
 
-        public FlowConnectionService(ILogger logger, ICrmServiceAdapter crmSvc)
+        public FlowActivationService(ILogger logger, ICrmServiceAdapter crmSvc)
         {
             this.logger = logger ?? throw new ArgumentNullException(nameof(logger));
             this.crmSvc = crmSvc ?? throw new ArgumentNullException(nameof(crmSvc));
         }
 
-        public void SetFlowConnections(IEnumerable<ConnectionReference> connectionReferences, IEnumerable<string> flowsToIgnore, List<string> solutions)
+        public void ActivateFlows(IEnumerable<string> flowsToIgnore, IEnumerable<string> solutions)
         {         
+            if (solutions == null || !solutions.Any())
+            {
+                logger.LogInformation($"No solutions to activate flows for");
+                return;
+            }
+
             foreach (var item in solutions)
             {
                 var solutionId = GetSolutionIdByUniqueName(item);
@@ -37,7 +41,12 @@ namespace Capgemini.PowerApps.PackageDeployerTemplate.Services
 
                 foreach (var solutionFlow in solutionFlowIds)
                 {
-                    var matchedFlow = flowsToIgnore.FirstOrDefault(f => f == solutionFlow.Attributes["name"].ToString());
+                    string matchedFlow = null;
+
+                    if (flowsToIgnore !=null)
+                    {
+                         matchedFlow = flowsToIgnore.FirstOrDefault(f => f == solutionFlow.Attributes["name"].ToString());
+                    }                   
                     
                     var stateCode =  matchedFlow == null ? 1 : 0;
                     var statusCode = matchedFlow == null ? 2 : 1;
@@ -51,7 +60,7 @@ namespace Capgemini.PowerApps.PackageDeployerTemplate.Services
                 }
             }
 
-            logger.LogInformation($"{nameof(FlowConnectionService)}: Flow Connections completed");
+            logger.LogInformation($"{nameof(FlowActivationService)}: Flow Connections completed");
         }
 
         private Guid? GetSolutionIdByUniqueName(string solution)
