@@ -124,8 +124,8 @@ namespace Capgemini.PowerApps.PackageDeployerTemplate.IntegrationTests
         }
 
         [Theory]
-        [InlineData("Account Creation Trigger -> Terminate", 0)]
-        [InlineData("Account Creation Trigger1 -> Terminate", 1)]
+        [InlineData("Account Creation Trigger -> Terminate", Constants.STATECODE_INACTIVE)]
+        [InlineData("Account Creation Trigger1 -> Terminate", Constants.STATECODE_ACTIVE)]
         public void CapgeminiPackageTemplate_FlowsAreActivated(string workflowName, int stateCode)
         {
             var workflowQuery = new QueryByAttribute("workflow");
