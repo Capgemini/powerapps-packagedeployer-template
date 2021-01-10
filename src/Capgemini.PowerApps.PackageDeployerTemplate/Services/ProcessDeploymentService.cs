@@ -12,12 +12,7 @@ namespace Capgemini.PowerApps.PackageDeployerTemplate.Services
     public class ProcessDeploymentService
     {
         private readonly ILogger logger;
-        private readonly ICrmServiceAdapter crmSvc;
-
-        private const int STATECODE_ACTIVE = 1;
-        private const int STATECODE_INACTIVE = 0;
-        private const int STATUSCODE_ACTIVE = 2;
-        private const int STATUSCODE_INACTIVE = 1;
+        private readonly ICrmServiceAdapter crmSvc;      
 
         public ProcessDeploymentService(ILogger logger, ICrmServiceAdapter crmSvc)
         {
@@ -34,7 +29,7 @@ namespace Capgemini.PowerApps.PackageDeployerTemplate.Services
             }
 
             var queryResponse = QueryWorkflowsByName(processesToActivate);
-            var executeMultipleResponse = this.crmSvc.SetRecordsStateInBatch(queryResponse, STATECODE_ACTIVE, STATUSCODE_ACTIVE);
+            var executeMultipleResponse = this.crmSvc.SetRecordsStateInBatch(queryResponse, Constants.STATECODE_ACTIVE, Constants.STATUSCODE_ACTIVE);
             if (executeMultipleResponse.IsFaulted)
             {
                 this.logger.LogError($"Error activating processes.");
@@ -51,7 +46,7 @@ namespace Capgemini.PowerApps.PackageDeployerTemplate.Services
             }
 
             var queryResponse = QueryWorkflowsByName(processesToDeactivate);
-            var executeMultipleResponse = this.crmSvc.SetRecordsStateInBatch(queryResponse, STATECODE_INACTIVE, STATUSCODE_INACTIVE);
+            var executeMultipleResponse = this.crmSvc.SetRecordsStateInBatch(queryResponse, Constants.STATECODE_INACTIVE, Constants.STATUSCODE_INACTIVE);
             if (executeMultipleResponse.IsFaulted)
             {
                 this.logger.LogError($"Error deactivating processes.");

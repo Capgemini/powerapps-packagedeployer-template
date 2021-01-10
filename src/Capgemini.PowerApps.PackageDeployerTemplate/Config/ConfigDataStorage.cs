@@ -75,15 +75,11 @@ namespace Capgemini.PowerApps.PackageDeployerTemplate.Config
         /// </summary>
         [XmlArray("dataimports")]
         [XmlArrayItem("dataimport")]
-        public DataImportConfig[] DataImports { get; set; }
-             
-        [XmlArray("connectionreferences")]
-        [XmlArrayItem("connectionreference")]
-        public ConnectionReference[] ConnctionReferences { get; set; }
-
+        public DataImportConfig[] DataImports { get; set; }            
+      
         [XmlArray("flowstodeactivate")]
         [XmlArrayItem("flowtodeactivate")]
-        public string[] Flows { get; set; }
+        public string[] FlowsToDeactivate { get; set; }
 
         /// <summary>
         /// Load an <see cref="ImportConfig"/> from the specified path.

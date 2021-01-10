@@ -19,7 +19,7 @@ namespace Capgemini.PowerApps.PackageDeployerTemplate.Services
             this.crmSvc = crmSvc ?? throw new ArgumentNullException(nameof(crmSvc));
         }
 
-        public void ActivateFlows(IEnumerable<string> flowsToIgnore, IEnumerable<string> solutions)
+        public void ActivateFlows(IEnumerable<string> flowsToDeactivate, IEnumerable<string> solutions)
         {         
             if (solutions == null || !solutions.Any())
             {
@@ -32,7 +32,7 @@ namespace Capgemini.PowerApps.PackageDeployerTemplate.Services
                 var solutionId = GetSolutionIdByUniqueName(item);
                 if (!solutionId.HasValue) return;
 
-                var solutionWorkflowIds = this.GetSolutionComponentObjectIdsByType(solutionId.Value, 29);
+                var solutionWorkflowIds = this.GetSolutionComponentObjectIdsByType(solutionId.Value, Constants.WORKFLOW_TYPE_FLOWS);
                 if (!solutionWorkflowIds.Any()) return;
 
                 var solutionFlowIds = this.GetDeployedFlows(solutionWorkflowIds, new ColumnSet("name"));
@@ -43,13 +43,13 @@ namespace Capgemini.PowerApps.PackageDeployerTemplate.Services
                 {
                     string matchedFlow = null;
 
-                    if (flowsToIgnore !=null)
+                    if (flowsToDeactivate !=null)
                     {
-                         matchedFlow = flowsToIgnore.FirstOrDefault(f => f == solutionFlow.Attributes["name"].ToString());
-                    }                   
+                         matchedFlow = flowsToDeactivate.FirstOrDefault(f => f == solutionFlow.Attributes["name"].ToString());
+                    }
                     
-                    var stateCode =  matchedFlow == null ? 1 : 0;
-                    var statusCode = matchedFlow == null ? 2 : 1;
+                    var stateCode =  matchedFlow == null ? Constants.STATECODE_ACTIVE : Constants.STATECODE_INACTIVE;
+                    var statusCode = matchedFlow == null ? Constants.STATUSCODE_ACTIVE : Constants.STATUSCODE_INACTIVE;
 
                     logger.LogInformation($"Setting flow status for {solutionFlow["name"]} with statecode {stateCode} and statuscode {statusCode}");
 
