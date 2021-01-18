@@ -24,10 +24,10 @@ This project's aim is to build a powerful base Package Deployer template that si
 
 Add a NuGet reference to the [Capgemini.PowerApps.PackageDeployerTemplate](https://www.nuget.org/packages/Capgemini.PowerApps.PackageDeployerTemplate) package in your Package Deployer package project. For more information on how to create the project, refer to Microsoft [documentation](https://docs.microsoft.com/en-us/powerapps/developer/common-data-service/package-deployer/create-packages-package-deployer#step-1-create-a-project-using-the-template)
 
-Update your `PackageTemplate` file (created by following the Microsoft documentation) to inherit from `CapgeminiPackageTemplate` e.g.
+Update your `PackageTemplate` file (created by following the Microsoft documentation) to inherit from `PackageTemplateBase` e.g.
 
 ```csharp
-    public class PackageTemplate : CapgeminiPackageTemplate
+    public class PackageTemplate : PackageTemplateBase
     {
     }
 ```
