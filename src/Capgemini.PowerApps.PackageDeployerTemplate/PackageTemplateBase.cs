@@ -14,10 +14,6 @@
     /// </summary>
     public abstract class PackageTemplateBase : ImportExtension
     {
-#pragma warning disable CS0169
-        private readonly Polly.Policy policy;
-#pragma warning restore CS0169
-
         /// <summary>
         /// Gets the path to the package folder.
         /// </summary>

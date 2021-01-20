@@ -138,7 +138,7 @@
         public bool UpdateStateAndStatusForEntity(string entityLogicalName, Guid entityId, int statecode, int status) => this.crmSvc.UpdateStateAndStatusForEntity(entityLogicalName, entityId, statecode, status);
 
         /// <inheritdoc/>
-        public void Update(Entity record) => this.crmSvc.Update(record);
+        public void Update(Entity entity) => this.crmSvc.Update(entity);
 
         /// <inheritdoc/>
         public Guid Create(Entity entity) => this.crmSvc.Create(entity);
