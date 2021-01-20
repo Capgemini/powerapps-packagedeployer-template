@@ -1,15 +1,15 @@
-﻿using Capgemini.PowerApps.PackageDeployerTemplate.Adapters;
-using Capgemini.PowerApps.PackageDeployerTemplate.Config;
-using Capgemini.PowerApps.PackageDeployerTemplate.Services;
-using Microsoft.Extensions.Logging;
-using Microsoft.Xrm.Sdk;
-using Moq;
-using System;
-using System.Collections.Generic;
-using Xunit;
-
-namespace Capgemini.PowerApps.PackageDeployerTemplate.UnitTests.Services
+﻿namespace Capgemini.PowerApps.PackageDeployerTemplate.UnitTests.Services
 {
+    using System;
+    using System.Collections.Generic;
+    using Capgemini.PowerApps.PackageDeployerTemplate.Adapters;
+    using Capgemini.PowerApps.PackageDeployerTemplate.Config;
+    using Capgemini.PowerApps.PackageDeployerTemplate.Services;
+    using Microsoft.Extensions.Logging;
+    using Microsoft.Xrm.Sdk;
+    using Moq;
+    using Xunit;
+
     public class DataImporterServiceTests
     {
         private readonly Mock<ILogger> loggerMock;
@@ -19,12 +19,10 @@ namespace Capgemini.PowerApps.PackageDeployerTemplate.UnitTests.Services
 
         public DataImporterServiceTests()
         {
-            loggerMock = new Mock<ILogger>();
-            crmServiceAdapterMock = new Mock<ICrmServiceAdapter>();
-            crmServiceAdapterMock.Setup(x => x.GetOrganizationService())
-                .Returns(() => new Mock<IOrganizationService>().Object);
+            this.loggerMock = new Mock<ILogger>();
+            this.crmServiceAdapterMock = new Mock<ICrmServiceAdapter>();
 
-            dataImporterService = new DataImporterService(loggerMock.Object, crmServiceAdapterMock.Object);
+            this.dataImporterService = new DataImporterService(this.loggerMock.Object, this.crmServiceAdapterMock.Object);
         }
 
         [Fact]
@@ -32,7 +30,7 @@ namespace Capgemini.PowerApps.PackageDeployerTemplate.UnitTests.Services
         {
             Assert.Throws<ArgumentNullException>(() =>
             {
-                new DataImporterService(null, crmServiceAdapterMock.Object);
+                new DataImporterService(null, this.crmServiceAdapterMock.Object);
             });
         }
 
@@ -41,28 +39,28 @@ namespace Capgemini.PowerApps.PackageDeployerTemplate.UnitTests.Services
         {
             Assert.Throws<ArgumentNullException>(() =>
             {
-                new DataImporterService(loggerMock.Object, null);
+                new DataImporterService(this.loggerMock.Object, null);
             });
         }
 
         [Fact]
         public void Import_NullImportConfigs_LogsNoConfig()
         {
-            dataImporterService.Import(null, "");
+            this.dataImporterService.Import(null, string.Empty);
 
-            loggerMock.VerifyLog(x => x.LogInformation("No imports have been configured."));
+            this.loggerMock.VerifyLog(x => x.LogInformation("No imports have been configured."));
         }
 
         [Fact]
         public void Import_EmptyImportConfigs_LogsNoConfig()
         {
-            dataImporterService.Import(new List<DataImportConfig>(), "");
+            this.dataImporterService.Import(new List<DataImportConfig>(), string.Empty);
 
-            loggerMock.VerifyLog(x => x.LogInformation("No imports have been configured."));
+            this.loggerMock.VerifyLog(x => x.LogInformation("No imports have been configured."));
         }
 
-        // TODO: Test call to the Data Migrator package but `CrmFileDataImporter` is newed up in the service itself. 
-        // My first idea is a factory but that means more that the calling code has to pass it. Is a fully DI containter 
+        // TODO: Test call to the Data Migrator package but `CrmFileDataImporter` is newed up in the service itself.
+        // My first idea is a factory but that means more that the calling code has to pass it. Is a fully DI containter
         // an option here?
     }
 }

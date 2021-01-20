@@ -1,12 +1,12 @@
-﻿using Microsoft.Xrm.Sdk.Query;
-using Xunit;
-using FluentAssertions;
-using System.Linq;
-using Microsoft.Xrm.Sdk;
-using System;
-
-namespace Capgemini.PowerApps.PackageDeployerTemplate.IntegrationTests
+﻿namespace Capgemini.PowerApps.PackageDeployerTemplate.IntegrationTests
 {
+    using System;
+    using System.Linq;
+    using FluentAssertions;
+    using Microsoft.Xrm.Sdk;
+    using Microsoft.Xrm.Sdk.Query;
+    using Xunit;
+
     public class CapgeminiPackageTemplateTests : IClassFixture<PackageDeployerFixture>
     {
         private readonly PackageDeployerFixture fixture;
@@ -124,8 +124,8 @@ namespace Capgemini.PowerApps.PackageDeployerTemplate.IntegrationTests
         }
 
         [Theory]
-        [InlineData("Account Creation Trigger -> Terminate", Constants.STATECODE_INACTIVE)]
-        [InlineData("Account Creation Trigger1 -> Terminate", Constants.STATECODE_ACTIVE)]
+        [InlineData("Account Creation Trigger -> Terminate", Constants.Process.StateCodeInactive)]
+        [InlineData("Account Creation Trigger1 -> Terminate", Constants.Process.StateCodeActive)]
         public void CapgeminiPackageTemplate_FlowsAreActivated(string workflowName, int stateCode)
         {
             var workflowQuery = new QueryByAttribute("workflow");

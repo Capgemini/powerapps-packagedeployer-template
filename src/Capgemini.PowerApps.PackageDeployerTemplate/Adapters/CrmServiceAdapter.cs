@@ -1,24 +1,32 @@
-﻿using Microsoft.Xrm.Sdk;
-using Microsoft.Xrm.Sdk.Messages;
-using Microsoft.Xrm.Sdk.Query;
-using Microsoft.Xrm.Tooling.Connector;
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-
-namespace Capgemini.PowerApps.PackageDeployerTemplate.Adapters
+﻿namespace Capgemini.PowerApps.PackageDeployerTemplate.Adapters
 {
+    using System;
+    using System.Collections.Generic;
+    using System.IO;
+    using System.Linq;
+    using Microsoft.Xrm.Sdk;
+    using Microsoft.Xrm.Sdk.Messages;
+    using Microsoft.Xrm.Sdk.Query;
+    using Microsoft.Xrm.Tooling.Connector;
+
+    /// <summary>
+    /// An extended <see cref="IOrganizationService"/> built on <see cref="CrmServiceClient"/>.
+    /// </summary>
     public class CrmServiceAdapter : ICrmServiceAdapter, IDisposable
     {
         private readonly CrmServiceClient crmSvc;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="CrmServiceAdapter"/> class.
+        /// </summary>
+        /// <param name="crmSvc">The <see cref="CrmServiceClient"/>.</param>
         public CrmServiceAdapter(CrmServiceClient crmSvc)
         {
             this.crmSvc = crmSvc;
         }
 
-        public EntityCollection QueryRecordsBySingleAttributeValue(string entity, string attribute, IEnumerable<object> values)
+        /// <inheritdoc/>
+        public EntityCollection RetrieveMultipleByAttribute(string entity, string attribute, IEnumerable<object> values)
         {
             if (string.IsNullOrEmpty(entity))
             {
@@ -38,26 +46,27 @@ namespace Capgemini.PowerApps.PackageDeployerTemplate.Adapters
             var query = new QueryByAttribute(entity)
             {
                 Attributes = { attribute },
-                ColumnSet = new ColumnSet(false)
+                ColumnSet = new ColumnSet(false),
             };
             query.Values.AddRange(values);
 
-            return crmSvc.RetrieveMultiple(query);
+            return this.crmSvc.RetrieveMultiple(query);
         }
 
-        public ExecuteMultipleResponse SetRecordsStateInBatch(EntityCollection queryResponse, int statecode, int statuscode)
+        /// <inheritdoc/>
+        public ExecuteMultipleResponse UpdateStateAndStatusForEntityInBatch(EntityCollection records, int statecode, int statuscode)
         {
-            if (queryResponse is null)
+            if (records is null)
             {
-                throw new ArgumentNullException(nameof(queryResponse));
+                throw new ArgumentNullException(nameof(records));
             }
 
-            if (string.IsNullOrEmpty(queryResponse.EntityName))
+            if (string.IsNullOrEmpty(records.EntityName))
             {
-                throw new ArgumentException($"{nameof(EntityCollection.EntityName)} must have a value.", nameof(queryResponse));
+                throw new ArgumentException($"{nameof(EntityCollection.EntityName)} must have a value.", nameof(records));
             }
 
-            if (queryResponse.Entities.Count == 0)
+            if (records.Entities.Count == 0)
             {
                 return new ExecuteMultipleResponse();
             }
@@ -72,15 +81,16 @@ namespace Capgemini.PowerApps.PackageDeployerTemplate.Adapters
                 throw new ArgumentException("You must provide a value greater than or equal to 0.", nameof(statuscode));
             }
 
-            var batchId = crmSvc.CreateBatchOperationRequest($"Set state of {queryResponse.EntityName}", true, true);
-            foreach (var matchingRecord in queryResponse.Entities)
+            var batchId = this.crmSvc.CreateBatchOperationRequest($"Set state of {records.EntityName}", true, true);
+            foreach (var matchingRecord in records.Entities)
             {
-                crmSvc.UpdateStateAndStatusForEntity(queryResponse.EntityName, matchingRecord.Id, statecode, statuscode, batchId);
+                this.crmSvc.UpdateStateAndStatusForEntity(records.EntityName, matchingRecord.Id, statecode, statuscode, batchId);
             }
 
-            return crmSvc.ExecuteBatch(batchId);
+            return this.crmSvc.ExecuteBatch(batchId);
         }
 
+        /// <inheritdoc/>
         public void ImportWordTemplate(string filePath)
         {
             var fileInfo = new FileInfo(filePath);
@@ -92,7 +102,7 @@ namespace Capgemini.PowerApps.PackageDeployerTemplate.Adapters
             }
 
             var logicalName = WordTemplateUtilities.GetEntityLogicalName(filePath);
-            var targetEntityTypeCode = crmSvc.GetEntityTypeCode(logicalName);
+            var targetEntityTypeCode = this.crmSvc.GetEntityTypeCode(logicalName);
             var entityTypeCode = WordTemplateUtilities.GetEntityTypeCode(filePath);
 
             if (targetEntityTypeCode != entityTypeCode)
@@ -100,7 +110,7 @@ namespace Capgemini.PowerApps.PackageDeployerTemplate.Adapters
                 WordTemplateUtilities.SetEntity(filePath, logicalName, targetEntityTypeCode);
             }
 
-            var retrieveMultipleResponse = crmSvc.RetrieveMultiple(
+            var retrieveMultipleResponse = this.crmSvc.RetrieveMultiple(
                 new QueryByAttribute("documenttemplate") { Attributes = { "name" }, Values = { Path.GetFileNameWithoutExtension(fileInfo.Name) } });
 
             var documentTemplate = retrieveMultipleResponse.Entities.FirstOrDefault();
@@ -109,34 +119,55 @@ namespace Capgemini.PowerApps.PackageDeployerTemplate.Adapters
                 documentTemplate = new Entity("documenttemplate");
                 documentTemplate["name"] = Path.GetFileNameWithoutExtension(fileInfo.Name);
             }
+
             documentTemplate["associatedentitytypecode"] = logicalName;
             documentTemplate["documenttype"] = templateType;
             documentTemplate["content"] = Convert.ToBase64String(File.ReadAllBytes(filePath));
 
             if (documentTemplate.Id == Guid.Empty)
             {
-                crmSvc.Create(documentTemplate);
+                this.crmSvc.Create(documentTemplate);
             }
             else
             {
-                crmSvc.Update(documentTemplate);
+                this.crmSvc.Update(documentTemplate);
             }
         }
 
-        public IOrganizationService GetOrganizationService() => (IOrganizationService)crmSvc.OrganizationWebProxyClient ?? crmSvc.OrganizationServiceProxy;
+        /// <inheritdoc/>
+        public bool UpdateStateAndStatusForEntity(string entityLogicalName, Guid entityId, int statecode, int status) => this.crmSvc.UpdateStateAndStatusForEntity(entityLogicalName, entityId, statecode, status);
 
-        public EntityCollection RetrieveMultiple(QueryByAttribute query) => crmSvc.RetrieveMultiple(query);
+        /// <inheritdoc/>
+        public void Update(Entity entity) => this.crmSvc.Update(entity);
 
-        public EntityCollection RetrieveMultiple(QueryExpression query) => crmSvc.RetrieveMultiple(query);
+        /// <inheritdoc/>
+        public Guid Create(Entity entity) => this.crmSvc.Create(entity);
 
-        public bool UpdateStateAndStatusForEntity(string entityLogicalName, Guid EntityId, int statecode, int status) => crmSvc.UpdateStateAndStatusForEntity(entityLogicalName, EntityId, statecode, status);
+        /// <inheritdoc/>
+        public Entity Retrieve(string entityName, Guid id, ColumnSet columnSet) => this.crmSvc.Retrieve(entityName, id, columnSet);
 
-        public void Update(Entity record) => crmSvc.Update(record);
+        /// <inheritdoc/>
+        public void Delete(string entityName, Guid id) => this.crmSvc.Delete(entityName, id);
 
+        /// <inheritdoc/>
+        public OrganizationResponse Execute(OrganizationRequest request) => this.crmSvc.Execute(request);
+
+        /// <inheritdoc/>
+        public void Associate(string entityName, Guid entityId, Relationship relationship, EntityReferenceCollection relatedEntities)
+            => this.crmSvc.Associate(entityName, entityId, relationship, relatedEntities);
+
+        /// <inheritdoc/>
+        public void Disassociate(string entityName, Guid entityId, Relationship relationship, EntityReferenceCollection relatedEntities) =>
+            this.crmSvc.Disassociate(entityName, entityId, relationship, relatedEntities);
+
+        /// <inheritdoc/>
+        public EntityCollection RetrieveMultiple(QueryBase query) => this.crmSvc.RetrieveMultiple(query);
+
+        /// <inheritdoc/>
         public void Dispose()
         {
-            crmSvc.Dispose();
+            GC.SuppressFinalize(this);
+            this.crmSvc.Dispose();
         }
-
     }
 }

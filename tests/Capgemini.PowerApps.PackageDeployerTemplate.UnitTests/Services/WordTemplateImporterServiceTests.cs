@@ -1,14 +1,14 @@
-﻿using Capgemini.PowerApps.PackageDeployerTemplate.Adapters;
-using Capgemini.PowerApps.PackageDeployerTemplate.Services;
-using Microsoft.Extensions.Logging;
-using Microsoft.Xrm.Sdk;
-using Moq;
-using System;
-using System.Linq;
-using Xunit;
-
-namespace Capgemini.PowerApps.PackageDeployerTemplate.UnitTests.Services
+﻿namespace Capgemini.PowerApps.PackageDeployerTemplate.UnitTests.Services
 {
+    using System;
+    using System.Linq;
+    using Capgemini.PowerApps.PackageDeployerTemplate.Adapters;
+    using Capgemini.PowerApps.PackageDeployerTemplate.Services;
+    using Microsoft.Extensions.Logging;
+    using Microsoft.Xrm.Sdk;
+    using Moq;
+    using Xunit;
+
     public class WordTemplateImporterServiceTests
     {
         private readonly Mock<ILogger> loggerMock;
@@ -18,12 +18,10 @@ namespace Capgemini.PowerApps.PackageDeployerTemplate.UnitTests.Services
 
         public WordTemplateImporterServiceTests()
         {
-            loggerMock = new Mock<ILogger>();
-            crmServiceAdapterMock = new Mock<ICrmServiceAdapter>();
-            crmServiceAdapterMock.Setup(x => x.GetOrganizationService())
-                .Returns(() => new Mock<IOrganizationService>().Object);
+            this.loggerMock = new Mock<ILogger>();
+            this.crmServiceAdapterMock = new Mock<ICrmServiceAdapter>();
 
-            wordTemplateImporterService = new WordTemplateImporterService(loggerMock.Object, crmServiceAdapterMock.Object);
+            this.wordTemplateImporterService = new WordTemplateImporterService(this.loggerMock.Object, this.crmServiceAdapterMock.Object);
         }
 
         [Fact]
@@ -31,7 +29,7 @@ namespace Capgemini.PowerApps.PackageDeployerTemplate.UnitTests.Services
         {
             Assert.Throws<ArgumentNullException>(() =>
             {
-                new WordTemplateImporterService(null, crmServiceAdapterMock.Object);
+                new WordTemplateImporterService(null, this.crmServiceAdapterMock.Object);
             });
         }
 
@@ -40,24 +38,24 @@ namespace Capgemini.PowerApps.PackageDeployerTemplate.UnitTests.Services
         {
             Assert.Throws<ArgumentNullException>(() =>
             {
-                new WordTemplateImporterService(loggerMock.Object, null);
+                new WordTemplateImporterService(this.loggerMock.Object, null);
             });
         }
 
         [Fact]
         public void ImportWordTemplates_NullTemplatesToImport_LogNoConfig()
         {
-            wordTemplateImporterService.ImportWordTemplates(null, "");
+            this.wordTemplateImporterService.ImportWordTemplates(null, string.Empty);
 
-            loggerMock.VerifyLog(x => x.LogInformation("No Work Template to import."));
+            this.loggerMock.VerifyLog(x => x.LogInformation("No Work Template to import."));
         }
 
         [Fact]
         public void ImportWordTemplates_EmptyTemplatesToImport_LogNoConfig()
         {
-            wordTemplateImporterService.ImportWordTemplates(Array.Empty<string>(), "");
+            this.wordTemplateImporterService.ImportWordTemplates(Array.Empty<string>(), string.Empty);
 
-            loggerMock.VerifyLog(x => x.LogInformation("No Work Template to import."));
+            this.loggerMock.VerifyLog(x => x.LogInformation("No Work Template to import."));
         }
 
         [Fact]
@@ -66,10 +64,10 @@ namespace Capgemini.PowerApps.PackageDeployerTemplate.UnitTests.Services
             var workTemplatesToImport = new string[] { "word_template_one", "word_template_two" };
             var packageFolderPath = "F:/fake_directory_to_templates/";
 
-            wordTemplateImporterService.ImportWordTemplates(workTemplatesToImport, packageFolderPath);
+            this.wordTemplateImporterService.ImportWordTemplates(workTemplatesToImport, packageFolderPath);
 
-            crmServiceAdapterMock.Verify(
-                x => x.ImportWordTemplate(It.IsIn<string>(
+            this.crmServiceAdapterMock.Verify(
+                x => x.ImportWordTemplate(It.IsIn(
                     workTemplatesToImport.Select(path => packageFolderPath + path))),
                 Times.Exactly(workTemplatesToImport.Length));
         }
@@ -80,11 +78,11 @@ namespace Capgemini.PowerApps.PackageDeployerTemplate.UnitTests.Services
             var workTemplatesToImport = new string[] { "word_template_one", "word_template_two" };
             var packageFolderPath = "F:/fake_directory_to_templates/";
 
-            wordTemplateImporterService.ImportWordTemplates(workTemplatesToImport, packageFolderPath);
+            this.wordTemplateImporterService.ImportWordTemplates(workTemplatesToImport, packageFolderPath);
 
             foreach (var workTemplate in workTemplatesToImport)
             {
-                loggerMock.VerifyLog(
+                this.loggerMock.VerifyLog(
                     x => x.LogInformation($"{nameof(WordTemplateImporterService)}: Word Template imported - {workTemplate}"), Times.Once);
             }
         }

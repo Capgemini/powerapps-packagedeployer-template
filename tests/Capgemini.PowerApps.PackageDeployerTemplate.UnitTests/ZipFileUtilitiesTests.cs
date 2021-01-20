@@ -1,11 +1,10 @@
-﻿using System;
-using System.IO;
-using NPOI.XWPF.UserModel;
-using Xunit;
-using FluentAssertions;
-
-namespace Capgemini.PowerApps.PackageDeployerTemplate.UnitTests
+﻿namespace Capgemini.PowerApps.PackageDeployerTemplate.UnitTests
 {
+    using System.IO;
+    using FluentAssertions;
+    using NPOI.XWPF.UserModel;
+    using Xunit;
+
     public class ZipFileUtilitiesTests
     {
         public ZipFileUtilitiesTests()

@@ -1,16 +1,14 @@
-﻿using System;
-using System.Diagnostics;
-using System.Linq;
-using System.Net;
-using Microsoft.Xrm.Sdk.Query;
-using Microsoft.Xrm.Tooling.Connector;
-
-namespace Capgemini.PowerApps.PackageDeployerTemplate.IntegrationTests
+﻿namespace Capgemini.PowerApps.PackageDeployerTemplate.IntegrationTests
 {
+    using System;
+    using System.Diagnostics;
+    using System.Linq;
+    using System.Net;
+    using Microsoft.Xrm.Sdk.Query;
+    using Microsoft.Xrm.Tooling.Connector;
+
     public class PackageDeployerFixture : IDisposable
     {
-        public CrmServiceClient ServiceClient { get; private set; }
-
         public PackageDeployerFixture()
         {
             var process = new Process();
@@ -31,14 +29,17 @@ namespace Capgemini.PowerApps.PackageDeployerTemplate.IntegrationTests
             ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
             this.ServiceClient = new CrmServiceClient(
                 $"Url={Environment.GetEnvironmentVariable("CAPGEMINI_PACKAGE_DEPLOYER_TESTS_URL")}; Username={Environment.GetEnvironmentVariable("CAPGEMINI_PACKAGE_DEPLOYER_TESTS_USERNAME")}; Password={Environment.GetEnvironmentVariable("CAPGEMINI_PACKAGE_DEPLOYER_TESTS_PASSWORD")}; authtype=Office365");
-
         }
+
+        public CrmServiceClient ServiceClient { get; private set; }
 
         public void Dispose()
         {
-            DeleteWordTemplates();
-            DeleteData();
-            UninstallSolution();
+            GC.SuppressFinalize(this);
+
+            this.DeleteWordTemplates();
+            this.DeleteData();
+            this.UninstallSolution();
 
             this.ServiceClient.Dispose();
         }
@@ -54,11 +55,12 @@ namespace Capgemini.PowerApps.PackageDeployerTemplate.IntegrationTests
                 this.ServiceClient.UpdateStateAndStatusForEntity("sla", sla.Id, 0, 1);
             }
 
-            var solutionQuery = new QueryExpression("solution");
-            solutionQuery.Criteria = new FilterExpression
+            var solutionQuery = new QueryExpression("solution")
             {
-                FilterOperator = LogicalOperator.Or,
-                Filters =
+                Criteria = new FilterExpression
+                {
+                    FilterOperator = LogicalOperator.Or,
+                    Filters =
                           {
                             new FilterExpression
                             {
@@ -67,9 +69,10 @@ namespace Capgemini.PowerApps.PackageDeployerTemplate.IntegrationTests
                               {
                                 new ConditionExpression("uniquename", ConditionOperator.Equal, "cap_PackageDeployerTemplate_IntegrationTest"),
                                 new ConditionExpression("uniquename", ConditionOperator.Equal, "cap_PackageDeployerTemplate_IntegrationTest_Flows"),
-                              }
-                            }
-                          }
+                              },
+                            },
+                          },
+                },
             };
 
             var solutionRecord = this.ServiceClient.RetrieveMultiple(solutionQuery).Entities;

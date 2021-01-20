@@ -1,40 +1,68 @@
-﻿using Microsoft.Extensions.Logging;
-using System;
-
-namespace Capgemini.PowerApps.PackageDeployerTemplate.Adapters
+﻿namespace Capgemini.PowerApps.PackageDeployerTemplate.Adapters
 {
-    public class DataMigratorLoggerAdapter : Capgemini.DataMigration.Core.ILogger
-    {
-        private readonly Microsoft.Extensions.Logging.ILogger logger;
+    using System;
+    using Microsoft.Extensions.Logging;
 
-        public DataMigratorLoggerAdapter(Microsoft.Extensions.Logging.ILogger traceLogger)
+    /// <summary>
+    /// An adapter from <see cref="DataMigration.Core.ILogger"/> to <see cref="ILogger"/>.
+    /// </summary>
+    public class DataMigratorLoggerAdapter : DataMigration.Core.ILogger
+    {
+        private readonly ILogger logger;
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="DataMigratorLoggerAdapter"/> class.
+        /// </summary>
+        /// <param name="traceLogger">The <see cref="ILogger"/>.</param>
+        public DataMigratorLoggerAdapter(ILogger traceLogger)
         {
             this.logger = traceLogger;
         }
 
+        /// <summary>
+        /// Logs an error.
+        /// </summary>
+        /// <param name="message">The message to log.</param>
         public void LogError(string message)
         {
             this.logger.LogError(message);
         }
 
+        /// <summary>
+        /// Logs an error with an inner exception.
+        /// </summary>
+        /// <param name="message">The message to log.</param>
+        /// <param name="ex">The exception to log.</param>
         public void LogError(string message, Exception ex)
         {
             this.logger.LogError(ex, message);
         }
 
+        /// <summary>
+        /// Logs an info message.
+        /// </summary>
+        /// <param name="message">The message to log.</param>
         public void LogInfo(string message)
         {
             this.logger.LogInformation(message);
         }
 
+        /// <summary>
+        /// Logs a verbose message.
+        /// </summary>
+        /// <param name="message">The message to log.</param>
         public void LogVerbose(string message)
         {
-            logger.LogDebug(message);
+            this.logger.LogDebug(message);
         }
 
+        /// <summary>
+        /// Logs a warning.
+        /// </summary>
+        /// <param name="message">The message to log.</param>
         public void LogWarning(string message)
         {
-            logger.LogWarning(message);
+            this.logger.LogWarning(message);
         }
     }
 }

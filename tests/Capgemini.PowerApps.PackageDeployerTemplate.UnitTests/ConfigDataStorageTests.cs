@@ -1,10 +1,9 @@
-﻿using Capgemini.PowerApps.PackageDeployerTemplate.Config;
-using FluentAssertions;
-
-using Xunit;
-
-namespace Capgemini.PowerApps.PackageDeployerTemplate.UnitTests
+﻿namespace Capgemini.PowerApps.PackageDeployerTemplate.UnitTests
 {
+    using Capgemini.PowerApps.PackageDeployerTemplate.Config;
+    using FluentAssertions;
+    using Xunit;
+
     public class ConfigDataStorageTests
     {
         private readonly ConfigDataStorage config;
@@ -55,9 +54,9 @@ namespace Capgemini.PowerApps.PackageDeployerTemplate.UnitTests
         {
             var expected = new DataImportConfig
             {
-                 DataFolderPath = "Data/Reference/PreDeploy/Extract",
-                 ImportBeforeSolutions = true,
-                 ImportConfigPath = "Data/Reference/PreDeploy/ImportConfig.json"
+                DataFolderPath = "Data/Reference/PreDeploy/Extract",
+                ImportBeforeSolutions = true,
+                ImportConfigPath = "Data/Reference/PreDeploy/ImportConfig.json",
             };
 
             this.config.DataImports.Should().Contain(element =>
@@ -72,7 +71,7 @@ namespace Capgemini.PowerApps.PackageDeployerTemplate.UnitTests
             this.config.ActivateDeactivateSLAs.Should().BeFalse();
         }
 
-        private ConfigDataStorage LoadConfig(string path)
+        private static ConfigDataStorage LoadConfig(string path)
         {
             return ConfigDataStorage.Load(TestUtilities.GetResourcePath(path));
         }
