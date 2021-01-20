@@ -1,16 +1,16 @@
-﻿using Capgemini.PowerApps.PackageDeployerTemplate.Adapters;
-using Capgemini.PowerApps.PackageDeployerTemplate.Services;
-using Microsoft.Extensions.Logging;
-using Microsoft.Xrm.Sdk;
-using Microsoft.Xrm.Sdk.Messages;
-using Moq;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using Xunit;
-
-namespace Capgemini.PowerApps.PackageDeployerTemplate.UnitTests.Services
+﻿namespace Capgemini.PowerApps.PackageDeployerTemplate.UnitTests.Services
 {
+    using System;
+    using System.Collections.Generic;
+    using System.Linq;
+    using Capgemini.PowerApps.PackageDeployerTemplate.Adapters;
+    using Capgemini.PowerApps.PackageDeployerTemplate.Services;
+    using Microsoft.Extensions.Logging;
+    using Microsoft.Xrm.Sdk;
+    using Microsoft.Xrm.Sdk.Messages;
+    using Moq;
+    using Xunit;
+
     public class SlaActivatorServiceTests
     {
         private readonly Mock<ILogger> loggerMock;
@@ -20,12 +20,10 @@ namespace Capgemini.PowerApps.PackageDeployerTemplate.UnitTests.Services
 
         public SlaActivatorServiceTests()
         {
-            loggerMock = new Mock<ILogger>();
-            crmServiceAdapterMock = new Mock<ICrmServiceAdapter>();
-            crmServiceAdapterMock.Setup(x => x.GetOrganizationService())
-                .Returns(() => new Mock<IOrganizationService>().Object);
+            this.loggerMock = new Mock<ILogger>();
+            this.crmServiceAdapterMock = new Mock<ICrmServiceAdapter>();
 
-            slaActivatorService = new SlaDeploymentService(loggerMock.Object, crmServiceAdapterMock.Object);
+            this.slaActivatorService = new SlaDeploymentService(this.loggerMock.Object, this.crmServiceAdapterMock.Object);
         }
 
         [Fact]
@@ -33,7 +31,7 @@ namespace Capgemini.PowerApps.PackageDeployerTemplate.UnitTests.Services
         {
             Assert.Throws<ArgumentNullException>(() =>
             {
-                new SlaDeploymentService(null, crmServiceAdapterMock.Object);
+                new SlaDeploymentService(null, this.crmServiceAdapterMock.Object);
             });
         }
 
@@ -42,7 +40,7 @@ namespace Capgemini.PowerApps.PackageDeployerTemplate.UnitTests.Services
         {
             Assert.Throws<ArgumentNullException>(() =>
             {
-                new SlaDeploymentService(loggerMock.Object, null);
+                new SlaDeploymentService(this.loggerMock.Object, null);
             });
         }
 
@@ -53,30 +51,30 @@ namespace Capgemini.PowerApps.PackageDeployerTemplate.UnitTests.Services
             {
                 new Entity("sla", Guid.NewGuid()),
                 new Entity("sla", Guid.NewGuid()),
-                new Entity("sla", Guid.NewGuid())
+                new Entity("sla", Guid.NewGuid()),
             };
 
-            crmServiceAdapterMock
-                .Setup(x => x.QueryRecordsBySingleAttributeValue("sla", "statecode", It.Is<object[]>(value => (int)value[0] == 0)))
+            this.crmServiceAdapterMock
+                .Setup(x => x.RetrieveMultipleByAttribute("sla", "statecode", It.Is<object[]>(value => (int)value[0] == 0)))
                 .Returns(() =>
                 {
                     var entityCollection = new EntityCollection
                     {
-                        EntityName = "sla"
+                        EntityName = "sla",
                     };
                     entityCollection.Entities.AddRange(allSlas);
                     return entityCollection;
                 })
                 .Verifiable();
 
-            crmServiceAdapterMock
-                .Setup(x => x.SetRecordsStateInBatch(It.IsAny<EntityCollection>(), It.IsAny<int>(), It.IsAny<int>()))
+            this.crmServiceAdapterMock
+                .Setup(x => x.UpdateStateAndStatusForEntityInBatch(It.IsAny<EntityCollection>(), It.IsAny<int>(), It.IsAny<int>()))
                 .Returns((EntityCollection records, int statecode, int statuscode) =>
                 {
                     var responseItemCollection = new ExecuteMultipleResponseItemCollection
                     {
                         new ExecuteMultipleResponseItem { },
-                        new ExecuteMultipleResponseItem { }
+                        new ExecuteMultipleResponseItem { },
                     };
 
                     var response = new ExecuteMultipleResponse();
@@ -84,9 +82,9 @@ namespace Capgemini.PowerApps.PackageDeployerTemplate.UnitTests.Services
                     return response;
                 });
 
-            slaActivatorService.ActivateAll();
+            this.slaActivatorService.ActivateAll();
 
-            crmServiceAdapterMock.Verify();
+            this.crmServiceAdapterMock.Verify();
         }
 
         [Fact]
@@ -96,23 +94,23 @@ namespace Capgemini.PowerApps.PackageDeployerTemplate.UnitTests.Services
             {
                 new Entity("sla", Guid.NewGuid()),
                 new Entity("sla", Guid.NewGuid()),
-                new Entity("sla", Guid.NewGuid())
+                new Entity("sla", Guid.NewGuid()),
             };
 
-            crmServiceAdapterMock
-                .Setup(x => x.QueryRecordsBySingleAttributeValue("sla", "statecode", It.Is<object[]>(value => (int)value[0] == 0)))
+            this.crmServiceAdapterMock
+                .Setup(x => x.RetrieveMultipleByAttribute("sla", "statecode", It.Is<object[]>(value => (int)value[0] == 0)))
                 .Returns(() =>
                 {
                     var entityCollection = new EntityCollection
                     {
-                        EntityName = "sla"
+                        EntityName = "sla",
                     };
                     entityCollection.Entities.AddRange(allSlas);
                     return entityCollection;
                 });
 
-            crmServiceAdapterMock
-                .Setup(x => x.SetRecordsStateInBatch(
+            this.crmServiceAdapterMock
+                .Setup(x => x.UpdateStateAndStatusForEntityInBatch(
                     It.Is<EntityCollection>(collection => allSlas.All(sla => collection.Entities.Contains(sla))),
                     It.IsAny<int>(),
                     It.IsAny<int>()))
@@ -121,7 +119,7 @@ namespace Capgemini.PowerApps.PackageDeployerTemplate.UnitTests.Services
                     var responseItemCollection = new ExecuteMultipleResponseItemCollection
                     {
                         new ExecuteMultipleResponseItem { },
-                        new ExecuteMultipleResponseItem { }
+                        new ExecuteMultipleResponseItem { },
                     };
 
                     var response = new ExecuteMultipleResponse();
@@ -130,9 +128,9 @@ namespace Capgemini.PowerApps.PackageDeployerTemplate.UnitTests.Services
                 })
                 .Verifiable();
 
-            slaActivatorService.ActivateAll();
+            this.slaActivatorService.ActivateAll();
 
-            crmServiceAdapterMock.Verify();
+            this.crmServiceAdapterMock.Verify();
         }
 
         [Fact]
@@ -142,23 +140,23 @@ namespace Capgemini.PowerApps.PackageDeployerTemplate.UnitTests.Services
             {
                 new Entity("sla", Guid.NewGuid()),
                 new Entity("sla", Guid.NewGuid()),
-                new Entity("sla", Guid.NewGuid())
+                new Entity("sla", Guid.NewGuid()),
             };
 
-            crmServiceAdapterMock
-                .Setup(x => x.QueryRecordsBySingleAttributeValue("sla", "statecode", It.Is<object[]>(value => (int)value[0] == 0)))
+            this.crmServiceAdapterMock
+                .Setup(x => x.RetrieveMultipleByAttribute("sla", "statecode", It.Is<object[]>(value => (int)value[0] == 0)))
                 .Returns(() =>
                 {
                     var entityCollection = new EntityCollection
                     {
-                        EntityName = "sla"
+                        EntityName = "sla",
                     };
                     entityCollection.Entities.AddRange(allSlas);
                     return entityCollection;
                 });
 
-            crmServiceAdapterMock
-                .Setup(x => x.SetRecordsStateInBatch(
+            this.crmServiceAdapterMock
+                .Setup(x => x.UpdateStateAndStatusForEntityInBatch(
                     It.Is<EntityCollection>(collection => allSlas.All(sla => collection.Entities.Contains(sla))),
                     It.IsAny<int>(),
                     It.IsAny<int>()))
@@ -170,10 +168,10 @@ namespace Capgemini.PowerApps.PackageDeployerTemplate.UnitTests.Services
                         {
                             Fault = new OrganizationServiceFault
                             {
-                                Message = "Test fault response"
-                            }
+                                Message = "Test fault response",
+                            },
                         },
-                        new ExecuteMultipleResponseItem { }
+                        new ExecuteMultipleResponseItem { },
                     };
 
                     var response = new ExecuteMultipleResponse();
@@ -182,11 +180,11 @@ namespace Capgemini.PowerApps.PackageDeployerTemplate.UnitTests.Services
                     return response;
                 });
 
-            slaActivatorService.ActivateAll();
+            this.slaActivatorService.ActivateAll();
 
-            loggerMock.VerifyLog(x => x.LogError(It.IsAny<string>()), Times.Exactly(2));
-            loggerMock.VerifyLog(x => x.LogError("Error activating SLAs."));
-            loggerMock.VerifyLog(x => x.LogError("Test fault response"));
+            this.loggerMock.VerifyLog(x => x.LogError(It.IsAny<string>()), Times.Exactly(2));
+            this.loggerMock.VerifyLog(x => x.LogError("Error activating SLAs."));
+            this.loggerMock.VerifyLog(x => x.LogError("Test fault response"));
         }
 
         [Fact]
@@ -196,30 +194,30 @@ namespace Capgemini.PowerApps.PackageDeployerTemplate.UnitTests.Services
             {
                 new Entity("sla", Guid.NewGuid()),
                 new Entity("sla", Guid.NewGuid()),
-                new Entity("sla", Guid.NewGuid())
+                new Entity("sla", Guid.NewGuid()),
             };
 
-            crmServiceAdapterMock
-                .Setup(x => x.QueryRecordsBySingleAttributeValue("sla", "statecode", It.Is<object[]>(value => (int)value[0] == 1)))
+            this.crmServiceAdapterMock
+                .Setup(x => x.RetrieveMultipleByAttribute("sla", "statecode", It.Is<object[]>(value => (int)value[0] == 1)))
                 .Returns(() =>
                 {
                     var entityCollection = new EntityCollection
                     {
-                        EntityName = "sla"
+                        EntityName = "sla",
                     };
                     entityCollection.Entities.AddRange(allSlas);
                     return entityCollection;
                 })
                 .Verifiable();
 
-            crmServiceAdapterMock
-                .Setup(x => x.SetRecordsStateInBatch(It.IsAny<EntityCollection>(), It.IsAny<int>(), It.IsAny<int>()))
+            this.crmServiceAdapterMock
+                .Setup(x => x.UpdateStateAndStatusForEntityInBatch(It.IsAny<EntityCollection>(), It.IsAny<int>(), It.IsAny<int>()))
                 .Returns((EntityCollection records, int statecode, int statuscode) =>
                 {
                     var responseItemCollection = new ExecuteMultipleResponseItemCollection
                     {
                         new ExecuteMultipleResponseItem { },
-                        new ExecuteMultipleResponseItem { }
+                        new ExecuteMultipleResponseItem { },
                     };
 
                     var response = new ExecuteMultipleResponse();
@@ -227,9 +225,9 @@ namespace Capgemini.PowerApps.PackageDeployerTemplate.UnitTests.Services
                     return response;
                 });
 
-            slaActivatorService.DeactivateAll();
+            this.slaActivatorService.DeactivateAll();
 
-            crmServiceAdapterMock.Verify();
+            this.crmServiceAdapterMock.Verify();
         }
 
         [Fact]
@@ -239,23 +237,23 @@ namespace Capgemini.PowerApps.PackageDeployerTemplate.UnitTests.Services
             {
                 new Entity("sla", Guid.NewGuid()),
                 new Entity("sla", Guid.NewGuid()),
-                new Entity("sla", Guid.NewGuid())
+                new Entity("sla", Guid.NewGuid()),
             };
 
-            crmServiceAdapterMock
-                .Setup(x => x.QueryRecordsBySingleAttributeValue("sla", "statecode", It.Is<object[]>(value => (int)value[0] == 1)))
+            this.crmServiceAdapterMock
+                .Setup(x => x.RetrieveMultipleByAttribute("sla", "statecode", It.Is<object[]>(value => (int)value[0] == 1)))
                 .Returns(() =>
                 {
                     var entityCollection = new EntityCollection
                     {
-                        EntityName = "sla"
+                        EntityName = "sla",
                     };
                     entityCollection.Entities.AddRange(allSlas);
                     return entityCollection;
                 });
 
-            crmServiceAdapterMock
-                .Setup(x => x.SetRecordsStateInBatch(
+            this.crmServiceAdapterMock
+                .Setup(x => x.UpdateStateAndStatusForEntityInBatch(
                     It.Is<EntityCollection>(collection => allSlas.All(sla => collection.Entities.Contains(sla))),
                     It.IsAny<int>(),
                     It.IsAny<int>()))
@@ -264,7 +262,7 @@ namespace Capgemini.PowerApps.PackageDeployerTemplate.UnitTests.Services
                     var responseItemCollection = new ExecuteMultipleResponseItemCollection
                     {
                         new ExecuteMultipleResponseItem { },
-                        new ExecuteMultipleResponseItem { }
+                        new ExecuteMultipleResponseItem { },
                     };
 
                     var response = new ExecuteMultipleResponse();
@@ -273,9 +271,9 @@ namespace Capgemini.PowerApps.PackageDeployerTemplate.UnitTests.Services
                 })
                 .Verifiable();
 
-            slaActivatorService.DeactivateAll();
+            this.slaActivatorService.DeactivateAll();
 
-            crmServiceAdapterMock.Verify();
+            this.crmServiceAdapterMock.Verify();
         }
 
         [Fact]
@@ -285,23 +283,23 @@ namespace Capgemini.PowerApps.PackageDeployerTemplate.UnitTests.Services
             {
                 new Entity("sla", Guid.NewGuid()),
                 new Entity("sla", Guid.NewGuid()),
-                new Entity("sla", Guid.NewGuid())
+                new Entity("sla", Guid.NewGuid()),
             };
 
-            crmServiceAdapterMock
-                .Setup(x => x.QueryRecordsBySingleAttributeValue("sla", "statecode", It.Is<object[]>(value => (int)value[0] == 1)))
+            this.crmServiceAdapterMock
+                .Setup(x => x.RetrieveMultipleByAttribute("sla", "statecode", It.Is<object[]>(value => (int)value[0] == 1)))
                 .Returns(() =>
                 {
                     var entityCollection = new EntityCollection
                     {
-                        EntityName = "sla"
+                        EntityName = "sla",
                     };
                     entityCollection.Entities.AddRange(allSlas);
                     return entityCollection;
                 });
 
-            crmServiceAdapterMock
-                .Setup(x => x.SetRecordsStateInBatch(
+            this.crmServiceAdapterMock
+                .Setup(x => x.UpdateStateAndStatusForEntityInBatch(
                     It.Is<EntityCollection>(collection => allSlas.All(sla => collection.Entities.Contains(sla))),
                     It.IsAny<int>(),
                     It.IsAny<int>()))
@@ -313,10 +311,10 @@ namespace Capgemini.PowerApps.PackageDeployerTemplate.UnitTests.Services
                         {
                             Fault = new OrganizationServiceFault
                             {
-                                Message = "Test fault response"
-                            }
+                                Message = "Test fault response",
+                            },
                         },
-                        new ExecuteMultipleResponseItem { }
+                        new ExecuteMultipleResponseItem { },
                     };
 
                     var response = new ExecuteMultipleResponse();
@@ -325,27 +323,27 @@ namespace Capgemini.PowerApps.PackageDeployerTemplate.UnitTests.Services
                     return response;
                 });
 
-            slaActivatorService.DeactivateAll();
+            this.slaActivatorService.DeactivateAll();
 
-            loggerMock.VerifyLog(x => x.LogError(It.IsAny<string>()), Times.Exactly(2));
-            loggerMock.VerifyLog(x => x.LogError("Error deactivating SLAs."));
-            loggerMock.VerifyLog(x => x.LogError("Test fault response"));
+            this.loggerMock.VerifyLog(x => x.LogError(It.IsAny<string>()), Times.Exactly(2));
+            this.loggerMock.VerifyLog(x => x.LogError("Error deactivating SLAs."));
+            this.loggerMock.VerifyLog(x => x.LogError("Test fault response"));
         }
 
         [Fact]
         public void SetDefaultSlas_NullDefaultSlas_LogsNoConfig()
         {
-            slaActivatorService.SetDefaultSlas(null);
+            this.slaActivatorService.SetDefaultSlas(null);
 
-            loggerMock.VerifyLog(x => x.LogInformation("No default SLAs have been configured."));
+            this.loggerMock.VerifyLog(x => x.LogInformation("No default SLAs have been configured."));
         }
 
         [Fact]
         public void SetDefaultSlas_EmptyDefaultSlas_LogsNoConfig()
         {
-            slaActivatorService.SetDefaultSlas(Array.Empty<string>());
+            this.slaActivatorService.SetDefaultSlas(Array.Empty<string>());
 
-            loggerMock.VerifyLog(x => x.LogInformation("No default SLAs have been configured."));
+            this.loggerMock.VerifyLog(x => x.LogInformation("No default SLAs have been configured."));
         }
 
         [Fact]
@@ -356,24 +354,24 @@ namespace Capgemini.PowerApps.PackageDeployerTemplate.UnitTests.Services
             var defaultSlas = new List<Entity>
             {
                 new Entity("sla", Guid.NewGuid()),
-                new Entity("sla", Guid.NewGuid())
+                new Entity("sla", Guid.NewGuid()),
             };
 
-            crmServiceAdapterMock
-                .Setup(x => x.QueryRecordsBySingleAttributeValue("sla", "name", defaultSlaNames))
+            this.crmServiceAdapterMock
+                .Setup(x => x.RetrieveMultipleByAttribute("sla", "name", defaultSlaNames))
                 .Returns(() =>
                 {
                     var entityCollection = new EntityCollection
                     {
-                        EntityName = "sla"
+                        EntityName = "sla",
                     };
                     entityCollection.Entities.AddRange(defaultSlas);
                     return entityCollection;
                 }).Verifiable();
 
-            slaActivatorService.SetDefaultSlas(defaultSlaNames);
+            this.slaActivatorService.SetDefaultSlas(defaultSlaNames);
 
-            crmServiceAdapterMock.Verify();
+            this.crmServiceAdapterMock.Verify();
         }
 
         [Fact]
@@ -384,28 +382,27 @@ namespace Capgemini.PowerApps.PackageDeployerTemplate.UnitTests.Services
             var defaultSlas = new List<Entity>
             {
                 new Entity("sla", Guid.NewGuid()),
-                new Entity("sla", Guid.NewGuid())
+                new Entity("sla", Guid.NewGuid()),
             };
 
-            crmServiceAdapterMock
-                .Setup(x => x.QueryRecordsBySingleAttributeValue("sla", "name", defaultSlaNames))
+            this.crmServiceAdapterMock
+                .Setup(x => x.RetrieveMultipleByAttribute("sla", "name", defaultSlaNames))
                 .Returns(() =>
                 {
                     var entityCollection = new EntityCollection
                     {
-                        EntityName = "sla"
+                        EntityName = "sla",
                     };
                     entityCollection.Entities.AddRange(defaultSlas);
                     return entityCollection;
                 });
 
-            slaActivatorService.SetDefaultSlas(defaultSlaNames);
+            this.slaActivatorService.SetDefaultSlas(defaultSlaNames);
 
-            crmServiceAdapterMock
-                .Verify(x => x.Update(It.Is<Entity>(
-                    entity => defaultSlas.Contains(entity) && entity.Attributes.Contains("isdefault") && (bool)entity.Attributes["isdefault"]
-                )), Times.Exactly(defaultSlas.Count));
+            this.crmServiceAdapterMock
+                .Verify(
+                    x => x.Update(It.Is<Entity>(
+                    entity => defaultSlas.Contains(entity) && entity.Attributes.Contains("isdefault") && (bool)entity.Attributes["isdefault"])), Times.Exactly(defaultSlas.Count));
         }
-
     }
 }

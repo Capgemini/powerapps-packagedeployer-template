@@ -1,14 +1,14 @@
-﻿using Capgemini.PowerApps.PackageDeployerTemplate.Adapters;
-using Capgemini.PowerApps.PackageDeployerTemplate.Services;
-using Microsoft.Extensions.Logging;
-using Microsoft.Xrm.Sdk;
-using Microsoft.Xrm.Sdk.Query;
-using Moq;
-using System;
-using Xunit;
-
-namespace Capgemini.PowerApps.PackageDeployerTemplate.UnitTests.Services
+﻿namespace Capgemini.PowerApps.PackageDeployerTemplate.UnitTests.Services
 {
+    using System;
+    using Capgemini.PowerApps.PackageDeployerTemplate.Adapters;
+    using Capgemini.PowerApps.PackageDeployerTemplate.Services;
+    using Microsoft.Extensions.Logging;
+    using Microsoft.Xrm.Sdk;
+    using Microsoft.Xrm.Sdk.Query;
+    using Moq;
+    using Xunit;
+
     public class FlowActivatorServiceTests
     {
         private readonly Mock<ILogger> loggerMock;
@@ -18,32 +18,30 @@ namespace Capgemini.PowerApps.PackageDeployerTemplate.UnitTests.Services
 
         public FlowActivatorServiceTests()
         {
-            loggerMock = new Mock<ILogger>();
-            crmServiceAdapterMock = new Mock<ICrmServiceAdapter>();
-            crmServiceAdapterMock.Setup(x => x.GetOrganizationService())
-                .Returns(() => new Mock<IOrganizationService>().Object);
+            this.loggerMock = new Mock<ILogger>();
+            this.crmServiceAdapterMock = new Mock<ICrmServiceAdapter>();
 
-            flowActivationService = new FlowActivationService(loggerMock.Object, crmServiceAdapterMock.Object);
+            this.flowActivationService = new FlowActivationService(this.loggerMock.Object, this.crmServiceAdapterMock.Object);
         }
 
         [Fact]
         public void Import_NullImportConfigs_LogsNoConfig()
         {
-            flowActivationService.ActivateFlows(null, null);
+            this.flowActivationService.ActivateFlows(null, null);
 
-            loggerMock.VerifyLog(x => x.LogInformation("No solutions to activate flows for"));
+            this.loggerMock.VerifyLog(x => x.LogInformation("No solutions to activate flows for"));
         }
 
         [Fact]
         public void Deactivate_When_A_Flow_Is_Found()
         {
-            crmServiceAdapterMock
+            this.crmServiceAdapterMock
                .Setup(x => x.RetrieveMultiple(It.IsAny<QueryExpression>()))
                .Returns((QueryExpression query) =>
                {
                    var entityCollection = new EntityCollection
                    {
-                       EntityName = query.EntityName
+                       EntityName = query.EntityName,
                    };
 
                    var entity = new Entity(query.EntityName, Guid.NewGuid());
@@ -54,22 +52,22 @@ namespace Capgemini.PowerApps.PackageDeployerTemplate.UnitTests.Services
                })
                .Verifiable();
 
-            flowActivationService.ActivateFlows(new string[] { "test" }, new string[] { "solution1" });
+            this.flowActivationService.ActivateFlows(new string[] { "test" }, new string[] { "solution1" });
 
-            crmServiceAdapterMock.Verify(exec=> exec.RetrieveMultiple(It.IsAny<QueryExpression>()),Times.Exactly(3));
-            crmServiceAdapterMock.Verify(exec => exec.UpdateStateAndStatusForEntity(It.IsAny<string>(),It.IsAny<Guid>(), It.IsAny<int>(), It.IsAny<int>()), Times.Exactly(1));
+            this.crmServiceAdapterMock.Verify(exec => exec.RetrieveMultiple(It.IsAny<QueryExpression>()), Times.Exactly(3));
+            this.crmServiceAdapterMock.Verify(exec => exec.UpdateStateAndStatusForEntity(It.IsAny<string>(), It.IsAny<Guid>(), It.IsAny<int>(), It.IsAny<int>()), Times.Exactly(1));
         }
 
         [Fact]
         public void Activate_When_No_Flows_To_Deactivate()
         {
-            crmServiceAdapterMock
+            this.crmServiceAdapterMock
                .Setup(x => x.RetrieveMultiple(It.IsAny<QueryExpression>()))
                .Returns((QueryExpression query) =>
                {
                    var entityCollection = new EntityCollection
                    {
-                       EntityName = query.EntityName
+                       EntityName = query.EntityName,
                    };
 
                    var entity = new Entity(query.EntityName, Guid.NewGuid());
@@ -80,10 +78,10 @@ namespace Capgemini.PowerApps.PackageDeployerTemplate.UnitTests.Services
                })
                .Verifiable();
 
-            flowActivationService.ActivateFlows(null, new string[] { "solution1" });
+            this.flowActivationService.ActivateFlows(null, new string[] { "solution1" });
 
-            crmServiceAdapterMock.Verify(exec => exec.RetrieveMultiple(It.IsAny<QueryExpression>()), Times.Exactly(3));
-            crmServiceAdapterMock.Verify(exec => exec.UpdateStateAndStatusForEntity("workflow", It.IsAny<Guid>(),1, 2), Times.Exactly(1));
+            this.crmServiceAdapterMock.Verify(exec => exec.RetrieveMultiple(It.IsAny<QueryExpression>()), Times.Exactly(3));
+            this.crmServiceAdapterMock.Verify(exec => exec.UpdateStateAndStatusForEntity("workflow", It.IsAny<Guid>(), 1, 2), Times.Exactly(1));
         }
     }
 }

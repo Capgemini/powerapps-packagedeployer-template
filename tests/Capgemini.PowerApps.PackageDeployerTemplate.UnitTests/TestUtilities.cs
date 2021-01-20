@@ -1,9 +1,9 @@
-﻿using System;
-using System.IO;
-using System.Reflection;
-
-namespace Capgemini.PowerApps.PackageDeployerTemplate.UnitTests
+﻿namespace Capgemini.PowerApps.PackageDeployerTemplate.UnitTests
 {
+    using System;
+    using System.IO;
+    using System.Reflection;
+
     public static class TestUtilities
     {
         public static string GetResourcePath(string resourceFileName)

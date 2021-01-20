@@ -1,16 +1,16 @@
-﻿using Capgemini.PowerApps.PackageDeployerTemplate.Adapters;
-using Capgemini.PowerApps.PackageDeployerTemplate.Services;
-using Microsoft.Extensions.Logging;
-using Microsoft.Xrm.Sdk;
-using Microsoft.Xrm.Sdk.Messages;
-using Microsoft.Xrm.Sdk.Query;
-using Moq;
-using System;
-using System.Linq;
-using Xunit;
-
-namespace Capgemini.PowerApps.PackageDeployerTemplate.UnitTests.Services
+﻿namespace Capgemini.PowerApps.PackageDeployerTemplate.UnitTests.Services
 {
+    using System;
+    using System.Linq;
+    using Capgemini.PowerApps.PackageDeployerTemplate.Adapters;
+    using Capgemini.PowerApps.PackageDeployerTemplate.Services;
+    using Microsoft.Extensions.Logging;
+    using Microsoft.Xrm.Sdk;
+    using Microsoft.Xrm.Sdk.Messages;
+    using Microsoft.Xrm.Sdk.Query;
+    using Moq;
+    using Xunit;
+
     public class ProcessActivatorServiceTests
     {
         private readonly Mock<ILogger> loggerMock;
@@ -20,10 +20,10 @@ namespace Capgemini.PowerApps.PackageDeployerTemplate.UnitTests.Services
 
         public ProcessActivatorServiceTests()
         {
-            loggerMock = new Mock<ILogger>();
-            crmServiceAdapterMock = new Mock<ICrmServiceAdapter>();
+            this.loggerMock = new Mock<ILogger>();
+            this.crmServiceAdapterMock = new Mock<ICrmServiceAdapter>();
 
-            processActivatorService = new ProcessDeploymentService(loggerMock.Object, crmServiceAdapterMock.Object);
+            this.processActivatorService = new ProcessDeploymentService(this.loggerMock.Object, this.crmServiceAdapterMock.Object);
         }
 
         [Fact]
@@ -31,7 +31,7 @@ namespace Capgemini.PowerApps.PackageDeployerTemplate.UnitTests.Services
         {
             Assert.Throws<ArgumentNullException>(() =>
             {
-                new ProcessDeploymentService(null, crmServiceAdapterMock.Object);
+                new ProcessDeploymentService(null, this.crmServiceAdapterMock.Object);
             });
         }
 
@@ -40,24 +40,24 @@ namespace Capgemini.PowerApps.PackageDeployerTemplate.UnitTests.Services
         {
             Assert.Throws<ArgumentNullException>(() =>
             {
-                new ProcessDeploymentService(loggerMock.Object, null);
+                new ProcessDeploymentService(this.loggerMock.Object, null);
             });
         }
 
         [Fact]
         public void Activate_NullProcessesToActivate_LogsNoConfig()
         {
-            processActivatorService.Activate(null);
+            this.processActivatorService.Activate(null);
 
-            loggerMock.VerifyLog(x => x.LogInformation("No processes to activate have been configured."));
+            this.loggerMock.VerifyLog(x => x.LogInformation("No processes to activate have been configured."));
         }
 
         [Fact]
         public void Activate_EmptyProcessesToActivate_LogsNoConfig()
         {
-            processActivatorService.Activate(Array.Empty<string>());
+            this.processActivatorService.Activate(Array.Empty<string>());
 
-            loggerMock.VerifyLog(x => x.LogInformation("No processes to activate have been configured."));
+            this.loggerMock.VerifyLog(x => x.LogInformation("No processes to activate have been configured."));
         }
 
         [Fact]
@@ -65,27 +65,27 @@ namespace Capgemini.PowerApps.PackageDeployerTemplate.UnitTests.Services
         {
             var processesToActivate = new string[] { "process_one", "process_two" };
 
-            crmServiceAdapterMock
+            this.crmServiceAdapterMock
                 .Setup(x => x.RetrieveMultiple(It.IsAny<QueryByAttribute>()))
                 .Returns((QueryByAttribute query) =>
                 {
                     var entityCollection = new EntityCollection
                     {
-                        EntityName = query.EntityName
+                        EntityName = query.EntityName,
                     };
                     entityCollection.Entities.AddRange(query.Values.Select(value => new Entity(query.EntityName, Guid.NewGuid())));
                     return entityCollection;
                 })
                 .Verifiable();
 
-            crmServiceAdapterMock
-                .Setup(x => x.SetRecordsStateInBatch(It.IsAny<EntityCollection>(), It.IsAny<int>(), It.IsAny<int>()))
+            this.crmServiceAdapterMock
+                .Setup(x => x.UpdateStateAndStatusForEntityInBatch(It.IsAny<EntityCollection>(), It.IsAny<int>(), It.IsAny<int>()))
                 .Returns(() =>
                 {
                     var responseItemCollection = new ExecuteMultipleResponseItemCollection
                     {
                         new ExecuteMultipleResponseItem { },
-                        new ExecuteMultipleResponseItem { }
+                        new ExecuteMultipleResponseItem { },
                     };
 
                     var response = new ExecuteMultipleResponse();
@@ -93,30 +93,29 @@ namespace Capgemini.PowerApps.PackageDeployerTemplate.UnitTests.Services
                     return response;
                 });
 
-            processActivatorService.Activate(processesToActivate);
+            this.processActivatorService.Activate(processesToActivate);
 
-            crmServiceAdapterMock.Verify(x => x.RetrieveMultiple(It.Is<QueryByAttribute>(
-                q => processesToActivate.All(value => q.Values.Contains(value))
-            )));
+            this.crmServiceAdapterMock.Verify(x => x.RetrieveMultiple(It.Is<QueryByAttribute>(
+                q => processesToActivate.All(value => q.Values.Contains(value)))));
         }
 
         [Fact]
         public void Activate_FaultWhenSettingsStatus_LogErrors()
         {
-            crmServiceAdapterMock
+            this.crmServiceAdapterMock
                 .Setup(x => x.RetrieveMultiple(It.IsAny<QueryByAttribute>()))
                 .Returns((QueryByAttribute query) =>
                 {
                     var entityCollection = new EntityCollection
                     {
-                        EntityName = query.EntityName
+                        EntityName = query.EntityName,
                     };
                     entityCollection.Entities.AddRange(query.Values.Select(value => new Entity(query.EntityName, Guid.NewGuid())));
                     return entityCollection;
                 });
 
-            crmServiceAdapterMock
-                .Setup(x => x.SetRecordsStateInBatch(It.IsAny<EntityCollection>(), It.IsAny<int>(), It.IsAny<int>()))
+            this.crmServiceAdapterMock
+                .Setup(x => x.UpdateStateAndStatusForEntityInBatch(It.IsAny<EntityCollection>(), It.IsAny<int>(), It.IsAny<int>()))
                 .Returns(() =>
                 {
                     var responseItemCollection = new ExecuteMultipleResponseItemCollection
@@ -125,10 +124,10 @@ namespace Capgemini.PowerApps.PackageDeployerTemplate.UnitTests.Services
                         {
                             Fault = new OrganizationServiceFault
                             {
-                                Message = "Test fault response"
-                            }
+                                Message = "Test fault response",
+                            },
                         },
-                        new ExecuteMultipleResponseItem { }
+                        new ExecuteMultipleResponseItem { },
                     };
 
                     var response = new ExecuteMultipleResponse();
@@ -137,27 +136,27 @@ namespace Capgemini.PowerApps.PackageDeployerTemplate.UnitTests.Services
                     return response;
                 });
 
-            processActivatorService.Activate(new string[] { "a_process_to_activate" });
+            this.processActivatorService.Activate(new string[] { "a_process_to_activate" });
 
-            loggerMock.VerifyLog(x => x.LogError(It.IsAny<string>()), Times.Exactly(2));
-            loggerMock.VerifyLog(x => x.LogError("Error activating processes."));
-            loggerMock.VerifyLog(x => x.LogError("Test fault response"));
+            this.loggerMock.VerifyLog(x => x.LogError(It.IsAny<string>()), Times.Exactly(2));
+            this.loggerMock.VerifyLog(x => x.LogError("Error activating processes."));
+            this.loggerMock.VerifyLog(x => x.LogError("Test fault response"));
         }
 
         [Fact]
         public void Deactivate_NullProcessesToActivate_LogsNoConfig()
         {
-            processActivatorService.Deactivate(null);
+            this.processActivatorService.Deactivate(null);
 
-            loggerMock.VerifyLog(x => x.LogInformation("No processes to deactivate have been configured."));
+            this.loggerMock.VerifyLog(x => x.LogInformation("No processes to deactivate have been configured."));
         }
 
         [Fact]
         public void Deactivate_EmptyProcessesToActivate_LogsNoConfig()
         {
-            processActivatorService.Deactivate(Array.Empty<string>());
+            this.processActivatorService.Deactivate(Array.Empty<string>());
 
-            loggerMock.VerifyLog(x => x.LogInformation("No processes to deactivate have been configured."));
+            this.loggerMock.VerifyLog(x => x.LogInformation("No processes to deactivate have been configured."));
         }
 
         [Fact]
@@ -165,27 +164,27 @@ namespace Capgemini.PowerApps.PackageDeployerTemplate.UnitTests.Services
         {
             var processesToDeactivate = new string[] { "process_one", "process_two" };
 
-            crmServiceAdapterMock
+            this.crmServiceAdapterMock
                 .Setup(x => x.RetrieveMultiple(It.IsAny<QueryByAttribute>()))
                 .Returns((QueryByAttribute query) =>
                 {
                     var entityCollection = new EntityCollection
                     {
-                        EntityName = query.EntityName
+                        EntityName = query.EntityName,
                     };
                     entityCollection.Entities.AddRange(query.Values.Select(value => new Entity(query.EntityName, Guid.NewGuid())));
                     return entityCollection;
                 })
                 .Verifiable();
 
-            crmServiceAdapterMock
-                .Setup(x => x.SetRecordsStateInBatch(It.IsAny<EntityCollection>(), It.IsAny<int>(), It.IsAny<int>()))
+            this.crmServiceAdapterMock
+                .Setup(x => x.UpdateStateAndStatusForEntityInBatch(It.IsAny<EntityCollection>(), It.IsAny<int>(), It.IsAny<int>()))
                 .Returns(() =>
                 {
                     var responseItemCollection = new ExecuteMultipleResponseItemCollection
                     {
                         new ExecuteMultipleResponseItem { },
-                        new ExecuteMultipleResponseItem { }
+                        new ExecuteMultipleResponseItem { },
                     };
 
                     var response = new ExecuteMultipleResponse();
@@ -193,30 +192,29 @@ namespace Capgemini.PowerApps.PackageDeployerTemplate.UnitTests.Services
                     return response;
                 });
 
-            processActivatorService.Deactivate(processesToDeactivate);
+            this.processActivatorService.Deactivate(processesToDeactivate);
 
-            crmServiceAdapterMock.Verify(x => x.RetrieveMultiple(It.Is<QueryByAttribute>(
-                q => processesToDeactivate.All(value => q.Values.Contains(value))
-            )));
+            this.crmServiceAdapterMock.Verify(x => x.RetrieveMultiple(It.Is<QueryByAttribute>(
+                q => processesToDeactivate.All(value => q.Values.Contains(value)))));
         }
 
         [Fact]
         public void Deactivate_FaultWhenSettingsStatus_LogErrors()
         {
-            crmServiceAdapterMock
+            this.crmServiceAdapterMock
                 .Setup(x => x.RetrieveMultiple(It.IsAny<QueryByAttribute>()))
                 .Returns((QueryByAttribute query) =>
                 {
                     var entityCollection = new EntityCollection
                     {
-                        EntityName = query.EntityName
+                        EntityName = query.EntityName,
                     };
                     entityCollection.Entities.AddRange(query.Values.Select(value => new Entity(query.EntityName, Guid.NewGuid())));
                     return entityCollection;
                 });
 
-            crmServiceAdapterMock
-                .Setup(x => x.SetRecordsStateInBatch(It.IsAny<EntityCollection>(), It.IsAny<int>(), It.IsAny<int>()))
+            this.crmServiceAdapterMock
+                .Setup(x => x.UpdateStateAndStatusForEntityInBatch(It.IsAny<EntityCollection>(), It.IsAny<int>(), It.IsAny<int>()))
                 .Returns(() =>
                 {
                     var responseItemCollection = new ExecuteMultipleResponseItemCollection
@@ -225,10 +223,10 @@ namespace Capgemini.PowerApps.PackageDeployerTemplate.UnitTests.Services
                         {
                             Fault = new OrganizationServiceFault
                             {
-                                Message = "Test fault response"
-                            }
+                                Message = "Test fault response",
+                            },
                         },
-                        new ExecuteMultipleResponseItem { }
+                        new ExecuteMultipleResponseItem { },
                     };
 
                     var response = new ExecuteMultipleResponse();
@@ -237,12 +235,11 @@ namespace Capgemini.PowerApps.PackageDeployerTemplate.UnitTests.Services
                     return response;
                 });
 
-            processActivatorService.Deactivate(new string[] { "a_process_to_deactivate" });
+            this.processActivatorService.Deactivate(new string[] { "a_process_to_deactivate" });
 
-            loggerMock.VerifyLog(x => x.LogError(It.IsAny<string>()), Times.Exactly(2));
-            loggerMock.VerifyLog(x => x.LogError("Error deactivating processes."));
-            loggerMock.VerifyLog(x => x.LogError("Test fault response"));
+            this.loggerMock.VerifyLog(x => x.LogError(It.IsAny<string>()), Times.Exactly(2));
+            this.loggerMock.VerifyLog(x => x.LogError("Error deactivating processes."));
+            this.loggerMock.VerifyLog(x => x.LogError("Test fault response"));
         }
     }
 }
-
