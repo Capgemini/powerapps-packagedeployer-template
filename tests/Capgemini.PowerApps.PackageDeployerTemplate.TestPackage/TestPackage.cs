@@ -1,41 +1,29 @@
-﻿using System.ComponentModel.Composition;
-using Microsoft.Xrm.Tooling.PackageDeployment.CrmPackageExtentionBase;
-
-namespace Capgemini.PowerApps.PackageDeployerTemplate.TestPackage
+﻿namespace Capgemini.PowerApps.PackageDeployerTemplate.TestPackage
 {
+    using System.ComponentModel.Composition;
+    using Microsoft.Xrm.Tooling.PackageDeployment.CrmPackageExtentionBase;
+
     /// <summary>
-    /// Import package starter frame. 
+    /// Import package starter frame.
     /// </summary>
     [Export(typeof(IImportExtensions))]
     public class TestPackage : PackageTemplateBase
     {
-        #region Properties
-
         /// <summary>
-        /// Name of the Import Package to Use
-        /// </summary>
-        /// <param name="plural">if true, return plural version</param>
-        /// <returns></returns>
-        public override string GetNameOfImport(bool plural)
-        {
-            return "Package Short Name";
-        }
-
-        /// <summary>
-        /// Folder Name for the Package data. 
+        /// Gets folder Name for the Package data.
         /// </summary>
         public override string GetImportPackageDataFolderName
         {
             get
             {
-                // WARNING this value directly correlates to the folder name in the Solution Explorer where the ImportConfig.xml and sub content is located. 
-                // Changing this name requires that you also change the correlating name in the Solution Explorer 
+                // WARNING this value directly correlates to the folder name in the Solution Explorer where the ImportConfig.xml and sub content is located.
+                // Changing this name requires that you also change the correlating name in the Solution Explorer
                 return "PkgFolder";
             }
         }
 
         /// <summary>
-        /// Description of the package, used in the package selection UI
+        /// Gets description of the package, used in the package selection UI.
         /// </summary>
         public override string GetImportPackageDescriptionText
         {
@@ -43,13 +31,21 @@ namespace Capgemini.PowerApps.PackageDeployerTemplate.TestPackage
         }
 
         /// <summary>
-        /// Long name of the Import Package. 
+        /// Gets long name of the Import Package.
         /// </summary>
         public override string GetLongNameOfImport
         {
             get { return "Package Long Name"; }
         }
-        #endregion
 
+        /// <summary>
+        /// Name of the Import Package to Use.
+        /// </summary>
+        /// <param name="plural">if true, return plural version.</param>
+        /// <returns>The package short name.</returns>
+        public override string GetNameOfImport(bool plural)
+        {
+            return "Package Short Name";
+        }
     }
 }
