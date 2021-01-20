@@ -6,7 +6,6 @@
     <PackageIcon>Capgemini.PowerApps.PackageDeployerTemplate.svg</PackageIcon>
     <PackageId>Capgemini.PowerApps.PackageDeployerTemplate</PackageId>
     <Description>A base package template that provides additional capabilities when deploying packages using the Power Apps Package Deployer tool.</Description>
-    <PackageLicenseUrl>https://github.com/Capgemini/powerapps-packagedeployer-template/blob/master/LICENSE</PackageLicenseUrl>
     <PackageProjectUrl>https://github.com/Capgemini/powerapps-packagedeployer-template</PackageProjectUrl>
     <PackageTags>deployment, xrm, packagedeployer, powerapps, cds, deploy, dataverse</PackageTags>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
