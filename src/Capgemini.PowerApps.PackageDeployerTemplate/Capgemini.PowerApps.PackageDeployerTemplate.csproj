@@ -3,7 +3,7 @@
     <TargetFramework>net462</TargetFramework>
     <LangVersion>8.0</LangVersion>
     <Authors>Capgemini</Authors>
-    <PackageIcon>Capgemini.PowerApps.PackageDeployerTemplate.svg</PackageIcon>
+    <PackageIcon>Capgemini.PowerApps.PackageDeployerTemplate.png</PackageIcon>
     <PackageId>Capgemini.PowerApps.PackageDeployerTemplate</PackageId>
     <Description>A base package template that provides additional capabilities when deploying packages using the Power Apps Package Deployer tool.</Description>
     <PackageProjectUrl>https://github.com/Capgemini/powerapps-packagedeployer-template</PackageProjectUrl>
@@ -20,7 +20,7 @@
   </PropertyGroup>
   <ItemGroup>
     <None Include="..\..\.editorconfig" Link=".editorconfig" />
-    <None Include="images\Capgemini.PowerApps.PackageDeployerTemplate.svg" Pack="true" PackagePath="" />
+    <None Include="images\Capgemini.PowerApps.PackageDeployerTemplate.png" Pack="true" PackagePath="" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Microsoft.CodeAnalysis.NetAnalyzers" Version="5.0.3">
