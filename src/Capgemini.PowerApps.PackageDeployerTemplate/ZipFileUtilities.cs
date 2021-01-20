@@ -1,10 +1,13 @@
-﻿using System;
-using System.IO;
-using System.IO.Compression;
-using System.Text.RegularExpressions;
-
-namespace Capgemini.PowerApps.PackageDeployerTemplate
+﻿namespace Capgemini.PowerApps.PackageDeployerTemplate
 {
+    using System;
+    using System.IO;
+    using System.IO.Compression;
+    using System.Text.RegularExpressions;
+
+    /// <summary>
+    /// Utiltiies for working with zip files.
+    /// </summary>
     public static class ZipFileUtilities
     {
         /// <summary>
@@ -28,6 +31,7 @@ namespace Capgemini.PowerApps.PackageDeployerTemplate
                         pattern,
                         replacement));
             }
+
             File.Delete(zipPath);
             ZipFile.CreateFromDirectory(tempExtractFolder, zipPath);
             Directory.Delete(tempExtractFolder, true);
