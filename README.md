@@ -1,4 +1,4 @@
-# Power Apps Package Deployer Template <img src="assets/Capgemini.PowerApps.PackageDeployerTemplate.svg" alt="Logo" height="32" />
+# Power Apps Package Deployer Template <img src="src\Capgemini.PowerApps.PackageDeployerTemplate\images\Capgemini.PowerApps.PackageDeployerTemplate.svg" alt="Logo" height="32" />
 
 [![Build Status](https://capgeminiuk.visualstudio.com/GitHub%20Support/_apis/build/status/CI-Builds/NuGet%20Packages/Capgemini.PowerAppsPackageDeployerTemplate?branchName=master)](https://capgeminiuk.visualstudio.com/GitHub%20Support/_build/latest?definitionId=205&branchName=master) [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=Capgemini_xrm-packagedeployer&metric=alert_status)](https://sonarcloud.io/dashboard?id=Capgemini_xrm-packagedeployer) [![Coverage](https://sonarcloud.io/api/project_badges/measure?project=Capgemini_xrm-packagedeployer&metric=coverage)](https://sonarcloud.io/dashboard?id=Capgemini_xrm-packagedeployer)
 
