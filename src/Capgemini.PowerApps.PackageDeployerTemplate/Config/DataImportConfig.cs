@@ -20,7 +20,7 @@ namespace Capgemini.PowerApps.PackageDeployerTemplate.Config
         public string ImportConfigPath { get; set; }
 
         /// <summary>
-        /// Gets or sets a value indicating whether whether to import the data before solution import.
+        /// Gets or sets a value indicating whether to import the data before solution import.
         /// </summary>
         [XmlAttribute("importbeforesolutions")]
         public bool ImportBeforeSolutions { get; set; }

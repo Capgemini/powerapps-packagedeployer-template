@@ -18,25 +18,25 @@
         }
 
         /// <summary>
-        /// Gets or sets a value indicating whether whether to force updates (rather than upgrades) when deploying a different solution major version.
+        /// Gets or sets a value indicating whether to force updates (rather than upgrades) when deploying a different solution major version.
         /// </summary>
         [XmlAttribute("useupdateformajorversions")]
         public bool UseUpdateForMajorVersions { get; set; }
 
         /// <summary>
-        /// Gets or sets a value indicating whether whether to force updates (rather than upgrades) when deploying a different solution minor version.
+        /// Gets or sets a value indicating whether to force updates (rather than upgrades) when deploying a different solution minor version.
         /// </summary>
         [XmlAttribute("useupdateforminorversions")]
         public bool UseUpdateForMinorVersions { get; set; }
 
         /// <summary>
-        /// Gets or sets a value indicating whether whether to force updates (rather than upgrades) when deploying a different solution patch version.
+        /// Gets or sets a value indicating whether to force updates (rather than upgrades) when deploying a different solution patch version.
         /// </summary>
         [XmlAttribute("useupdateforpatchversions")]
         public bool UseUpdateForPatchVersions { get; set; }
 
         /// <summary>
-        /// Gets or sets a value indicating whether whether to activate/deactivate SLAs before/after deployment.
+        /// Gets or sets a value indicating whether to activate/deactivate SLAs before/after deployment.
         /// </summary>
         [XmlAttribute("activatedeactivateslas")]
         public bool ActivateDeactivateSLAs { get; set; } = true;
