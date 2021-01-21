@@ -359,8 +359,10 @@
             var environmentVariables = Environment.GetEnvironmentVariables();
             var mappings = environmentVariables.Keys
                 .Cast<string>()
-                .Where(k => k.StartsWith($"{Constants.Settings.EnvironmentVariablePrefix}{prefix}", StringComparison.InvariantCultureIgnoreCase))
-                .ToDictionary(k => k, v => environmentVariables[v].ToString());
+                .Where(k => k.StartsWith($"{Constants.Settings.EnvironmentVariablePrefix}{prefix}_", StringComparison.InvariantCultureIgnoreCase))
+                .ToDictionary(
+                    k => k.Remove(0, Constants.Settings.EnvironmentVariablePrefix.Length + prefix.Length + 1).ToLower(),
+                    v => environmentVariables[v].ToString());
 
             this.PackageLog.Log($"{mappings.Count} matching settings found in environment variables", TraceEventType.Verbose);
 
