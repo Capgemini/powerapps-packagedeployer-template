@@ -16,6 +16,7 @@ This project's aim is to build a powerful base Package Deployer template that si
   - [Migrate data](#Migrate-data)
   - [Deploying word templates](#Deploying-word-templates)
   - [Setting SLAs as default](#Setting-SLAs-as-default)
+  - [Set connections on connection references](#Set-connections-on-connection-references)
   - [Upgrade or update based on solution version](#Upgrade-or-update-based-on-solution-version)
 - [Contributing](#Contributing)
 - [Licence](#Licence)
@@ -117,6 +118,8 @@ You can configure which flows should be disabled after import by adding a `flows
 </configdatastorage>
 ```
 
+If your deployment is running as an application user then you may face [some issues](https://github.com/MicrosoftDocs/power-automate-docs/issues/216). If you wish to continue deploying as an application user, you can pass the `LicensedUsername` and `LicensedUsername` runtime settings to the Package Deployer (or set the `PACKAGEDEPLOYER_SETTINGS_LICENSEDUSERNAME and `PACKAGEDEPLOYER_SETTINGS_LICENSEDPASSWORD` environment variables) and these credentials will be used for interacting with flows.
+
 ### Set connections on connection references
 
 You can set connections for connection references either through environment variables (for example, those [exposed on Azure Pipelines](https://docs.microsoft.com/en-us/azure/devops/pipelines/process/variables?view=azure-devops&tabs=yaml%2Cbatch#access-variables-through-the-environment) from your variables or variable groups) or through Package Deployer [runtime settings](https://docs.microsoft.com/en-us/power-platform/admin/deploy-packages-using-package-deployer-windows-powershell#use-the-cmdlet-to-deploy-packages).
@@ -140,6 +143,10 @@ Import-CrmPackage –CrmConnection $conn –PackageDirectory $packageDir –Pack
 ```
 
 The runtime setting takes precedence if both an environment variable and runtime setting are found for the same connection reference.
+
+To get your flow connection names, go to your environment and navigate to _Data -> Connections_ within the [Maker Portal](https://make.powerapps.com). Opening a connection will reveal the connection name in the URL, which will have a format of 'environments/environmentid/connections/apiname/_connectionname_/details'. 
+
+As above, you will need to pass licensed user credentials via runtime settings or environment variables if the Package Deployer is not running in the context of a licensed user. In addition, the connections passed in need to be owned by the user doing the deployment.
 
 ### Upgrade or update based on solution version
 
