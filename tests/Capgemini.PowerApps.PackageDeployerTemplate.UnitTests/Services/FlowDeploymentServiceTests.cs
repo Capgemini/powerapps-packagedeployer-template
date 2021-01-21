@@ -1,4 +1,4 @@
-﻿namespace Capgemini.PowerApps.PackageDeployerTemplate.UnitTests.Services
+namespace Capgemini.PowerApps.PackageDeployerTemplate.UnitTests.Services
 {
     using System;
     using Capgemini.PowerApps.PackageDeployerTemplate.Adapters;
@@ -9,19 +9,19 @@
     using Moq;
     using Xunit;
 
-    public class FlowActivatorServiceTests
+    public class FlowDeploymentServiceTests
     {
         private readonly Mock<ILogger> loggerMock;
         private readonly Mock<ICrmServiceAdapter> crmServiceAdapterMock;
 
-        private readonly FlowActivationService flowActivationService;
+        private readonly FlowDeploymentService flowActivationService;
 
-        public FlowActivatorServiceTests()
+        public FlowDeploymentServiceTests()
         {
             this.loggerMock = new Mock<ILogger>();
             this.crmServiceAdapterMock = new Mock<ICrmServiceAdapter>();
 
-            this.flowActivationService = new FlowActivationService(this.loggerMock.Object, this.crmServiceAdapterMock.Object);
+            this.flowActivationService = new FlowDeploymentService(this.loggerMock.Object, this.crmServiceAdapterMock.Object);
         }
 
         [Fact]

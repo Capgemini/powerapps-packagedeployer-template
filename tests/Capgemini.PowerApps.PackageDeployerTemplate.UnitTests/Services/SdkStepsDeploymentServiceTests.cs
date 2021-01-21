@@ -10,14 +10,14 @@
     using Moq;
     using Xunit;
 
-    public class SdkStepsActivatorServiceTests
+    public class SdkStepsDeploymentServiceTests
     {
         private readonly Mock<ILogger> loggerMock;
         private readonly Mock<ICrmServiceAdapter> crmServiceAdapterMock;
 
         private readonly SdkStepDeploymentService sdkStepsActivatorService;
 
-        public SdkStepsActivatorServiceTests()
+        public SdkStepsDeploymentServiceTests()
         {
             this.loggerMock = new Mock<ILogger>();
             this.crmServiceAdapterMock = new Mock<ICrmServiceAdapter>();
@@ -65,7 +65,7 @@
             var sdkStepsToDeactivate = new string[] { "sdk_step_one", "sdk_step_two" };
 
             this.crmServiceAdapterMock
-                .Setup(x => x.RetrieveMultipleByAttribute("sdkmessageprocessingstep", "name", sdkStepsToDeactivate))
+                .Setup(x => x.RetrieveMultipleByAttribute("sdkmessageprocessingstep", "name", sdkStepsToDeactivate, null))
                 .Returns(() =>
                 {
                     var entityCollection = new EntityCollection
@@ -101,7 +101,7 @@
         public void Deactivate_FaultWhenSettingsStatus_LogErrors()
         {
             this.crmServiceAdapterMock
-                .Setup(x => x.RetrieveMultipleByAttribute("sdkmessageprocessingstep", "name", It.IsAny<string[]>()))
+                .Setup(x => x.RetrieveMultipleByAttribute("sdkmessageprocessingstep", "name", It.IsAny<string[]>(), null))
                 .Returns((string entity, string attribute, string[] values) =>
                 {
                     var entityCollection = new EntityCollection
