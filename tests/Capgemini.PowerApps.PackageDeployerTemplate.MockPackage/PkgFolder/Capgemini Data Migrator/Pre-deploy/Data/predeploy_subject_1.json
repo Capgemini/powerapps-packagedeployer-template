@@ -1,0 +1,22 @@
+{
+  "RecordsCount": 1,
+  "ExportedEntities": [
+    {
+      "LogicalName": "subject",
+      "Id": "495a0a1f-ae87-e911-a98f-00224800bb9b",
+      "IsManyToMany": false,
+      "Attributes": [
+        {
+          "AttributeName": "featuremask",
+          "AttributeValue": 1,
+          "AttributeType": "System.Int32"
+        },
+        {
+          "AttributeName": "title",
+          "AttributeValue": "Integration Test Subject",
+          "AttributeType": "System.String"
+        }
+      ]
+    }
+  ]
+}

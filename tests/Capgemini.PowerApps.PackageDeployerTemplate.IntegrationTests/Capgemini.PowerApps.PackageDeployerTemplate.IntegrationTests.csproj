@@ -1,6 +1,6 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFramework>net462</TargetFramework>
+    <TargetFramework>net472</TargetFramework>
     <RunSettingsFilePath>$(MSBuildProjectDirectory)\CodeCoverage.runsettings</RunSettingsFilePath>
     <AssemblyTitle>Capgemini.PowerApps.PackageDeployerTemplate.IntegrationTests</AssemblyTitle>
     <Deterministic>false</Deterministic>
@@ -54,7 +54,7 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\src\Capgemini.PowerApps.PackageDeployerTemplate\Capgemini.PowerApps.PackageDeployerTemplate.csproj" />
-    <ProjectReference Include="..\Capgemini.PowerApps.PackageDeployerTemplate.TestPackage\Capgemini.PowerApps.PackageDeployerTemplate.TestPackage.csproj" />
+    <ProjectReference Include="..\Capgemini.PowerApps.PackageDeployerTemplate.MockPackage\Capgemini.PowerApps.PackageDeployerTemplate.MockPackage.csproj" ReferenceOutputAssembly="false" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Resources\DeployPackage.ps1">

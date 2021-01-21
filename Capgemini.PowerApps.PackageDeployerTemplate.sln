@@ -2,17 +2,15 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.30611.23
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Capgemini.PowerApps.PackageDeployerTemplate", "src\Capgemini.PowerApps.PackageDeployerTemplate\Capgemini.PowerApps.PackageDeployerTemplate.csproj", "{6E076053-5DF7-4546-BDCB-7062729330C1}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Capgemini.PowerApps.PackageDeployerTemplate", "src\Capgemini.PowerApps.PackageDeployerTemplate\Capgemini.PowerApps.PackageDeployerTemplate.csproj", "{6E076053-5DF7-4546-BDCB-7062729330C1}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{49F293E5-4702-4ECF-BE31-F0E7A16E88FA}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{419B3DE1-9E57-49AF-AF98-5613BE061C28}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Capgemini.PowerApps.PackageDeployerTemplate.IntegrationTests", "tests\Capgemini.PowerApps.PackageDeployerTemplate.IntegrationTests\Capgemini.PowerApps.PackageDeployerTemplate.IntegrationTests.csproj", "{F8B9DC51-E931-488A-A88E-CD0A82693851}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Capgemini.PowerApps.PackageDeployerTemplate.IntegrationTests", "tests\Capgemini.PowerApps.PackageDeployerTemplate.IntegrationTests\Capgemini.PowerApps.PackageDeployerTemplate.IntegrationTests.csproj", "{F8B9DC51-E931-488A-A88E-CD0A82693851}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Capgemini.PowerApps.PackageDeployerTemplate.UnitTests", "tests\Capgemini.PowerApps.PackageDeployerTemplate.UnitTests\Capgemini.PowerApps.PackageDeployerTemplate.UnitTests.csproj", "{16429F4F-ABF0-4E7C-9BB3-7719D4CFF564}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Capgemini.PowerApps.PackageDeployerTemplate.TestPackage", "tests\Capgemini.PowerApps.PackageDeployerTemplate.TestPackage\Capgemini.PowerApps.PackageDeployerTemplate.TestPackage.csproj", "{170C0103-3F94-4896-9062-6314167F596A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Capgemini.PowerApps.PackageDeployerTemplate.UnitTests", "tests\Capgemini.PowerApps.PackageDeployerTemplate.UnitTests\Capgemini.PowerApps.PackageDeployerTemplate.UnitTests.csproj", "{16429F4F-ABF0-4E7C-9BB3-7719D4CFF564}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{310E899F-8746-4249-B754-652A627085A4}"
 	ProjectSection(SolutionItems) = preProject
@@ -20,6 +18,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		CONTRIBUTING.md = CONTRIBUTING.md
 		README.md = README.md
 	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Capgemini.PowerApps.PackageDeployerTemplate.MockPackage", "tests\Capgemini.PowerApps.PackageDeployerTemplate.MockPackage\Capgemini.PowerApps.PackageDeployerTemplate.MockPackage.csproj", "{ACCB4C73-C1F4-4CE4-AED2-9A625948A36A}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -39,10 +39,10 @@ Global
 		{16429F4F-ABF0-4E7C-9BB3-7719D4CFF564}.Debug|anycpu.Build.0 = Debug|Any CPU
 		{16429F4F-ABF0-4E7C-9BB3-7719D4CFF564}.Release|anycpu.ActiveCfg = Release|Any CPU
 		{16429F4F-ABF0-4E7C-9BB3-7719D4CFF564}.Release|anycpu.Build.0 = Release|Any CPU
-		{170C0103-3F94-4896-9062-6314167F596A}.Debug|anycpu.ActiveCfg = Debug|Any CPU
-		{170C0103-3F94-4896-9062-6314167F596A}.Debug|anycpu.Build.0 = Debug|Any CPU
-		{170C0103-3F94-4896-9062-6314167F596A}.Release|anycpu.ActiveCfg = Release|Any CPU
-		{170C0103-3F94-4896-9062-6314167F596A}.Release|anycpu.Build.0 = Release|Any CPU
+		{ACCB4C73-C1F4-4CE4-AED2-9A625948A36A}.Debug|anycpu.ActiveCfg = Debug|Any CPU
+		{ACCB4C73-C1F4-4CE4-AED2-9A625948A36A}.Debug|anycpu.Build.0 = Debug|Any CPU
+		{ACCB4C73-C1F4-4CE4-AED2-9A625948A36A}.Release|anycpu.ActiveCfg = Release|Any CPU
+		{ACCB4C73-C1F4-4CE4-AED2-9A625948A36A}.Release|anycpu.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -51,7 +51,7 @@ Global
 		{6E076053-5DF7-4546-BDCB-7062729330C1} = {49F293E5-4702-4ECF-BE31-F0E7A16E88FA}
 		{F8B9DC51-E931-488A-A88E-CD0A82693851} = {419B3DE1-9E57-49AF-AF98-5613BE061C28}
 		{16429F4F-ABF0-4E7C-9BB3-7719D4CFF564} = {419B3DE1-9E57-49AF-AF98-5613BE061C28}
-		{170C0103-3F94-4896-9062-6314167F596A} = {419B3DE1-9E57-49AF-AF98-5613BE061C28}
+		{ACCB4C73-C1F4-4CE4-AED2-9A625948A36A} = {419B3DE1-9E57-49AF-AF98-5613BE061C28}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {6C72021D-4BC0-44FB-A2CD-AABA1D22E29F}
