@@ -4,6 +4,7 @@
     using System.Collections.Generic;
     using Microsoft.Xrm.Sdk;
     using Microsoft.Xrm.Sdk.Messages;
+    using Microsoft.Xrm.Sdk.Query;
 
     /// <summary>
     /// An en extended <see cref="IOrganizationService"/>.
@@ -22,8 +23,9 @@
         /// <param name="entity">The entity logical name.</param>
         /// <param name="attribute">The attribute logical name.</param>
         /// <param name="values">The values to match on.</param>
+        /// <param name="columnSet">The columns to select.</param>
         /// <returns>The matching records.</returns>
-        EntityCollection RetrieveMultipleByAttribute(string entity, string attribute, IEnumerable<object> values);
+        EntityCollection RetrieveMultipleByAttribute(string entity, string attribute, IEnumerable<object> values, ColumnSet columnSet = null);
 
         /// <summary>
         /// Sets the state of a number of records in batch.
@@ -43,5 +45,22 @@
         /// <param name="status">The status code.</param>
         /// <returns>True on success.</returns>
         bool UpdateStateAndStatusForEntity(string entityLogicalName, Guid entityId, int statecode, int status);
+
+        /// <summary>
+        /// Execute multiple requests.
+        /// </summary>
+        /// <param name="requests">The requests.</param>
+        /// <param name="continueOnError">Whether to continue on error.</param>
+        /// <param name="returnResponses">Whether to return responses.</param>
+        /// <returns>The <see cref="ExecuteMultipleResponse"/>.</returns>
+        ExecuteMultipleResponse ExecuteMultiple(IEnumerable<OrganizationRequest> requests, bool continueOnError = true, bool returnResponses = true);
+
+        /// <summary>
+        /// Gets solution component object IDs of a given type.
+        /// </summary>
+        /// <param name="solutionName">The unique name of the solution.</param>
+        /// <param name="componentType">The type of the components.</param>
+        /// <returns>A collection of object IDs.</returns>
+        IEnumerable<Guid> GetSolutionComponentObjectIdsByType(string solutionName, int componentType);
     }
 }

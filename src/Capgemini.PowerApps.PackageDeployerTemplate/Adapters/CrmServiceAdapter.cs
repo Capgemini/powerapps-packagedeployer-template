@@ -26,7 +26,44 @@
         }
 
         /// <inheritdoc/>
-        public EntityCollection RetrieveMultipleByAttribute(string entity, string attribute, IEnumerable<object> values)
+        public ExecuteMultipleResponse ExecuteMultiple(IEnumerable<OrganizationRequest> requests, bool continueOnError = true, bool returnResponses = true)
+        {
+            var executeMultipleRequest = new ExecuteMultipleRequest
+            {
+                Requests = new OrganizationRequestCollection(),
+                Settings = new ExecuteMultipleSettings
+                {
+                    ContinueOnError = continueOnError,
+                    ReturnResponses = returnResponses,
+                },
+            };
+            executeMultipleRequest.Requests.AddRange(requests);
+
+            return (ExecuteMultipleResponse)this.crmSvc.Execute(executeMultipleRequest);
+        }
+
+        /// <inheritdoc/>
+        public IEnumerable<Guid> GetSolutionComponentObjectIdsByType(string solutionName, int componentType)
+        {
+            var queryExpression = new QueryExpression(Constants.SolutionComponent.LogicalName)
+            {
+                ColumnSet = new ColumnSet(new string[] { Constants.SolutionComponent.Fields.ObjectId }),
+                Criteria = new FilterExpression(LogicalOperator.And),
+            };
+            queryExpression.AddLink(
+                Constants.Solution.LogicalName,
+                Constants.SolutionComponent.Fields.SolutionId,
+                Constants.Solution.Fields.SolutionId);
+            queryExpression.Criteria.AddCondition(Constants.SolutionComponent.Fields.ComponentType, ConditionOperator.Equal, componentType);
+            queryExpression.Criteria.AddCondition(Constants.Solution.LogicalName, Constants.Solution.Fields.UniqueName, ConditionOperator.Equal, solutionName);
+
+            var results = this.crmSvc.RetrieveMultiple(queryExpression);
+
+            return results.Entities.Select(e => e.GetAttributeValue<Guid>(Constants.SolutionComponent.Fields.ObjectId)).ToArray();
+        }
+
+        /// <inheritdoc/>
+        public EntityCollection RetrieveMultipleByAttribute(string entity, string attribute, IEnumerable<object> values, ColumnSet columnSet = null)
         {
             if (string.IsNullOrEmpty(entity))
             {
@@ -46,7 +83,7 @@
             var query = new QueryByAttribute(entity)
             {
                 Attributes = { attribute },
-                ColumnSet = new ColumnSet(false),
+                ColumnSet = columnSet ?? new ColumnSet(false),
             };
             query.Values.AddRange(values);
 
