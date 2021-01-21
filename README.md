@@ -139,7 +139,7 @@ $runtimeSettings = @{
 Import-CrmPackage –CrmConnection $conn –PackageDirectory $packageDir –PackageName Package.dll –RuntimePackageSettings $runtimeSettings
 ```
 
-If both an environment variable and runtime setting are found then the runtime setting will take precedence.
+The runtime setting takes precedence if both an environment variable and runtime setting are found for the same connection reference.
 
 ### Upgrade or update based on solution version
 
