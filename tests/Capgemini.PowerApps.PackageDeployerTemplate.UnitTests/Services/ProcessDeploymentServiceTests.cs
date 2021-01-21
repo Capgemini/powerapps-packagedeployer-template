@@ -11,14 +11,14 @@
     using Moq;
     using Xunit;
 
-    public class ProcessActivatorServiceTests
+    public class ProcessDeploymentServiceTests
     {
         private readonly Mock<ILogger> loggerMock;
         private readonly Mock<ICrmServiceAdapter> crmServiceAdapterMock;
 
         private readonly ProcessDeploymentService processActivatorService;
 
-        public ProcessActivatorServiceTests()
+        public ProcessDeploymentServiceTests()
         {
             this.loggerMock = new Mock<ILogger>();
             this.crmServiceAdapterMock = new Mock<ICrmServiceAdapter>();

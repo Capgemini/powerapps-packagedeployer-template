@@ -11,14 +11,14 @@
     using Moq;
     using Xunit;
 
-    public class SlaActivatorServiceTests
+    public class SlaDeploymentServiceTests
     {
         private readonly Mock<ILogger> loggerMock;
         private readonly Mock<ICrmServiceAdapter> crmServiceAdapterMock;
 
         private readonly SlaDeploymentService slaActivatorService;
 
-        public SlaActivatorServiceTests()
+        public SlaDeploymentServiceTests()
         {
             this.loggerMock = new Mock<ILogger>();
             this.crmServiceAdapterMock = new Mock<ICrmServiceAdapter>();
@@ -55,7 +55,7 @@
             };
 
             this.crmServiceAdapterMock
-                .Setup(x => x.RetrieveMultipleByAttribute("sla", "statecode", It.Is<object[]>(value => (int)value[0] == 0)))
+                .Setup(x => x.RetrieveMultipleByAttribute("sla", "statecode", It.Is<object[]>(value => (int)value[0] == 0), null))
                 .Returns(() =>
                 {
                     var entityCollection = new EntityCollection
@@ -98,7 +98,7 @@
             };
 
             this.crmServiceAdapterMock
-                .Setup(x => x.RetrieveMultipleByAttribute("sla", "statecode", It.Is<object[]>(value => (int)value[0] == 0)))
+                .Setup(x => x.RetrieveMultipleByAttribute("sla", "statecode", It.Is<object[]>(value => (int)value[0] == 0), null))
                 .Returns(() =>
                 {
                     var entityCollection = new EntityCollection
@@ -144,7 +144,7 @@
             };
 
             this.crmServiceAdapterMock
-                .Setup(x => x.RetrieveMultipleByAttribute("sla", "statecode", It.Is<object[]>(value => (int)value[0] == 0)))
+                .Setup(x => x.RetrieveMultipleByAttribute("sla", "statecode", It.Is<object[]>(value => (int)value[0] == 0), null))
                 .Returns(() =>
                 {
                     var entityCollection = new EntityCollection
@@ -198,7 +198,7 @@
             };
 
             this.crmServiceAdapterMock
-                .Setup(x => x.RetrieveMultipleByAttribute("sla", "statecode", It.Is<object[]>(value => (int)value[0] == 1)))
+                .Setup(x => x.RetrieveMultipleByAttribute("sla", "statecode", It.Is<object[]>(value => (int)value[0] == 1), null))
                 .Returns(() =>
                 {
                     var entityCollection = new EntityCollection
@@ -241,7 +241,7 @@
             };
 
             this.crmServiceAdapterMock
-                .Setup(x => x.RetrieveMultipleByAttribute("sla", "statecode", It.Is<object[]>(value => (int)value[0] == 1)))
+                .Setup(x => x.RetrieveMultipleByAttribute("sla", "statecode", It.Is<object[]>(value => (int)value[0] == 1), null))
                 .Returns(() =>
                 {
                     var entityCollection = new EntityCollection
@@ -287,7 +287,7 @@
             };
 
             this.crmServiceAdapterMock
-                .Setup(x => x.RetrieveMultipleByAttribute("sla", "statecode", It.Is<object[]>(value => (int)value[0] == 1)))
+                .Setup(x => x.RetrieveMultipleByAttribute("sla", "statecode", It.Is<object[]>(value => (int)value[0] == 1), null))
                 .Returns(() =>
                 {
                     var entityCollection = new EntityCollection
@@ -358,7 +358,7 @@
             };
 
             this.crmServiceAdapterMock
-                .Setup(x => x.RetrieveMultipleByAttribute("sla", "name", defaultSlaNames))
+                .Setup(x => x.RetrieveMultipleByAttribute("sla", "name", defaultSlaNames, null))
                 .Returns(() =>
                 {
                     var entityCollection = new EntityCollection
@@ -386,7 +386,7 @@
             };
 
             this.crmServiceAdapterMock
-                .Setup(x => x.RetrieveMultipleByAttribute("sla", "name", defaultSlaNames))
+                .Setup(x => x.RetrieveMultipleByAttribute("sla", "name", defaultSlaNames, null))
                 .Returns(() =>
                 {
                     var entityCollection = new EntityCollection
