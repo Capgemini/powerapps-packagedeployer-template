@@ -41,7 +41,7 @@
             }
 
             var queryResponse = this.QueryWorkflowsByName(processesToActivate);
-            var executeMultipleResponse = this.crmSvc.UpdateStateAndStatusForEntityInBatch(queryResponse, Constants.Process.StateCodeActive, Constants.Process.StatusCodeActive);
+            var executeMultipleResponse = this.crmSvc.UpdateStateAndStatusForEntityInBatch(queryResponse, Constants.Workflow.StateCodeActive, Constants.Workflow.StatusCodeActive);
             if (executeMultipleResponse.IsFaulted)
             {
                 this.logger.LogError($"Error activating processes.");
@@ -62,7 +62,7 @@
             }
 
             var queryResponse = this.QueryWorkflowsByName(processesToDeactivate);
-            var executeMultipleResponse = this.crmSvc.UpdateStateAndStatusForEntityInBatch(queryResponse, Constants.Process.StateCodeInactive, Constants.Process.StatusCodeInactive);
+            var executeMultipleResponse = this.crmSvc.UpdateStateAndStatusForEntityInBatch(queryResponse, Constants.Workflow.StateCodeInactive, Constants.Workflow.StatusCodeInactive);
             if (executeMultipleResponse.IsFaulted)
             {
                 this.logger.LogError($"Error deactivating processes.");
@@ -79,11 +79,11 @@
         {
             var query = new QueryByAttribute("workflow")
             {
-                Attributes = { "name" },
+                Attributes = { Constants.Workflow.Fields.Name },
                 ColumnSet = new ColumnSet(false),
             };
             query.Values.AddRange(names);
-            query.AddAttributeValue("type", 1);
+            query.AddAttributeValue(Constants.Workflow.Fields.Type, 1);
 
             var results = this.crmSvc.RetrieveMultiple(query);
             this.logger.LogInformation($"Found {results.Entities.Count} of {names.Count()} workflows found.");

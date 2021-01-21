@@ -32,10 +32,15 @@
         }
 
         /// <summary>
-        /// Constants related to the process entity.
+        /// Constants related to the workflow entity.
         /// </summary>
-        public static class Process
+        public static class Workflow
         {
+            /// <summary>
+            /// Definition option set value for type option set.
+            /// </summary>
+            public const int TypeDefinition = 1;
+
             /// <summary>
             /// The logical name.
             /// </summary>
@@ -67,6 +72,11 @@
             public static class Fields
             {
                 /// <summary>
+                /// The process type.
+                /// </summary>
+                public const string Type = "type";
+
+                /// <summary>
                 /// The name of the process.
                 /// </summary>
                 public const string Name = "name";
@@ -78,6 +88,11 @@
         /// </summary>
         public static class Sla
         {
+            /// <summary>
+            /// The logical name.
+            /// </summary>
+            public const string LogicalName = "sla";
+
             /// <summary>
             /// An active state code.
             /// </summary>
@@ -97,6 +112,32 @@
             /// An inactive status code.
             /// </summary>
             public const int StatusCodeInactive = 1;
+
+            /// <summary>
+            /// Field logical names.
+            /// </summary>
+            public static class Fields
+            {
+                /// <summary>
+                /// The name.
+                /// </summary>
+                public const string Name = "name";
+
+                /// <summary>
+                /// The status.
+                /// </summary>
+                public const string StateCode = "statecode";
+
+                /// <summary>
+                /// The status reason.
+                /// </summary>
+                public const string StatusCode = "statuscode";
+
+                /// <summary>
+                /// The Is Default field.
+                /// </summary>
+                public const string IsDefault = "isdefault";
+            }
         }
 
         /// <summary>
@@ -113,6 +154,53 @@
             /// An inactive status code.
             /// </summary>
             public const int StatusCodeInactive = 2;
+        }
+
+        /// <summary>
+        /// Constants elated to the document template entity.
+        /// </summary>
+        public static class DocumentTemplate
+        {
+            /// <summary>
+            /// The logical name.
+            /// </summary>
+            public const string LogicalName = "documenttemplate";
+
+            /// <summary>
+            /// Document type option set value for Excel documents.
+            /// </summary>
+            public const int DocumentTypeExcel = 1;
+
+            /// <summary>
+            /// Document type option set value for Word documents.
+            /// </summary>
+            public const int DocumentTypeWord = 2;
+
+            /// <summary>
+            /// Field logical names.
+            /// </summary>
+            public static class Fields
+            {
+                /// <summary>
+                /// The document template content.
+                /// </summary>
+                public const string Content = "content";
+
+                /// <summary>
+                /// The name.
+                /// </summary>
+                public const string Name = "name";
+
+                /// <summary>
+                /// The document type.
+                /// </summary>
+                public const string DocumentType = "documenttype";
+
+                /// <summary>
+                /// The associated entity type code.
+                /// </summary>
+                public const string AssociatedEntityTypeCode = "associatedentitytypecode";
+            }
         }
 
         /// <summary>

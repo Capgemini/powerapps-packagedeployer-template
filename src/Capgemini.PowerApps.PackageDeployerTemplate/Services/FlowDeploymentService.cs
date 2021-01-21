@@ -79,7 +79,7 @@ namespace Capgemini.PowerApps.PackageDeployerTemplate.Services
                     continue;
                 }
 
-                var solutionFlowIds = this.GetDeployedFlows(solutionWorkflowIds, new ColumnSet(Constants.Process.Fields.Name));
+                var solutionFlowIds = this.GetDeployedFlows(solutionWorkflowIds, new ColumnSet(Constants.Workflow.Fields.Name));
 
                 this.logger.LogInformation($"{solutionFlowIds.Count()} flows found for solution '{solution}'.");
 
@@ -87,12 +87,12 @@ namespace Capgemini.PowerApps.PackageDeployerTemplate.Services
                 {
                     var toDeactivate = (flowsToDeactivate?.Any(f => f == solutionFlow.Attributes["name"].ToString())).GetValueOrDefault();
 
-                    var stateCode = toDeactivate ? Constants.Process.StateCodeActive : Constants.Process.StateCodeInactive;
-                    var statusCode = toDeactivate ? Constants.Process.StatusCodeActive : Constants.Process.StatusCodeInactive;
+                    var stateCode = toDeactivate ? Constants.Workflow.StateCodeActive : Constants.Workflow.StateCodeInactive;
+                    var statusCode = toDeactivate ? Constants.Workflow.StatusCodeActive : Constants.Workflow.StatusCodeInactive;
 
                     this.logger.LogInformation($"Setting flow status for {solutionFlow["name"]} with statecode {stateCode} and statuscode {statusCode}");
 
-                    if (!this.crmSvc.UpdateStateAndStatusForEntity(Constants.Process.LogicalName, solutionFlow.Id, stateCode, statusCode))
+                    if (!this.crmSvc.UpdateStateAndStatusForEntity(Constants.Workflow.LogicalName, solutionFlow.Id, stateCode, statusCode))
                     {
                         this.logger.LogInformation($"Status for flow {solutionFlow.Attributes["name"]} could not be set. Please check the flows for errors e.g. missing connections.");
                     }

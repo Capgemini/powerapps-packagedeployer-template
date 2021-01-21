@@ -38,10 +38,10 @@
                 return;
             }
 
-            var retrieveMultipleResponse = this.crmSvc.RetrieveMultipleByAttribute("sla", "name", defaultSlas);
+            var retrieveMultipleResponse = this.crmSvc.RetrieveMultipleByAttribute(Constants.Sla.LogicalName, Constants.Sla.Fields.Name, defaultSlas);
             foreach (var defaultSla in retrieveMultipleResponse.Entities)
             {
-                defaultSla["isdefault"] = true;
+                defaultSla[Constants.Sla.Fields.IsDefault] = true;
                 this.crmSvc.Update(defaultSla);
             }
         }
@@ -51,7 +51,7 @@
         /// </summary>
         public void ActivateAll()
         {
-            var queryResponse = this.crmSvc.RetrieveMultipleByAttribute("sla", "statecode", new object[] { Constants.Sla.StateCodeInactive });
+            var queryResponse = this.crmSvc.RetrieveMultipleByAttribute(Constants.Sla.LogicalName, Constants.Sla.Fields.StateCode, new object[] { Constants.Sla.StateCodeInactive });
             var executeMultipleResponse = this.crmSvc.UpdateStateAndStatusForEntityInBatch(queryResponse, Constants.Sla.StateCodeActive, Constants.Sla.StatusCodeActive);
             if (executeMultipleResponse.IsFaulted)
             {
@@ -65,7 +65,7 @@
         /// </summary>
         public void DeactivateAll()
         {
-            var queryResponse = this.crmSvc.RetrieveMultipleByAttribute("sla", "statecode", new object[] { Constants.Sla.StateCodeActive });
+            var queryResponse = this.crmSvc.RetrieveMultipleByAttribute(Constants.Sla.LogicalName, Constants.Sla.Fields.StateCode, new object[] { Constants.Sla.StateCodeActive });
             var executeMultipleResponse = this.crmSvc.UpdateStateAndStatusForEntityInBatch(queryResponse, Constants.Sla.StateCodeInactive, Constants.Sla.StatusCodeInactive);
             if (executeMultipleResponse.IsFaulted)
             {

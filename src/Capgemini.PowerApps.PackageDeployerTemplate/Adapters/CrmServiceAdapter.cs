@@ -131,7 +131,7 @@
         public void ImportWordTemplate(string filePath)
         {
             var fileInfo = new FileInfo(filePath);
-            var templateType = new OptionSetValue(fileInfo.Extension.Equals("xlsx", StringComparison.OrdinalIgnoreCase) ? 1 : 2);
+            var templateType = new OptionSetValue(fileInfo.Extension.Equals("xlsx", StringComparison.OrdinalIgnoreCase) ? Constants.DocumentTemplate.DocumentTypeExcel : Constants.DocumentTemplate.DocumentTypeWord);
 
             if (templateType.Value != 2)
             {
@@ -148,18 +148,18 @@
             }
 
             var retrieveMultipleResponse = this.crmSvc.RetrieveMultiple(
-                new QueryByAttribute("documenttemplate") { Attributes = { "name" }, Values = { Path.GetFileNameWithoutExtension(fileInfo.Name) } });
+                new QueryByAttribute(Constants.DocumentTemplate.LogicalName) { Attributes = { Constants.DocumentTemplate.Fields.Name }, Values = { Path.GetFileNameWithoutExtension(fileInfo.Name) } });
 
             var documentTemplate = retrieveMultipleResponse.Entities.FirstOrDefault();
             if (documentTemplate == null)
             {
-                documentTemplate = new Entity("documenttemplate");
-                documentTemplate["name"] = Path.GetFileNameWithoutExtension(fileInfo.Name);
+                documentTemplate = new Entity(Constants.DocumentTemplate.LogicalName);
+                documentTemplate[Constants.DocumentTemplate.Fields.Name] = Path.GetFileNameWithoutExtension(fileInfo.Name);
             }
 
-            documentTemplate["associatedentitytypecode"] = logicalName;
-            documentTemplate["documenttype"] = templateType;
-            documentTemplate["content"] = Convert.ToBase64String(File.ReadAllBytes(filePath));
+            documentTemplate[Constants.DocumentTemplate.Fields.AssociatedEntityTypeCode] = logicalName;
+            documentTemplate[Constants.DocumentTemplate.Fields.DocumentType] = templateType;
+            documentTemplate[Constants.DocumentTemplate.Fields.Content] = Convert.ToBase64String(File.ReadAllBytes(filePath));
 
             if (documentTemplate.Id == Guid.Empty)
             {
