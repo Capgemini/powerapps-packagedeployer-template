@@ -35,20 +35,31 @@ namespace Capgemini.PowerApps.PackageDeployerTemplate.Services
         /// <param name="connectionMap">Connection name by connection reference ID.</param>
         public void ConnectConnectionReferences(IDictionary<string, string> connectionMap)
         {
+            if (connectionMap is null)
+            {
+                throw new ArgumentNullException(nameof(connectionMap));
+            }
+
             var updateRequests = this
                 .GetConnectionReferences(connectionMap.Keys.ToArray())
                 .Select(e => new UpdateRequest
                 {
-                    Target = new Entity(Constants.ConnectionReference.LogicalName, e.Id)
+                    Target = new Entity(Constants.ConnectionReference.LogicalName)
                     {
+                        Id = e.Id,
                         Attributes =
+                        {
                             {
-                                new KeyValuePair<string, object>(
-                                    Constants.ConnectionReference.Fields.ConnectionReferenceId,
-                                    connectionMap[e.GetAttributeValue<string>(Constants.ConnectionReference.Fields.ConnectionReferenceLogicalName)]),
+                                Constants.ConnectionReference.Fields.ConnectionReferenceId,
+                                e.Id
                             },
+                            {
+                                Constants.ConnectionReference.Fields.ConnectionId,
+                                connectionMap[e.GetAttributeValue<string>(Constants.ConnectionReference.Fields.ConnectionReferenceLogicalName)]
+                            },
+                        },
                     },
-                });
+                }).ToList();
 
             var result = this.crmSvc.ExecuteMultiple(updateRequests);
             if (result.IsFaulted)
@@ -60,13 +71,13 @@ namespace Capgemini.PowerApps.PackageDeployerTemplate.Services
         /// <summary>
         /// Ensures that all flows in the provided solutions are active or inactive.
         /// </summary>
-        /// <param name="flowsToDeactivate">Flows which should not be active.</param>
         /// <param name="solutions">The solutions containing the flows.</param>
-        public void ActivateFlows(IEnumerable<string> flowsToDeactivate, IEnumerable<string> solutions)
+        /// <param name="flowsToDeactivate">Flows which should not be active.</param>
+        public void ActivateFlows(IEnumerable<string> solutions, IEnumerable<string> flowsToDeactivate = null)
         {
             if (solutions == null || !solutions.Any())
             {
-                this.logger.LogInformation($"No solutions to activate flows for");
+                this.logger.LogInformation($"No solutions to activate flows for.");
                 return;
             }
 
@@ -85,16 +96,16 @@ namespace Capgemini.PowerApps.PackageDeployerTemplate.Services
 
                 foreach (var solutionFlow in solutionFlowIds)
                 {
-                    var toDeactivate = (flowsToDeactivate?.Any(f => f == solutionFlow.Attributes["name"].ToString())).GetValueOrDefault();
+                    var toDeactivate = (flowsToDeactivate?.Any(f => f == solutionFlow.Attributes[Constants.Workflow.Fields.Name].ToString())).GetValueOrDefault();
 
-                    var stateCode = toDeactivate ? Constants.Workflow.StateCodeActive : Constants.Workflow.StateCodeInactive;
-                    var statusCode = toDeactivate ? Constants.Workflow.StatusCodeActive : Constants.Workflow.StatusCodeInactive;
+                    var stateCode = toDeactivate ? Constants.Workflow.StateCodeInactive : Constants.Workflow.StateCodeActive;
+                    var statusCode = toDeactivate ? Constants.Workflow.StatusCodeInactive : Constants.Workflow.StatusCodeActive;
 
-                    this.logger.LogInformation($"Setting flow status for {solutionFlow["name"]} with statecode {stateCode} and statuscode {statusCode}");
+                    this.logger.LogInformation($"Setting flow status for {solutionFlow[Constants.Workflow.Fields.Name]} with statecode {stateCode} and statuscode {statusCode}");
 
                     if (!this.crmSvc.UpdateStateAndStatusForEntity(Constants.Workflow.LogicalName, solutionFlow.Id, stateCode, statusCode))
                     {
-                        this.logger.LogInformation($"Status for flow {solutionFlow.Attributes["name"]} could not be set. Please check the flows for errors e.g. missing connections.");
+                        this.logger.LogInformation($"Status for flow {solutionFlow.Attributes[Constants.Workflow.Fields.Name]} could not be set. Please check the flows for errors e.g. missing connections.");
                     }
                 }
             }
@@ -109,13 +120,11 @@ namespace Capgemini.PowerApps.PackageDeployerTemplate.Services
                 throw new ArgumentNullException(nameof(logicalNames));
             }
 
-            return logicalNames
-                .SelectMany(l => this.crmSvc.RetrieveMultipleByAttribute(
+            return this.crmSvc.RetrieveMultipleByAttribute(
                     Constants.ConnectionReference.LogicalName,
                     Constants.ConnectionReference.Fields.ConnectionReferenceLogicalName,
                     logicalNames,
-                    new ColumnSet(true)).Entities)
-                .ToList();
+                    new ColumnSet(true)).Entities.ToList();
         }
 
         private IEnumerable<Entity> GetDeployedFlows(IEnumerable<Guid> guids, ColumnSet columnSet)

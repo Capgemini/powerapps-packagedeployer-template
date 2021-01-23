@@ -2,6 +2,7 @@
 {
     using System;
     using System.Collections.Generic;
+    using System.ComponentModel.Composition;
     using System.Diagnostics;
     using System.Globalization;
     using System.IO;
@@ -15,6 +16,7 @@
     /// <summary>
     /// A base Package Deployer template class that provides additional configurable deployment functionality.
     /// </summary>
+    [Export(typeof(IImportExtensions))]
     public abstract class PackageTemplateBase : ImportExtension
     {
         private ICrmServiceAdapter crmServiceAdapter;
@@ -298,7 +300,7 @@
                 this.ProcessDeploymentService.Activate(this.ConfigDataStorage.ProcessesToActivate);
                 this.WordTemplateImporterService.ImportWordTemplates(this.ConfigDataStorage.WordTemplates, this.PackageFolderPath);
                 this.FlowDeploymentService.ConnectConnectionReferences(this.ConnectionReferenceMappings);
-                this.FlowDeploymentService.ActivateFlows(this.ConfigDataStorage.FlowsToDeactivate, this.ProcessedSolutions);
+                this.FlowDeploymentService.ActivateFlows(this.ProcessedSolutions, this.ConfigDataStorage.FlowsToDeactivate);
             });
 
             return true;
@@ -365,6 +367,11 @@
                     v => environmentVariables[v].ToString());
 
             this.PackageLog.Log($"{mappings.Count} matching settings found in environment variables", TraceEventType.Verbose);
+
+            if (this.RuntimeSettings == null)
+            {
+                return mappings;
+            }
 
             var runtimeSettingMappings = this.RuntimeSettings
                 .Where(s => s.Key.StartsWith($"{prefix}:"))

@@ -146,6 +146,11 @@
         public static class SdkMessageProcessingStep
         {
             /// <summary>
+            /// The logical name.
+            /// </summary>
+            public const string LogicalName = "sdkmessageprocessingstep";
+
+            /// <summary>
             /// An active state code.
             /// </summary>
             public const int StateCodeInactive = 1;
@@ -154,6 +159,17 @@
             /// An inactive status code.
             /// </summary>
             public const int StatusCodeInactive = 2;
+
+            /// <summary>
+            /// Field logical names.
+            /// </summary>
+            public static class Fields
+            {
+                /// <summary>
+                /// The name of the SDK message processing step.
+                /// </summary>
+                public const string Name = "name";
+            }
         }
 
         /// <summary>
