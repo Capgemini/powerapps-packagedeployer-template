@@ -16,7 +16,6 @@
     /// <summary>
     /// A base Package Deployer template class that provides additional configurable deployment functionality.
     /// </summary>
-    [Export(typeof(IImportExtensions))]
     public abstract class PackageTemplateBase : ImportExtension
     {
         private ICrmServiceAdapter crmServiceAdapter;
