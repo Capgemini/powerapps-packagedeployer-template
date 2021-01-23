@@ -38,7 +38,7 @@
                 return;
             }
 
-            var queryResponse = this.crmSvc.RetrieveMultipleByAttribute("sdkmessageprocessingstep", "name", sdkStepsToDeactivate);
+            var queryResponse = this.crmSvc.RetrieveMultipleByAttribute(Constants.SdkMessageProcessingStep.LogicalName, Constants.SdkMessageProcessingStep.Fields.Name, sdkStepsToDeactivate);
             var executeMultipleResponse = this.crmSvc.UpdateStateAndStatusForEntityInBatch(
                 queryResponse,
                 Constants.SdkMessageProcessingStep.StateCodeInactive,
