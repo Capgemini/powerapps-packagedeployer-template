@@ -83,16 +83,9 @@
       <RootComponent type="29" id="{1bd3d7de-995f-4002-b70f-74a183b4f9ba}" behavior="0" />
       <RootComponent type="29" id="{42171b7a-015c-eb11-a812-00224800ed7c}" behavior="0" />
       <RootComponent type="29" id="{cec1de32-025c-eb11-a812-00224800ed7c}" behavior="0" />
+      <RootComponent type="92" id="{c22fdadb-3f5c-eb11-a812-00224800ed7c}" behavior="0" />
+      <RootComponent type="95" id="{42f2f6aa-3f5c-eb11-a812-00224800ed7c}" behavior="0" />
     </RootComponents>
-    <MissingDependencies>
-      <MissingDependency>
-        <Required key="0" type="connectionreference" displayName="new_sharedcommondataserviceforapps_c9a92" solution="ConnectionReferenceTest (1.0.0.1)" id.connectionreferencelogicalname="new_sharedcommondataserviceforapps_c9a92" />
-        <Dependent key="1" type="29" displayName="When a contact is created -&gt; Create an approval" id="{42171b7a-015c-eb11-a812-00224800ed7c}" />
-      </MissingDependency>
-      <MissingDependency>
-        <Required key="0" type="connectionreference" displayName="new_sharedcommondataserviceforapps_c9a92" solution="ConnectionReferenceTest (1.0.0.1)" id.connectionreferencelogicalname="new_sharedcommondataserviceforapps_c9a92" />
-        <Dependent key="2" type="29" displayName="When a contact is created -&gt; Terminate" id="{cec1de32-025c-eb11-a812-00224800ed7c}" />
-      </MissingDependency>
-    </MissingDependencies>
+    <MissingDependencies />
   </SolutionManifest>
 </ImportExportXml>

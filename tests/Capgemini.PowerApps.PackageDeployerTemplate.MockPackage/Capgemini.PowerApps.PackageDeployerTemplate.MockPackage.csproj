@@ -36,12 +36,13 @@
     </Content>
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Microsoft.IdentityModel.Clients.ActiveDirectory" Version="5.2.8" />
+    <ProjectReference Include="..\..\src\Capgemini.PowerApps.PackageDeployerTemplate\Capgemini.PowerApps.PackageDeployerTemplate.csproj" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\src\Capgemini.PowerApps.PackageDeployerTemplate\Capgemini.PowerApps.PackageDeployerTemplate.csproj" />
-    <ProjectReference Include="..\pdt_PackageDeployerTemplate_MockSolution\pdt_PackageDeployerTemplate_MockSolution.cdsproj" ReferenceOutputAssembly="false">
-      <Properties>SolutionPackageZipFilePath=$(TargetDir)pdt_PackageDeployerTemplate_MockSolution.zip</Properties>
-    </ProjectReference>
+    <SolutionProjectsToBuild Include="..\pdt_PackageDeployerTemplate_MockSolution\pdt_PackageDeployerTemplate_MockSolution.cdsproj" Visible="false" />
   </ItemGroup>
+  <Target Name="PackSolutions" AfterTargets="Build">
+    <!-- Using Exec as the MSBuild task fails. -->
+    <Exec Command="dotnet build %(SolutionProjectsToBuild.FullPath) -o $(TargetDir)\PkgFolder\" />
+  </Target>
 </Project>
