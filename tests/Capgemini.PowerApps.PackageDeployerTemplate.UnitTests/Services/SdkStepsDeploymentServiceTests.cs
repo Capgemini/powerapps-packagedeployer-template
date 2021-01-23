@@ -7,6 +7,7 @@
     using Microsoft.Extensions.Logging;
     using Microsoft.Xrm.Sdk;
     using Microsoft.Xrm.Sdk.Messages;
+    using Microsoft.Xrm.Sdk.Query;
     using Moq;
     using Xunit;
 
@@ -101,8 +102,8 @@
         public void Deactivate_FaultWhenSettingsStatus_LogErrors()
         {
             this.crmServiceAdapterMock
-                .Setup(x => x.RetrieveMultipleByAttribute("sdkmessageprocessingstep", "name", It.IsAny<string[]>(), null))
-                .Returns((string entity, string attribute, string[] values) =>
+                .Setup(x => x.RetrieveMultipleByAttribute("sdkmessageprocessingstep", "name", It.IsAny<string[]>(), It.IsAny<ColumnSet>()))
+                .Returns((string entity, string attribute, string[] values, ColumnSet columnSet) =>
                 {
                     var entityCollection = new EntityCollection
                     {

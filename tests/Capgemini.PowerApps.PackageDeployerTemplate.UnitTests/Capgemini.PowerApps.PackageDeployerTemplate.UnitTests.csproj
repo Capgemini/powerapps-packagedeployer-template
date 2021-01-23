@@ -17,9 +17,9 @@
     <PackageReference Include="NPOI" Version="2.5.1" />
     <PackageReference Include="FluentAssertions" Version="5.10.3" />
     <PackageReference Include="ILogger.Moq" Version="1.1.8" />
-    <PackageReference Include="Microsoft.CrmSdk.CoreAssemblies" Version="9.0.2.24" />
-    <PackageReference Include="Microsoft.CrmSdk.XrmTooling.CoreAssembly" Version="9.1.0.42" />
-    <PackageReference Include="Microsoft.CrmSdk.XrmTooling.PackageDeployment" Version="9.1.0.36" />
+    <PackageReference Include="Microsoft.CrmSdk.CoreAssemblies" Version="9.0.2.29" />
+    <PackageReference Include="Microsoft.CrmSdk.XrmTooling.CoreAssembly" Version="9.1.0.68" />
+    <PackageReference Include="Microsoft.CrmSdk.XrmTooling.PackageDeployment" Version="9.1.0.46" />
     <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="5.0.0" />
     <PackageReference Include="Moq" Version="4.14.1" />
     <PackageReference Include="StyleCop.Analyzers" Version="1.1.118">
