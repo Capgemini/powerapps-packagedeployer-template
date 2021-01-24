@@ -3,7 +3,7 @@
     "tasks": [
         {
             "label": "restore",
-            "command": "nuget",
+            "command": "dotnet",
             "type": "process",
             "args": [
                 "restore"
@@ -11,8 +11,11 @@
         },
         {
             "label": "build",
-            "command": "msbuild",
+            "command": "dotnet",
             "type": "process",
+            "args": [
+                "build"
+            ],
             "problemMatcher": "$msCompile"
         }
     ]

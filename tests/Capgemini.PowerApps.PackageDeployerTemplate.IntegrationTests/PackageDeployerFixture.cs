@@ -28,7 +28,12 @@
 
             ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
             this.ServiceClient = new CrmServiceClient(
-                $"Url={Environment.GetEnvironmentVariable("CAPGEMINI_PACKAGE_DEPLOYER_TESTS_URL")}; Username={Environment.GetEnvironmentVariable("CAPGEMINI_PACKAGE_DEPLOYER_TESTS_USERNAME")}; Password={Environment.GetEnvironmentVariable("CAPGEMINI_PACKAGE_DEPLOYER_TESTS_PASSWORD")}; authtype=Office365");
+                $"Url={Environment.GetEnvironmentVariable("CAPGEMINI_PACKAGE_DEPLOYER_TESTS_URL")}; " +
+                $"Username={Environment.GetEnvironmentVariable("CAPGEMINI_PACKAGE_DEPLOYER_TESTS_USERNAME")}; " +
+                $"Password={Environment.GetEnvironmentVariable("CAPGEMINI_PACKAGE_DEPLOYER_TESTS_PASSWORD")}; " +
+                "AuthType=OAuth; " +
+                "AppId=51f81489-12ee-4a9e-aaae-a2591f45987d; " +
+                "RedirectUri=app://58145B91-0C36-4500-8554-080854F2AC97");
         }
 
         public CrmServiceClient ServiceClient { get; private set; }
@@ -46,16 +51,7 @@
 
         private void UninstallSolution()
         {
-            var slaQuery = new QueryByAttribute("sla");
-            slaQuery.AddAttributeValue("name", "Standard Case SLA");
-            var sla = this.ServiceClient.RetrieveMultiple(slaQuery).Entities.FirstOrDefault();
-
-            if (sla != null)
-            {
-                this.ServiceClient.UpdateStateAndStatusForEntity("sla", sla.Id, 0, 1);
-            }
-
-            var solutionQuery = new QueryExpression("solution")
+            var solutionQuery = new QueryExpression(Constants.Solution.LogicalName)
             {
                 Criteria = new FilterExpression
                 {
@@ -67,8 +63,7 @@
                               FilterOperator = LogicalOperator.Or,
                               Conditions =
                               {
-                                new ConditionExpression("uniquename", ConditionOperator.Equal, "cap_PackageDeployerTemplate_IntegrationTest"),
-                                new ConditionExpression("uniquename", ConditionOperator.Equal, "cap_PackageDeployerTemplate_IntegrationTest_Flows"),
+                                new ConditionExpression(Constants.Solution.Fields.UniqueName, ConditionOperator.Equal, "pdt_PackageDeployerTemplate_MockSolution"),
                               },
                             },
                           },
@@ -79,7 +74,7 @@
 
             solutionRecord.ToList().ForEach(solution =>
             {
-                this.ServiceClient.Delete("solution", solution.Id);
+                this.ServiceClient.Delete(Constants.Solution.LogicalName, solution.Id);
             });
         }
 
@@ -108,13 +103,13 @@
 
         private void DeleteWordTemplates()
         {
-            var wordTemplateQuery = new QueryByAttribute("documenttemplate");
-            wordTemplateQuery.AddAttributeValue("name", "Case Survey");
+            var wordTemplateQuery = new QueryByAttribute(Constants.DocumentTemplate.LogicalName);
+            wordTemplateQuery.AddAttributeValue(Constants.DocumentTemplate.Fields.Name, "Contact Profile");
             var wordTemplate = this.ServiceClient.RetrieveMultiple(wordTemplateQuery).Entities.FirstOrDefault();
 
             if (wordTemplate != null)
             {
-                this.ServiceClient.Delete("documenttemplate", wordTemplate.Id);
+                this.ServiceClient.Delete(Constants.DocumentTemplate.LogicalName, wordTemplate.Id);
             }
         }
     }

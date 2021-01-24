@@ -1,0 +1,16 @@
+{
+  "IgnoreStatuses": false,
+  "IgnoreSystemFields": true,
+  "MigrationConfig": {
+    "ApplyAliasMapping": true,
+    "SourceRootBUName": "org10877a3d",
+    "Mappings": {}
+  },
+  "SaveBatchSize": 200,
+  "JsonFolderPath": "Data",
+  "DeactivateAllProcesses": false,
+  "FilePrefix": "postdeploy",
+  "PassOneReferences": [
+    "businessunit"
+  ]
+}

@@ -1,12 +1,13 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFramework>net462</TargetFramework>
+    <TargetFramework>net472</TargetFramework>
     <RunSettingsFilePath>$(MSBuildProjectDirectory)\CodeCoverage.runsettings</RunSettingsFilePath>
     <AssemblyTitle>Capgemini.PowerApps.PackageDeployerTemplate.IntegrationTests</AssemblyTitle>
     <Deterministic>false</Deterministic>
     <AssemblyVersion>1.0.0</AssemblyVersion>
     <FileVersion>1.0.0</FileVersion>
     <ConsolePause>false</ConsolePause>
+    <UserSecretsId>79263aef-8b6e-4bb0-8688-445ea17d6b7d</UserSecretsId>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="FluentAssertions" Version="5.10.3" />
@@ -14,9 +15,9 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="Microsoft.CrmSdk.CoreAssemblies" Version="9.0.2.24" />
-    <PackageReference Include="Microsoft.CrmSdk.XrmTooling.CoreAssembly" Version="9.1.0.42" />
-    <PackageReference Include="Microsoft.CrmSdk.XrmTooling.PackageDeployment" Version="9.1.0.36" />
+    <PackageReference Include="Microsoft.CrmSdk.CoreAssemblies" Version="9.0.2.29" />
+    <PackageReference Include="Microsoft.CrmSdk.XrmTooling.CoreAssembly" Version="9.1.0.68" />
+    <PackageReference Include="Microsoft.CrmSdk.XrmTooling.PackageDeployment" Version="9.1.0.46" />
     <PackageReference Include="Microsoft.CrmSdk.XrmTooling.PackageDeployment.PowerShell" Version="9.0.2.11" />
     <PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
     <PackageReference Include="StyleCop.Analyzers" Version="1.1.118">
@@ -54,7 +55,6 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\src\Capgemini.PowerApps.PackageDeployerTemplate\Capgemini.PowerApps.PackageDeployerTemplate.csproj" />
-    <ProjectReference Include="..\Capgemini.PowerApps.PackageDeployerTemplate.TestPackage\Capgemini.PowerApps.PackageDeployerTemplate.TestPackage.csproj" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Resources\DeployPackage.ps1">
@@ -64,4 +64,11 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>
+  <Target Name="CopyPackage" AfterTargets="Build">
+    <MSBuild Projects="..\Capgemini.PowerApps.PackageDeployerTemplate.MockPackage\Capgemini.PowerApps.PackageDeployerTemplate.MockPackage.csproj" />
+    <ItemGroup>
+      <PackageFiles Include="..\Capgemini.PowerApps.PackageDeployerTemplate.MockPackage\bin\$(Configuration)\net472\**\*.*" />
+    </ItemGroup>
+    <Copy SourceFiles="@(PackageFiles)" DestinationFiles="@(PackageFiles->'$(OutputPath)%(RecursiveDir)%(Filename)%(Extension)')" />
+  </Target>
 </Project>

@@ -6,17 +6,25 @@ A base template that introduces additional functionality when deploying Power Ap
 
 This project's aim is to build a powerful base Package Deployer template that simplifies common Power Apps package deployment tasks.
 
-## Table of Contents
+## Table of contents
 
 - [Installation](#Installation)
 - [Usage](#Usage)
-  - [Deactivate SLAs during import](#Deactivate-SLAs-during-import)
-  - [Deactivate/activate processes](#Deactivateactivate-processes)
-  - [Deactivate/activate plug-ins steps](#Deactivateactivate-plug-ins-steps)
-  - [Migrate data](#Migrate-data)
-  - [Deploying word templates](#Deploying-word-templates)
-  - [Setting SLAs as default](#Setting-SLAs-as-default)
-  - [Upgrade or update based on solution version](#Upgrade-or-update-based-on-solution-version)
+  - [SLAs (classic)](#SLAs-classic)
+    - [Deactivate SLAs during import](#Deactivate-SLAs-during-import)
+    - [Set SLAs as default](#Set-SLAs-as-default)
+  - [Processes](#Processes)
+    - [Deactivate processes](#Deactivate-processes)
+    - [Activate processes](#Activate-processes)
+  - [SDK Steps](#SDK-stpes)
+    - [Deactivate SDK steps](#Deactivate-SDK-steps)
+  - [Flows](#Flows)
+    - [Deactivate flows](#Deactivate-flows)
+    - [Set connection references](#Set-connection-references)
+  - [Data](#Data)
+    - [Import data](#Import-data)
+  - [Word templates](#Word-templates)
+    - [Import word templates](#Import-word-templates)
 - [Contributing](#Contributing)
 - [Licence](#Licence)
 
@@ -34,13 +42,36 @@ Update your `PackageTemplate` file (created by following the Microsoft documenta
 
 ## Usage
 
-### Deactivate SLAs during import
+### SLAs (classic)
 
-Deploying SLAs to an instance where they are already activated can cause problems during solution import. The package template will automatically deactivate SLAs pre-deployment and activate them again post-deployment.
+**Note: this functionality is for the old SLA component - not the new SLA KPI component.**
 
-### Deactivate/activate processes
+#### Deactivate SLAs during import
 
-You can specify which processes to deactivate on import by adding a `processestodeactivate` element within the `configdatastorage` element of the `ImportConfig.xml` file.
+Deploying SLAs to an instance where they are already activated can cause problems during solution import. The package template will automatically deactivate SLAs pre-deployment and activate them again post-deployment. If you want to disable this functionality, you can add an `activatedeactivateslas` attribute to the `configdatastorage` element.
+
+```xml
+<configdatastorage activatedeactivateslas="false">
+</configdatastorage>
+```
+
+#### Set SLAs as default
+
+You can configure which SLAs should be set as default after import by adding a `defaultslas` within the `configdatastorage` element of the `ImportConfig.xml`.
+
+```xml
+<configdatastorage>
+    <defaultslas>
+        <defaultsla>The name of the SLA</defaultsla>
+    </defaultslas>
+</configdatastorage>
+```
+
+### Processes
+
+#### Deactivate processes
+
+You can specify which processes to deactivate post-import by adding a `processestodeactivate` element within the `configdatastorage` element of the `ImportConfig.xml` file. This executes before data is imported (unless the data is explictly imported before solutions).
 
 ```xml
 <configdatastorage>
@@ -50,9 +81,25 @@ You can specify which processes to deactivate on import by adding a `processesto
 </configdatastorage>
 ```
 
-### Deactivate/activate plug-ins steps
+#### Activate processes
 
-You can specify which plug-in steps to deactivate on import by adding an `sdkstepstodeactivate` element within the `configdatastorage` element of the `ImportConfig.xml`.
+You can specify which processes to activate after your post-solution data is imported by adding a `processestoactivate` element within the `configdatastorage` element of the `ImportConfig.xml` file. 
+
+This can be useful where you want to activate processes that are dependent on data that imports after your solutions (e.g. any data for custom entities. Another example might be where you use this in conjunction with `processestodeactivate` for any worklows that you don't want active during the data import but that you do want active after the package has been deployed.
+
+```xml
+<configdatastorage>
+    <processestoactivate>
+        <processtoactivate>The name of the process</processtoactivate>
+    </processestoactivate>
+</configdatastorage>
+```
+
+### SDK steps
+
+#### Deactivate SDK steps
+
+You can specify which plug-in steps to deactivate on import by adding an `sdkstepstodeactivate` element within the `configdatastorage` element of the `ImportConfig.xml`. This executes before data is imported (unless the data is explictly imported before solutions).
 
 ```xml
 <configdatastorage>
@@ -61,8 +108,53 @@ You can specify which plug-in steps to deactivate on import by adding an `sdkste
     </sdkstepstodeactivate>
 </configdatastorage>
 ```
+### Flows
 
-### Migrate data
+#### Deactivate flows
+
+You can configure which flows should be disabled after import by adding a `flowstodeactivate` element within the `configdatastorage` element of the `ImportConfig.xml`. Any flows not listed here will be enabled by default. 
+
+```xml
+<configdatastorage>
+    <flowstodeactivate>
+        <flowtodeactivate>Name of the flow to deactivate</flowtodeactivate>
+    </flowstodeactivate>
+</configdatastorage>
+```
+
+If your deployment is running as an application user then you may face [some issues](https://github.com/MicrosoftDocs/power-automate-docs/issues/216). If you wish to continue deploying as an application user, you can pass the `LicensedUsername` and `LicensedPassword` runtime settings to the Package Deployer (or set the `PACKAGEDEPLOYER_SETTINGS_LICENSEDUSERNAME and `PACKAGEDEPLOYER_SETTINGS_LICENSEDPASSWORD` environment variables) and these credentials will be used for interacting with flows.
+
+#### Set connection references
+
+You can set connections for connection references either through environment variables (for example, those [exposed on Azure Pipelines](https://docs.microsoft.com/en-us/azure/devops/pipelines/process/variables?view=azure-devops&tabs=yaml%2Cbatch#access-variables-through-the-environment) from your variables or variable groups) or through Package Deployer [runtime settings](https://docs.microsoft.com/en-us/power-platform/admin/deploy-packages-using-package-deployer-windows-powershell#use-the-cmdlet-to-deploy-packages).
+
+Environment variables must be prefixed with `PACKAGEDEPLOYER_SETTINGS_CONNREF_` and followed by the logical name. Similarly, runtime settings must be prefixed with `ConnRef:` and followed by the connection reference logical name. For example, if a connection reference logical name was `devhub_sharedvisualstudioteamservices_ca653`, this could be set via either of the following:
+
+**Environment variable**
+
+```powershell
+$env:PACKAGEDEPLOYER_SETTINGS_CONNREF_DEVHUB_SHAREDVISUALSTUDIOTEAMSERVICES_CA653 = "shared-visualstudiot-44dd3131-3292-482a-9ec3-32cd7f3e799b"
+```
+
+**Runtime setting**
+
+```powershell
+$runtimeSettings = @{ 
+    "ConnRef:devhub_sharedvisualstudioteamservices_ca653" = "shared-visualstudiot-44dd3131-3292-482a-9ec3-32cd7f3e799b" 
+}
+
+Import-CrmPackage –CrmConnection $conn –PackageDirectory $packageDir –PackageName Package.dll –RuntimePackageSettings $runtimeSettings
+```
+
+The runtime setting takes precedence if both an environment variable and runtime setting are found for the same connection reference.
+
+To get your flow connection names, go to your environment and navigate to _Data -> Connections_ within the [Maker Portal](https://make.powerapps.com). Opening a connection will reveal the connection name in the URL, which will have a format of 'environments/environmentid/connections/apiname/_connectionname_/details'. 
+
+As above, you will need to pass licensed user credentials via runtime settings or environment variables if the Package Deployer is not running in the context of a licensed user. In addition, **the connections passed in need to be owned by the user doing the deployment**.
+
+### Data
+
+#### Import data
 
 You can migrate data using Capgemini's [data migrator tool](https://github.com/Capgemini/xrm-datamigration) by adding a `dataimports` element within the `configdatastorage` element of the `ImportConfig.xml`. There are three attributes that can be added to the individual `dataimport` elements.
 
@@ -81,7 +173,9 @@ You can migrate data using Capgemini's [data migrator tool](https://github.com/C
 </configdatastorage>
 ```
 
-### Deploying word templates
+### Word templates
+
+#### Import word templates
 
 You can import word templates by adding a `wordtemplates` element within the `configdatastorage` element of the `ImportConfig.xml`.
 
@@ -90,42 +184,6 @@ You can import word templates by adding a `wordtemplates` element within the `co
     <wordtemplates>
         <wordtemplates name="Word Template.docx">
     </wordtemplates>
-</configdatastorage>
-```
-
-### Setting SLAs as default
-
-You can configure which SLAs should be set as default after import by adding a `defaultslas` within the `configdatastorage` element of the `ImportConfig.xml`.
-
-```xml
-<configdatastorage>
-    <defaultslas>
-        <defaultsla>The name of the SLA</defaultsla>
-    </defaultslas>
-</configdatastorage>
-```
-
-### Deactivate/Activate Flows
-
-You can configure which flows should be disabled after import by adding a `flowstodeactivate` element within the `configdatastorage` element of the `ImportConfig.xml`. Any flows not listed here will be enabled by default. 
-
-```xml
-<configdatastorage>
-    <flowstodeactivate>
-        <flowtodeactivate>Name of the flow to deactivate</flowtodeactivate>
-    </flowstodeactivate>
-</configdatastorage>
-```
-
-### Upgrade or update based on solution version
-
-You can configure the template to either update or upgrade based on a semantic solution versioning scheme. This is done by adding the following attributes to the `configdatastorage` element. This may allow you to achieve faster deployment times if you only delete solution components on major version changes (for example).
-
-```xml
-<configdatastorage
-    useupdateformajorversions="true"
-    useupdateforminorversions="false"
-    useupdateforpatchversions="false">
 </configdatastorage>
 ```
 

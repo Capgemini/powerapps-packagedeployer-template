@@ -1,0 +1,15 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ServiceEndpoints xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <ServiceEndpoint ServiceEndpointId="{42f2f6aa-3f5c-eb11-a812-00224800ed7c}" Name="Test WebHook">
+    <ConnectionMode>1</ConnectionMode>
+    <Contract>8</Contract>
+    <Path></Path>
+    <SolutionNamespace></SolutionNamespace>
+    <UserClaim>1</UserClaim>
+    <IsCustomizable>1</IsCustomizable>
+    <AuthType>6</AuthType>
+    <MessageFormat>2</MessageFormat>
+    <NamespaceFormat>1</NamespaceFormat>
+    <Url>https://testurl.com</Url>
+  </ServiceEndpoint>
+</ServiceEndpoints>

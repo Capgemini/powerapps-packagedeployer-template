@@ -26,7 +26,44 @@
         }
 
         /// <inheritdoc/>
-        public EntityCollection RetrieveMultipleByAttribute(string entity, string attribute, IEnumerable<object> values)
+        public ExecuteMultipleResponse ExecuteMultiple(IEnumerable<OrganizationRequest> requests, bool continueOnError = true, bool returnResponses = true)
+        {
+            var executeMultipleRequest = new ExecuteMultipleRequest
+            {
+                Requests = new OrganizationRequestCollection(),
+                Settings = new ExecuteMultipleSettings
+                {
+                    ContinueOnError = continueOnError,
+                    ReturnResponses = returnResponses,
+                },
+            };
+            executeMultipleRequest.Requests.AddRange(requests);
+
+            return (ExecuteMultipleResponse)this.crmSvc.Execute(executeMultipleRequest);
+        }
+
+        /// <inheritdoc/>
+        public IEnumerable<Guid> GetSolutionComponentObjectIdsByType(string solutionName, int componentType)
+        {
+            var queryExpression = new QueryExpression(Constants.SolutionComponent.LogicalName)
+            {
+                ColumnSet = new ColumnSet(new string[] { Constants.SolutionComponent.Fields.ObjectId }),
+                Criteria = new FilterExpression(LogicalOperator.And),
+            };
+            queryExpression.AddLink(
+                Constants.Solution.LogicalName,
+                Constants.SolutionComponent.Fields.SolutionId,
+                Constants.Solution.Fields.SolutionId);
+            queryExpression.Criteria.AddCondition(Constants.SolutionComponent.Fields.ComponentType, ConditionOperator.Equal, componentType);
+            queryExpression.Criteria.AddCondition(Constants.Solution.LogicalName, Constants.Solution.Fields.UniqueName, ConditionOperator.Equal, solutionName);
+
+            var results = this.crmSvc.RetrieveMultiple(queryExpression);
+
+            return results.Entities.Select(e => e.GetAttributeValue<Guid>(Constants.SolutionComponent.Fields.ObjectId)).ToArray();
+        }
+
+        /// <inheritdoc/>
+        public EntityCollection RetrieveMultipleByAttribute(string entity, string attribute, IEnumerable<object> values, ColumnSet columnSet = null)
         {
             if (string.IsNullOrEmpty(entity))
             {
@@ -46,7 +83,7 @@
             var query = new QueryByAttribute(entity)
             {
                 Attributes = { attribute },
-                ColumnSet = new ColumnSet(false),
+                ColumnSet = columnSet ?? new ColumnSet(false),
             };
             query.Values.AddRange(values);
 
@@ -94,7 +131,7 @@
         public void ImportWordTemplate(string filePath)
         {
             var fileInfo = new FileInfo(filePath);
-            var templateType = new OptionSetValue(fileInfo.Extension.Equals("xlsx", StringComparison.OrdinalIgnoreCase) ? 1 : 2);
+            var templateType = new OptionSetValue(fileInfo.Extension.Equals("xlsx", StringComparison.OrdinalIgnoreCase) ? Constants.DocumentTemplate.DocumentTypeExcel : Constants.DocumentTemplate.DocumentTypeWord);
 
             if (templateType.Value != 2)
             {
@@ -111,18 +148,18 @@
             }
 
             var retrieveMultipleResponse = this.crmSvc.RetrieveMultiple(
-                new QueryByAttribute("documenttemplate") { Attributes = { "name" }, Values = { Path.GetFileNameWithoutExtension(fileInfo.Name) } });
+                new QueryByAttribute(Constants.DocumentTemplate.LogicalName) { Attributes = { Constants.DocumentTemplate.Fields.Name }, Values = { Path.GetFileNameWithoutExtension(fileInfo.Name) } });
 
             var documentTemplate = retrieveMultipleResponse.Entities.FirstOrDefault();
             if (documentTemplate == null)
             {
-                documentTemplate = new Entity("documenttemplate");
-                documentTemplate["name"] = Path.GetFileNameWithoutExtension(fileInfo.Name);
+                documentTemplate = new Entity(Constants.DocumentTemplate.LogicalName);
+                documentTemplate[Constants.DocumentTemplate.Fields.Name] = Path.GetFileNameWithoutExtension(fileInfo.Name);
             }
 
-            documentTemplate["associatedentitytypecode"] = logicalName;
-            documentTemplate["documenttype"] = templateType;
-            documentTemplate["content"] = Convert.ToBase64String(File.ReadAllBytes(filePath));
+            documentTemplate[Constants.DocumentTemplate.Fields.AssociatedEntityTypeCode] = logicalName;
+            documentTemplate[Constants.DocumentTemplate.Fields.DocumentType] = templateType;
+            documentTemplate[Constants.DocumentTemplate.Fields.Content] = Convert.ToBase64String(File.ReadAllBytes(filePath));
 
             if (documentTemplate.Id == Guid.Empty)
             {
