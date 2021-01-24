@@ -89,6 +89,19 @@
         }
 
         [Fact]
+        public void PackageTemplateBase_ProcessConfiguredToActivate_ProcessIsActivated()
+        {
+            var workflowQuery = new QueryByAttribute(Constants.Workflow.LogicalName);
+            workflowQuery.AddAttributeValue(Constants.Workflow.Fields.Name, "When an account is created do nothing");
+            workflowQuery.AddAttributeValue(Constants.Workflow.Fields.Type, Constants.Workflow.TypeDefinition);
+            workflowQuery.ColumnSet = new ColumnSet("statecode");
+
+            var workflow = this.fixture.ServiceClient.RetrieveMultiple(workflowQuery).Entities.FirstOrDefault();
+
+            workflow["statecode"].As<OptionSetValue>().Value.Should().Be(Constants.Workflow.StateCodeActive);
+        }
+
+        [Fact]
         public void PackageTemplateBase_SdkStepConfiguredToDeactivate_SdkStepIsDeactivated()
         {
             var sdkStepQuery = new QueryByAttribute(Constants.SdkMessageProcessingStep.LogicalName);

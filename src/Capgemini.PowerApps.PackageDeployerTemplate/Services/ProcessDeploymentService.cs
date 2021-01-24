@@ -75,18 +75,18 @@
         /// </summary>
         /// <param name="names">The names.</param>
         /// <returns>An <see cref="EntityCollection"/> containing the workflow records.</returns>
-        public EntityCollection QueryWorkflowsByName(IEnumerable<object> names)
+        public EntityCollection QueryWorkflowsByName(IEnumerable<string> names)
         {
-            var query = new QueryByAttribute(Constants.Workflow.LogicalName)
+            var query = new QueryExpression(Constants.Workflow.LogicalName)
             {
-                Attributes = { Constants.Workflow.Fields.Name },
                 ColumnSet = new ColumnSet(false),
             };
-            query.Values.AddRange(names);
-            query.AddAttributeValue(Constants.Workflow.Fields.Type, Constants.Workflow.TypeDefinition);
+            query.Criteria.AddCondition(Constants.Workflow.Fields.Name, ConditionOperator.In, names.ToArray<object>());
+            query.Criteria.AddCondition(Constants.Workflow.Fields.Type, ConditionOperator.Equal, Constants.Workflow.TypeDefinition);
 
             var results = this.crmSvc.RetrieveMultiple(query);
-            this.logger.LogInformation($"Found {results.Entities.Count} of {names.Count()} workflows found.");
+            this.logger.LogInformation($"Found {results.Entities.Count} processes matching the {names.Count()} provided names.");
+
             return results;
         }
     }
