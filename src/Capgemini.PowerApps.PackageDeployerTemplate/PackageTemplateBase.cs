@@ -84,7 +84,7 @@
                     {
                         this.licensedCrmServiceAdapter = new CrmServiceAdapter(
                             new CrmServiceClient(
-                                $"AuthType=OAuth;Username={username};Password={password};Url={this.CrmSvc.ConnectedOrgPublishedEndpoints.First().Value};AppId=51f81489-12ee-4a9e-aaae-a2591f45987d;RedirectUri=app://58145B91-0C36-4500-8554-080854F2AC97;LoginPrompt=Never"));
+                                $"AuthType=OAuth; Username={username}; Password={password}; Url={this.CrmSvc.ConnectedOrgPublishedEndpoints.First().Value}; AppId=51f81489-12ee-4a9e-aaae-a2591f45987d; RedirectUri=app://58145B91-0C36-4500-8554-080854F2AC97; LoginPrompt=Never"));
                     }
                     else
                     {
