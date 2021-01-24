@@ -66,14 +66,14 @@
             var processesToActivate = new string[] { "process_one", "process_two" };
 
             this.crmServiceAdapterMock
-                .Setup(x => x.RetrieveMultiple(It.IsAny<QueryByAttribute>()))
-                .Returns((QueryByAttribute query) =>
+                .Setup(x => x.RetrieveMultiple(It.IsAny<QueryExpression>()))
+                .Returns((QueryExpression query) =>
                 {
                     var entityCollection = new EntityCollection
                     {
                         EntityName = query.EntityName,
                     };
-                    entityCollection.Entities.AddRange(query.Values.Select(value => new Entity(query.EntityName, Guid.NewGuid())));
+                    entityCollection.Entities.AddRange(processesToActivate.Select(value => new Entity(query.EntityName, Guid.NewGuid())));
                     return entityCollection;
                 })
                 .Verifiable();
@@ -95,22 +95,30 @@
 
             this.processActivatorService.Activate(processesToActivate);
 
-            this.crmServiceAdapterMock.Verify(x => x.RetrieveMultiple(It.Is<QueryByAttribute>(
-                q => processesToActivate.All(value => q.Values.Contains(value)))));
+            this.crmServiceAdapterMock.Verify(
+                svc => svc.RetrieveMultiple(
+                    It.Is<QueryExpression>(
+                        q => q.Criteria.Conditions.Any(
+                            c => c.AttributeName == Constants.Workflow.Fields.Name &&
+                            c.Operator == ConditionOperator.In &&
+                            c.Values.All(v => processesToActivate.Contains(v))))));
         }
 
         [Fact]
         public void Activate_FaultWhenSettingsStatus_LogErrors()
         {
             this.crmServiceAdapterMock
-                .Setup(x => x.RetrieveMultiple(It.IsAny<QueryByAttribute>()))
-                .Returns((QueryByAttribute query) =>
+                .Setup(x => x.RetrieveMultiple(It.IsAny<QueryExpression>()))
+                .Returns((QueryExpression query) =>
                 {
                     var entityCollection = new EntityCollection
                     {
                         EntityName = query.EntityName,
                     };
-                    entityCollection.Entities.AddRange(query.Values.Select(value => new Entity(query.EntityName, Guid.NewGuid())));
+                    entityCollection.Entities.AddRange(
+                        query.Criteria.Conditions.First(
+                            c => c.AttributeName == Constants.Workflow.Fields.Name).Values.Select(
+                                value => new Entity(query.EntityName, Guid.NewGuid())));
                     return entityCollection;
                 });
 
@@ -165,14 +173,17 @@
             var processesToDeactivate = new string[] { "process_one", "process_two" };
 
             this.crmServiceAdapterMock
-                .Setup(x => x.RetrieveMultiple(It.IsAny<QueryByAttribute>()))
-                .Returns((QueryByAttribute query) =>
+                .Setup(x => x.RetrieveMultiple(It.IsAny<QueryExpression>()))
+                .Returns((QueryExpression query) =>
                 {
                     var entityCollection = new EntityCollection
                     {
                         EntityName = query.EntityName,
                     };
-                    entityCollection.Entities.AddRange(query.Values.Select(value => new Entity(query.EntityName, Guid.NewGuid())));
+                    entityCollection.Entities.AddRange(
+                        query.Criteria.Conditions.First(
+                            c => c.AttributeName == Constants.Workflow.Fields.Name).Values.Select(
+                                value => new Entity(query.EntityName, Guid.NewGuid())));
                     return entityCollection;
                 })
                 .Verifiable();
@@ -194,22 +205,30 @@
 
             this.processActivatorService.Deactivate(processesToDeactivate);
 
-            this.crmServiceAdapterMock.Verify(x => x.RetrieveMultiple(It.Is<QueryByAttribute>(
-                q => processesToDeactivate.All(value => q.Values.Contains(value)))));
+            this.crmServiceAdapterMock.Verify(
+                svc => svc.RetrieveMultiple(
+                    It.Is<QueryExpression>(
+                        q => q.Criteria.Conditions.Any(
+                            c => c.AttributeName == Constants.Workflow.Fields.Name &&
+                            c.Operator == ConditionOperator.In &&
+                            c.Values.All(v => processesToDeactivate.Contains(v))))));
         }
 
         [Fact]
         public void Deactivate_FaultWhenSettingsStatus_LogErrors()
         {
             this.crmServiceAdapterMock
-                .Setup(x => x.RetrieveMultiple(It.IsAny<QueryByAttribute>()))
-                .Returns((QueryByAttribute query) =>
+                .Setup(x => x.RetrieveMultiple(It.IsAny<QueryExpression>()))
+                .Returns((QueryExpression query) =>
                 {
                     var entityCollection = new EntityCollection
                     {
                         EntityName = query.EntityName,
                     };
-                    entityCollection.Entities.AddRange(query.Values.Select(value => new Entity(query.EntityName, Guid.NewGuid())));
+                    entityCollection.Entities.AddRange(
+                        query.Criteria.Conditions.First(
+                            c => c.AttributeName == Constants.Workflow.Fields.Name).Values.Select(
+                                value => new Entity(query.EntityName, Guid.NewGuid())));
                     return entityCollection;
                 });
 
