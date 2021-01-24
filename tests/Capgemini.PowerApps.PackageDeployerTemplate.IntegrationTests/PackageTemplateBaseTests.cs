@@ -67,8 +67,8 @@
             postDeploymentRecordQuery.ColumnSet = new ColumnSet("createdon");
             var postDeploymentRecord = this.fixture.ServiceClient.RetrieveMultiple(postDeploymentRecordQuery).Entities.FirstOrDefault();
 
-            var solutionQuery = new QueryByAttribute("solution");
-            solutionQuery.AddAttributeValue("uniquename", "pdt_PackageDeployerTemplate_MockSolution");
+            var solutionQuery = new QueryByAttribute(Constants.Solution.LogicalName);
+            solutionQuery.AddAttributeValue(Constants.Solution.Fields.UniqueName, "pdt_PackageDeployerTemplate_MockSolution");
             solutionQuery.ColumnSet = new ColumnSet("createdon");
             var solutionRecord = this.fixture.ServiceClient.RetrieveMultiple(solutionQuery).Entities.FirstOrDefault();
 
@@ -108,7 +108,7 @@
 
             var connectionReference = this.fixture.ServiceClient.RetrieveMultiple(connectionReferenceQuery).Entities.First();
 
-            connectionReference.GetAttributeValue<string>(Constants.ConnectionReference.Fields.ConnectionId).Should().Be("fca88ebd155b4029b69f590f1b2c0e28");
+            connectionReference.GetAttributeValue<string>(Constants.ConnectionReference.Fields.ConnectionId).Should().Be(Environment.GetEnvironmentVariable("PACKAGEDEPLOYER_SETTINGS_CONNREF_PDT_SHAREDAPPROVALS_D7DCB"));
         }
 
         [Theory]
