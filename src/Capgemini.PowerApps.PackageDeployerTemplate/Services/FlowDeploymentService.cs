@@ -146,7 +146,6 @@ namespace Capgemini.PowerApps.PackageDeployerTemplate.Services
                 Criteria = new FilterExpression(LogicalOperator.And),
             };
 
-            // TODO: Replace 5 with a constant.
             flowQuery.Criteria.AddCondition(Constants.Workflow.Fields.Category, ConditionOperator.Equal, Constants.Workflow.CategoryModernFlow);
             flowQuery.Criteria.AddCondition(Constants.Workflow.Fields.WorkflowId, ConditionOperator.In, guids.Cast<object>().ToArray());
 
