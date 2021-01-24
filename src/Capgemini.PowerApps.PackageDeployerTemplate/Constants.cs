@@ -42,6 +42,11 @@
             public const int TypeDefinition = 1;
 
             /// <summary>
+            /// Modern flow option set value for type option set.
+            /// </summary>
+            public const int CategoryModernFlow = 5;
+
+            /// <summary>
             /// The logical name.
             /// </summary>
             public const string LogicalName = "workflow";
@@ -71,6 +76,16 @@
             /// </summary>
             public static class Fields
             {
+                /// <summary>
+                /// The workflow ID.
+                /// </summary>
+                public const string WorkflowId = "workflowid";
+
+                /// <summary>
+                /// The workflow category.
+                /// </summary>
+                public const string Category = "category";
+
                 /// <summary>
                 /// The process type.
                 /// </summary>

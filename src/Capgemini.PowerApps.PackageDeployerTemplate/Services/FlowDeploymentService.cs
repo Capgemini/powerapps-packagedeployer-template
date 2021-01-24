@@ -140,13 +140,15 @@ namespace Capgemini.PowerApps.PackageDeployerTemplate.Services
             }
 
             this.logger.LogInformation($"Getting deployed flows matching the following workflow IDs: {string.Join("\n - ", guids)}");
-            var flowQuery = new QueryExpression("workflow")
+            var flowQuery = new QueryExpression(Constants.Workflow.LogicalName)
             {
                 ColumnSet = columnSet,
                 Criteria = new FilterExpression(LogicalOperator.And),
             };
-            flowQuery.Criteria.AddCondition("category", ConditionOperator.Equal, 5);
-            flowQuery.Criteria.AddCondition("workflowid", ConditionOperator.In, guids.Cast<object>().ToArray());
+
+            // TODO: Replace 5 with a constant.
+            flowQuery.Criteria.AddCondition(Constants.Workflow.Fields.Category, ConditionOperator.Equal, Constants.Workflow.CategoryModernFlow);
+            flowQuery.Criteria.AddCondition(Constants.Workflow.Fields.WorkflowId, ConditionOperator.In, guids.Cast<object>().ToArray());
 
             var results = this.crmSvc.RetrieveMultiple(flowQuery);
 

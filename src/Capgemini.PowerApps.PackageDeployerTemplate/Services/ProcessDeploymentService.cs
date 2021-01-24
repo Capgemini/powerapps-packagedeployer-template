@@ -77,13 +77,13 @@
         /// <returns>An <see cref="EntityCollection"/> containing the workflow records.</returns>
         public EntityCollection QueryWorkflowsByName(IEnumerable<object> names)
         {
-            var query = new QueryByAttribute("workflow")
+            var query = new QueryByAttribute(Constants.Workflow.LogicalName)
             {
                 Attributes = { Constants.Workflow.Fields.Name },
                 ColumnSet = new ColumnSet(false),
             };
             query.Values.AddRange(names);
-            query.AddAttributeValue(Constants.Workflow.Fields.Type, 1);
+            query.AddAttributeValue(Constants.Workflow.Fields.Type, Constants.Workflow.TypeDefinition);
 
             var results = this.crmSvc.RetrieveMultiple(query);
             this.logger.LogInformation($"Found {results.Entities.Count} of {names.Count()} workflows found.");
