@@ -85,14 +85,14 @@ namespace Capgemini.PowerApps.PackageDeployerTemplate.Config
         /// </summary>
         /// <returns>A collection of data import configurations to run post-deployment.</returns>
         [XmlIgnore]
-        public IEnumerable<DataImportConfig> PostDeployDataImports => this.DataImports.Where(c => !c.ImportBeforeSolutions).ToArray();
+        public IEnumerable<DataImportConfig> PostDeployDataImports => this.DataImports.Where(c => !c.ImportBeforeSolutions);
 
         /// <summary>
         /// Gets a collection of data import configurations to run pre-deployment.
         /// </summary>
         /// <returns>A collection of data import configurations to run post-deployment.</returns>
         [XmlIgnore]
-        public IEnumerable<DataImportConfig> PreDeployDataImports => this.DataImports.Where(c => c.ImportBeforeSolutions).ToArray();
+        public IEnumerable<DataImportConfig> PreDeployDataImports => this.DataImports.Where(c => c.ImportBeforeSolutions);
 
         /// <summary>
         /// Gets or sets a collection of SLAs and their deployment configuration.
