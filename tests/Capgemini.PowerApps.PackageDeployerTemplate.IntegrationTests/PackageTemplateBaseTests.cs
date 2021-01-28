@@ -70,7 +70,7 @@
             var solutionQuery = new QueryByAttribute(Constants.Solution.LogicalName);
             solutionQuery.AddAttributeValue(Constants.Solution.Fields.UniqueName, "pdt_PackageDeployerTemplate_MockSolution");
             solutionQuery.ColumnSet = new ColumnSet("createdon");
-            var solutionRecord = this.fixture.ServiceClient.RetrieveMultiple(solutionQuery).Entities.FirstOrDefault();
+            var solutionRecord = this.fixture.ServiceClient.RetrieveMultiple(solutionQuery).Entities.First();
 
             postDeploymentRecord["createdon"].As<DateTime>().Should().BeAfter(solutionRecord["createdon"].As<DateTime>());
         }

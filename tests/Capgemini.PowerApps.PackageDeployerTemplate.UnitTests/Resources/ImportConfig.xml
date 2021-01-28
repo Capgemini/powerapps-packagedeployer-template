@@ -1,21 +1,34 @@
 ﻿<?xml version="1.0"?>
-<configdatastorage xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" installsampledata="false" waitforsampledatatoinstall="true" agentdesktopzipfile="" agentdesktopexename="" crmmigdataimportfile="" activatedeactivateslas="false">
-    <processestodeactivate>
-        <processtodeactivate>Case: Set Name</processtodeactivate>
-    </processestodeactivate>
-    <sdkstepstodeactivate>
-        <sdksteptodeactivate>Case: Publish Update of Case Reference to ASB</sdksteptodeactivate>
-    </sdkstepstodeactivate>
-    <processestoactivate>
-        <processtoactivate>Case: Set Name Activate</processtoactivate>
-    </processestoactivate>
-    <defaultslas>
-        <defaultsla>Standard Case SLA</defaultsla>
-    </defaultslas>
-    <wordtemplates>
-        <wordtemplate>Case Survey</wordtemplate>
-    </wordtemplates>
+<configdatastorage xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" installsampledata="false" waitforsampledatatoinstall="true" agentdesktopzipfile="" agentdesktopexename="" crmmigdataimportfile="">
+  <templateconfig activatedeactivateslas="true">
+    <sdksteps>
+      <sdkstep name="This SDK step should be deactivated" state="Inactive"/>
+      <sdkstep name="This SDK step should be activated" state="Active" external="true"/>
+      <sdkstep name="This SDK step should also be activated" external="true"/>
+    </sdksteps>
+    <processes>
+      <process name="This process should be deactivated" state="Inactive"/>
+      <process name="This process should be activated" state="Active" external="true"/>
+      <process name="This process should also be activated" external="true"/>
+    </processes>
+    <slas>
+      <sla name="Standard Case SLA" isdefault="true" />
+    </slas>
+    <documenttemplates>
+      <documenttemplate path="Word Document.docx" />
+    </documenttemplates>
     <dataimports>
-        <dataimport datafolderpath="Data/Reference/PreDeploy/Extract" importconfigpath="Data/Reference/PreDeploy/ImportConfig.json" importbeforesolutions="true" />
+      <dataimport
+        datafolderpath="Data/Reference/PreDeploy/Extract"
+        importconfigpath="Data/Reference/PreDeploy/ImportConfig.json"
+        importbeforesolutions="true" />
+      <dataimport
+        datafolderpath="Data/Reference/PostDeploy/Extract"
+        importconfigpath="Data/Reference/PostDeploy/ImportConfig.json"
+        importbeforesolutions="false" />
+      <dataimport
+        datafolderpath="Data/Reference/DefaultedPostDeploy/Extract"
+        importconfigpath="Data/Reference/DefaultedPostDeploy/ImportConfig.json" />
     </dataimports>
+  </templateconfig>
 </configdatastorage>

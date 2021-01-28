@@ -1,264 +1,208 @@
 ﻿namespace Capgemini.PowerApps.PackageDeployerTemplate.UnitTests.Services
 {
     using System;
+    using System.Collections.Generic;
     using System.Linq;
     using Capgemini.PowerApps.PackageDeployerTemplate.Adapters;
     using Capgemini.PowerApps.PackageDeployerTemplate.Services;
+    using FluentAssertions;
     using Microsoft.Extensions.Logging;
     using Microsoft.Xrm.Sdk;
-    using Microsoft.Xrm.Sdk.Messages;
     using Microsoft.Xrm.Sdk.Query;
     using Moq;
     using Xunit;
 
     public class ProcessDeploymentServiceTests
     {
+        private static readonly string[] Solutions = new string[] { "new_SolutionA", "new_SolutionB" };
+
         private readonly Mock<ILogger> loggerMock;
         private readonly Mock<ICrmServiceAdapter> crmServiceAdapterMock;
 
-        private readonly ProcessDeploymentService processActivatorService;
+        private readonly ProcessDeploymentService processDeploymentSvc;
 
         public ProcessDeploymentServiceTests()
         {
             this.loggerMock = new Mock<ILogger>();
             this.crmServiceAdapterMock = new Mock<ICrmServiceAdapter>();
 
-            this.processActivatorService = new ProcessDeploymentService(this.loggerMock.Object, this.crmServiceAdapterMock.Object);
+            this.processDeploymentSvc = new ProcessDeploymentService(this.loggerMock.Object, this.crmServiceAdapterMock.Object);
         }
 
         [Fact]
         public void Construct_NullPackageLog_ThrowsArgumentNullException()
         {
-            Assert.Throws<ArgumentNullException>(() =>
-            {
-                new ProcessDeploymentService(null, this.crmServiceAdapterMock.Object);
-            });
+            Action constructWithNullLogger = () => new ProcessDeploymentService(null, this.crmServiceAdapterMock.Object);
+
+            constructWithNullLogger.Should().Throw<ArgumentNullException>();
         }
 
         [Fact]
         public void Construct_NullCrmService_ThrowsArgumentNullException()
         {
-            Assert.Throws<ArgumentNullException>(() =>
+            Action constructWithNullCrmSvc = () => new ProcessDeploymentService(this.loggerMock.Object, null);
+
+            constructWithNullCrmSvc.Should().Throw<ArgumentNullException>();
+        }
+
+        [Fact]
+        public void SetStatesBySolution_NullSolutionsArgument_LogsNoSolutions()
+        {
+            this.processDeploymentSvc.SetStatesBySolution(null);
+
+            this.loggerMock.VerifyLog(x => x.LogInformation("No solutions were provided to activate processes for."));
+        }
+
+        [Fact]
+        public void SetStatesBySolution_ProcessInComponentsToDeactivateList_DeactivatesProcess()
+        {
+            var processToDeactivateName = "Process to deactivate";
+            var solutionProcesses = new List<Entity>
             {
-                new ProcessDeploymentService(this.loggerMock.Object, null);
+                new Entity(Constants.Workflow.LogicalName)
+                {
+                    Id = Guid.NewGuid(),
+                    Attributes =
+                    {
+                        { Constants.Workflow.Fields.Name, processToDeactivateName },
+                    },
+                },
+            };
+            this.MockBySolutionProcesses(solutionProcesses);
+
+            this.processDeploymentSvc.SetStatesBySolution(Solutions, new List<string> { processToDeactivateName });
+
+            this.crmServiceAdapterMock.Verify(
+                c => c.UpdateStateAndStatusForEntity(
+                    Constants.Workflow.LogicalName,
+                    solutionProcesses[0].Id,
+                    Constants.Workflow.StateCodeInactive,
+                    Constants.Workflow.StatusCodeInactive),
+                Times.Once());
+        }
+
+        [Fact]
+        public void SetStates_ComponentsToActivateNull_ThrowsArgumentNullException()
+        {
+            Action setStatesWithoutComponentsToActivate = () => this.processDeploymentSvc.SetStates(null);
+
+            setStatesWithoutComponentsToActivate.Should().Throw<ArgumentNullException>();
+        }
+
+        [Fact]
+        public void SetStates_ComponentsToDeactivateNull_DoesNotThrow()
+        {
+            Action setStatesWithoutComponentsToDeactivate = () => this.processDeploymentSvc.SetStates(Enumerable.Empty<string>());
+
+            setStatesWithoutComponentsToDeactivate.Should().NotThrow<ArgumentNullException>();
+        }
+
+        [Fact]
+        public void SetStates_NoProcessesPassed_LogsNoProcessesProvided()
+        {
+            this.processDeploymentSvc.SetStates(Enumerable.Empty<string>());
+
+            this.loggerMock.VerifyLog(l => l.LogInformation("No processes were provided."));
+        }
+
+        [Fact]
+        public void SetStates_NoProcessesFound_LogsNoProcessesFound()
+        {
+            this.MockSetStatesProcesses(new List<Entity>());
+
+            this.processDeploymentSvc.SetStates(new List<string> { "Not found process" });
+
+            this.loggerMock.VerifyLog(l => l.LogInformation("No processes were found with the names provided."));
+        }
+
+        [Fact]
+        public void SetStates_FoundProcessCountDiffersFromProvidedNamesCount_LogsMismatchWarning()
+        {
+            var foundProcesses = new List<Entity>
+            {
+                new Entity(Constants.Workflow.LogicalName) { Attributes = { { Constants.Workflow.Fields.Name, "Found process" } } },
+            };
+            this.MockSetStatesProcesses(foundProcesses);
+            var processesToFind = new List<string>
+            {
+                foundProcesses.First().GetAttributeValue<string>(Constants.Workflow.Fields.Name),
+                "Not found process",
+            };
+
+            this.processDeploymentSvc.SetStates(processesToFind);
+
+            this.loggerMock.VerifyLog(l => l.LogWarning($"Found {foundProcesses.Count} deployed processes but expected {processesToFind.Count}."));
+        }
+
+        [Fact]
+        public void SetStates_ProcessInComponentsToActivateFound_ActivatesProcess()
+        {
+            var foundProcesses = new List<Entity>
+            {
+                new Entity(Constants.Workflow.LogicalName) { Attributes = { { Constants.Workflow.Fields.Name, "Found process" } } },
+            };
+            this.MockSetStatesProcesses(foundProcesses);
+
+            this.processDeploymentSvc.SetStates(new List<string>
+            {
+                foundProcesses.First().GetAttributeValue<string>(Constants.Workflow.Fields.Name),
             });
-        }
-
-        [Fact]
-        public void Activate_NullProcessesToActivate_LogsNoConfig()
-        {
-            this.processActivatorService.Activate(null);
-
-            this.loggerMock.VerifyLog(x => x.LogInformation("No processes to activate have been configured."));
-        }
-
-        [Fact]
-        public void Activate_EmptyProcessesToActivate_LogsNoConfig()
-        {
-            this.processActivatorService.Activate(Array.Empty<string>());
-
-            this.loggerMock.VerifyLog(x => x.LogInformation("No processes to activate have been configured."));
-        }
-
-        [Fact]
-        public void Activate_QueryForProcesses_IncludesAllNamesPassed()
-        {
-            var processesToActivate = new string[] { "process_one", "process_two" };
-
-            this.crmServiceAdapterMock
-                .Setup(x => x.RetrieveMultiple(It.IsAny<QueryExpression>()))
-                .Returns((QueryExpression query) =>
-                {
-                    var entityCollection = new EntityCollection
-                    {
-                        EntityName = query.EntityName,
-                    };
-                    entityCollection.Entities.AddRange(processesToActivate.Select(value => new Entity(query.EntityName, Guid.NewGuid())));
-                    return entityCollection;
-                })
-                .Verifiable();
-
-            this.crmServiceAdapterMock
-                .Setup(x => x.UpdateStateAndStatusForEntityInBatch(It.IsAny<EntityCollection>(), It.IsAny<int>(), It.IsAny<int>()))
-                .Returns(() =>
-                {
-                    var responseItemCollection = new ExecuteMultipleResponseItemCollection
-                    {
-                        new ExecuteMultipleResponseItem { },
-                        new ExecuteMultipleResponseItem { },
-                    };
-
-                    var response = new ExecuteMultipleResponse();
-                    response.Results.Add("Responses", responseItemCollection);
-                    return response;
-                });
-
-            this.processActivatorService.Activate(processesToActivate);
 
             this.crmServiceAdapterMock.Verify(
-                svc => svc.RetrieveMultiple(
-                    It.Is<QueryExpression>(
-                        q => q.Criteria.Conditions.Any(
-                            c => c.AttributeName == Constants.Workflow.Fields.Name &&
-                            c.Operator == ConditionOperator.In &&
-                            c.Values.All(v => processesToActivate.Contains(v))))));
+                svc => svc.UpdateStateAndStatusForEntity(
+                    Constants.Workflow.LogicalName,
+                    foundProcesses.First().Id,
+                    Constants.Workflow.StateCodeActive,
+                    Constants.Workflow.StatusCodeActive),
+                Times.Once());
         }
 
         [Fact]
-        public void Activate_FaultWhenSettingsStatus_LogErrors()
+        public void SetStates_ProcessInComponentsToDeactivateFound_DectivatesProcess()
         {
-            this.crmServiceAdapterMock
-                .Setup(x => x.RetrieveMultiple(It.IsAny<QueryExpression>()))
-                .Returns((QueryExpression query) =>
-                {
-                    var entityCollection = new EntityCollection
-                    {
-                        EntityName = query.EntityName,
-                    };
-                    entityCollection.Entities.AddRange(
-                        query.Criteria.Conditions.First(
-                            c => c.AttributeName == Constants.Workflow.Fields.Name).Values.Select(
-                                value => new Entity(query.EntityName, Guid.NewGuid())));
-                    return entityCollection;
-                });
+            var foundProcesses = new List<Entity>
+            {
+                new Entity(Constants.Workflow.LogicalName) { Attributes = { { Constants.Workflow.Fields.Name, "Found process" } } },
+            };
+            this.MockSetStatesProcesses(foundProcesses);
 
-            this.crmServiceAdapterMock
-                .Setup(x => x.UpdateStateAndStatusForEntityInBatch(It.IsAny<EntityCollection>(), It.IsAny<int>(), It.IsAny<int>()))
-                .Returns(() =>
-                {
-                    var responseItemCollection = new ExecuteMultipleResponseItemCollection
-                    {
-                        new ExecuteMultipleResponseItem
-                        {
-                            Fault = new OrganizationServiceFault
-                            {
-                                Message = "Test fault response",
-                            },
-                        },
-                        new ExecuteMultipleResponseItem { },
-                    };
-
-                    var response = new ExecuteMultipleResponse();
-                    response.Results.Add("Responses", responseItemCollection);
-                    response.Results.Add("IsFaulted", true);
-                    return response;
-                });
-
-            this.processActivatorService.Activate(new string[] { "a_process_to_activate" });
-
-            this.loggerMock.VerifyLog(x => x.LogError(It.IsAny<string>()), Times.Exactly(2));
-            this.loggerMock.VerifyLog(x => x.LogError("Error activating processes."));
-            this.loggerMock.VerifyLog(x => x.LogError("Test fault response"));
-        }
-
-        [Fact]
-        public void Deactivate_NullProcessesToActivate_LogsNoConfig()
-        {
-            this.processActivatorService.Deactivate(null);
-
-            this.loggerMock.VerifyLog(x => x.LogInformation("No processes to deactivate have been configured."));
-        }
-
-        [Fact]
-        public void Deactivate_EmptyProcessesToActivate_LogsNoConfig()
-        {
-            this.processActivatorService.Deactivate(Array.Empty<string>());
-
-            this.loggerMock.VerifyLog(x => x.LogInformation("No processes to deactivate have been configured."));
-        }
-
-        [Fact]
-        public void Deactivate_QueryForProcesses_IncludesAllNamesPassed()
-        {
-            var processesToDeactivate = new string[] { "process_one", "process_two" };
-
-            this.crmServiceAdapterMock
-                .Setup(x => x.RetrieveMultiple(It.IsAny<QueryExpression>()))
-                .Returns((QueryExpression query) =>
-                {
-                    var entityCollection = new EntityCollection
-                    {
-                        EntityName = query.EntityName,
-                    };
-                    entityCollection.Entities.AddRange(
-                        query.Criteria.Conditions.First(
-                            c => c.AttributeName == Constants.Workflow.Fields.Name).Values.Select(
-                                value => new Entity(query.EntityName, Guid.NewGuid())));
-                    return entityCollection;
-                })
-                .Verifiable();
-
-            this.crmServiceAdapterMock
-                .Setup(x => x.UpdateStateAndStatusForEntityInBatch(It.IsAny<EntityCollection>(), It.IsAny<int>(), It.IsAny<int>()))
-                .Returns(() =>
-                {
-                    var responseItemCollection = new ExecuteMultipleResponseItemCollection
-                    {
-                        new ExecuteMultipleResponseItem { },
-                        new ExecuteMultipleResponseItem { },
-                    };
-
-                    var response = new ExecuteMultipleResponse();
-                    response.Results.Add("Responses", responseItemCollection);
-                    return response;
-                });
-
-            this.processActivatorService.Deactivate(processesToDeactivate);
+            this.processDeploymentSvc.SetStates(Enumerable.Empty<string>(), new List<string>
+            {
+                foundProcesses.First().GetAttributeValue<string>(Constants.Workflow.Fields.Name),
+            });
 
             this.crmServiceAdapterMock.Verify(
-                svc => svc.RetrieveMultiple(
-                    It.Is<QueryExpression>(
-                        q => q.Criteria.Conditions.Any(
-                            c => c.AttributeName == Constants.Workflow.Fields.Name &&
-                            c.Operator == ConditionOperator.In &&
-                            c.Values.All(v => processesToDeactivate.Contains(v))))));
+                svc => svc.UpdateStateAndStatusForEntity(
+                    Constants.Workflow.LogicalName,
+                    foundProcesses.First().Id,
+                    Constants.Workflow.StateCodeInactive,
+                    Constants.Workflow.StatusCodeInactive),
+                Times.Once());
         }
 
-        [Fact]
-        public void Deactivate_FaultWhenSettingsStatus_LogErrors()
+        private void MockSetStatesProcesses(IList<Entity> processes)
+        {
+            this.crmServiceAdapterMock.Setup(
+                svc => svc.RetrieveMultiple(
+                    It.Is<QueryExpression>(
+                        q =>
+                        q.EntityName == Constants.Workflow.LogicalName &&
+                        q.Criteria.Conditions.Any(
+                            c =>
+                            c.AttributeName == Constants.Workflow.Fields.Name &&
+                            c.Operator == ConditionOperator.In))))
+                .Returns(new EntityCollection(processes));
+        }
+
+        private void MockBySolutionProcesses(IList<Entity> processes)
         {
             this.crmServiceAdapterMock
-                .Setup(x => x.RetrieveMultiple(It.IsAny<QueryExpression>()))
-                .Returns((QueryExpression query) =>
-                {
-                    var entityCollection = new EntityCollection
-                    {
-                        EntityName = query.EntityName,
-                    };
-                    entityCollection.Entities.AddRange(
-                        query.Criteria.Conditions.First(
-                            c => c.AttributeName == Constants.Workflow.Fields.Name).Values.Select(
-                                value => new Entity(query.EntityName, Guid.NewGuid())));
-                    return entityCollection;
-                });
-
-            this.crmServiceAdapterMock
-                .Setup(x => x.UpdateStateAndStatusForEntityInBatch(It.IsAny<EntityCollection>(), It.IsAny<int>(), It.IsAny<int>()))
-                .Returns(() =>
-                {
-                    var responseItemCollection = new ExecuteMultipleResponseItemCollection
-                    {
-                        new ExecuteMultipleResponseItem
-                        {
-                            Fault = new OrganizationServiceFault
-                            {
-                                Message = "Test fault response",
-                            },
-                        },
-                        new ExecuteMultipleResponseItem { },
-                    };
-
-                    var response = new ExecuteMultipleResponse();
-                    response.Results.Add("Responses", responseItemCollection);
-                    response.Results.Add("IsFaulted", true);
-                    return response;
-                });
-
-            this.processActivatorService.Deactivate(new string[] { "a_process_to_deactivate" });
-
-            this.loggerMock.VerifyLog(x => x.LogError(It.IsAny<string>()), Times.Exactly(2));
-            this.loggerMock.VerifyLog(x => x.LogError("Error deactivating processes."));
-            this.loggerMock.VerifyLog(x => x.LogError("Test fault response"));
+                .Setup(c => c.RetrieveDeployedSolutionComponents(
+                    Solutions,
+                    Constants.SolutionComponent.ComponentTypeWorkflow,
+                    Constants.Workflow.LogicalName,
+                    It.IsAny<ColumnSet>()))
+                .Returns(new EntityCollection(processes));
         }
     }
 }
