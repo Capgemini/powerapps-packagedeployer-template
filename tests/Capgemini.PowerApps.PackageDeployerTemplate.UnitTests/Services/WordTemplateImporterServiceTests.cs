@@ -46,7 +46,7 @@
         {
             this.wordTemplateImporterService.Import(null, string.Empty);
 
-            this.loggerMock.VerifyLog(x => x.LogInformation("No Work Template to import."));
+            this.loggerMock.VerifyLog(x => x.LogInformation("No Word template to import."));
         }
 
         [Fact]
@@ -54,7 +54,7 @@
         {
             this.wordTemplateImporterService.Import(Array.Empty<string>(), string.Empty);
 
-            this.loggerMock.VerifyLog(x => x.LogInformation("No Work Template to import."));
+            this.loggerMock.VerifyLog(x => x.LogInformation("No Word template to import."));
         }
 
         [Fact]
