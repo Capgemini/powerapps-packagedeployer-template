@@ -56,11 +56,21 @@
         ExecuteMultipleResponse ExecuteMultiple(IEnumerable<OrganizationRequest> requests, bool continueOnError = true, bool returnResponses = true);
 
         /// <summary>
-        /// Gets solution component object IDs of a given type.
+        /// Retrieve solution component object IDs of a given type and solution.
         /// </summary>
         /// <param name="solutionName">The unique name of the solution.</param>
         /// <param name="componentType">The type of the components.</param>
         /// <returns>A collection of object IDs.</returns>
-        IEnumerable<Guid> GetSolutionComponentObjectIdsByType(string solutionName, int componentType);
+        IEnumerable<Guid> RetieveSolutionComponentsObjectIds(string solutionName, int componentType);
+
+        /// <summary>
+        /// Retrieve deployed component records for the given solution(s) and component type.
+        /// </summary>
+        /// <param name="solutions">The solutions to get component records for.</param>
+        /// <param name="solutionComponentType">The component type.</param>
+        /// <param name="componentLogicalName">The logical name of the entity associated with the component type.</param>
+        /// <param name="columnSet">The columns to select.</param>
+        /// <returns>A collection of the component entity records.</returns>
+        EntityCollection RetrieveDeployedSolutionComponents(IEnumerable<string> solutions, int solutionComponentType, string componentLogicalName, ColumnSet columnSet = null);
     }
 }
