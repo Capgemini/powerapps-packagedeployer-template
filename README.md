@@ -14,9 +14,9 @@ This project's aim is to build a powerful base Package Deployer template that si
     - [Deactivate SLAs during import](#Deactivate-SLAs-during-import)
     - [Set SLAs as default](#Set-SLAs-as-default)
   - [Processes](#Processes)
-    - [Deactivate processes](#Deactivate-processes)
+    - [Set process states](#Set-process-states)
   - [SDK Steps](#SDK-stpes)
-    - [Deactivate SDK steps](#Deactivate-SDK-steps)
+    - [Set SDK step states](#Set-sdk-step-states)
   - [Connection references](#Connection-references)
     - [Set connection references](#Set-connection-references)
   - [Data](#Data)
@@ -83,7 +83,7 @@ All processes within the deployed solution(s) are activated by default after the
 
 If your deployment is running as an application user then you may face [some issues](https://github.com/MicrosoftDocs/power-automate-docs/issues/216) if your solution contains flows. If you wish to continue deploying as an application user, you can pass the `LicensedUsername` and `LicensedPassword` runtime settings to the Package Deployer (or set the `PACKAGEDEPLOYER_SETTINGS_LICENSEDUSERNAME and `PACKAGEDEPLOYER_SETTINGS_LICENSEDPASSWORD` environment variables) and these credentials will be used for flow activation.
 
-> You can also activate or deactivate processes that are not in your package by setting the 'external` attribute to `true` on a `<process>` element. Be careful when doing this - deploying your package may introduce side-effects to an environment that make it incompatible with other solutions.
+> You can also activate or deactivate processes that are not in your package by setting the `external` attribute to `true` on a `<process>` element. Be careful when doing this - deploying your package may introduce side-effects to an environment that make it incompatible with other solutions.
 
 ### SDK steps
 
@@ -99,7 +99,9 @@ All SDK steps within the deployed solution(s) are activated by default after the
 </templateconfig>
 ```
 
-> You can also activate or deactivate SDK steps that are not in your package by setting the 'external` attribute to `true` on a `<process>` element. Be careful when doing this - deploying your package may introduce side-effects to an environment that make it incompatible with other solutions.### Connection references
+> You can also activate or deactivate SDK steps that are not in your package by setting the `external` attribute to `true` on an `<sdkstep>` element. Be careful when doing this - deploying your package may introduce side-effects to an environment that make it incompatible with other solutions.
+
+### Connection references
 
 #### Set connection references
 
