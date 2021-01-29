@@ -14,12 +14,10 @@ This project's aim is to build a powerful base Package Deployer template that si
     - [Deactivate SLAs during import](#Deactivate-SLAs-during-import)
     - [Set SLAs as default](#Set-SLAs-as-default)
   - [Processes](#Processes)
-    - [Deactivate processes](#Deactivate-processes)
-    - [Activate processes](#Activate-processes)
+    - [Set process states](#Set-process-states)
   - [SDK Steps](#SDK-stpes)
-    - [Deactivate SDK steps](#Deactivate-SDK-steps)
-  - [Flows](#Flows)
-    - [Deactivate flows](#Deactivate-flows)
+    - [Set SDK step states](#Set-sdk-step-states)
+  - [Connection references](#Connection-references)
     - [Set connection references](#Set-connection-references)
   - [Data](#Data)
     - [Import data](#Import-data)
@@ -42,87 +40,68 @@ Update your `PackageTemplate` file (created by following the Microsoft documenta
 
 ## Usage
 
+All configuration for the package is placed within a `<templateconfig>` element in your package's ImportConfig.xml file.
+
 ### SLAs (classic)
 
 **Note: this functionality is for the old SLA component - not the new SLA KPI component.**
 
 #### Deactivate SLAs during import
 
-Deploying SLAs to an instance where they are already activated can cause problems during solution import. The package template will automatically deactivate SLAs pre-deployment and activate them again post-deployment. If you want to disable this functionality, you can add an `activatedeactivateslas` attribute to the `configdatastorage` element.
+Deploying SLAs to an instance where they are already activated can cause problems during solution import. The package template will automatically deactivate all SLAs pre-deployment and activate all SLAs post-deployment. If you want to disable this functionality, you can add an `activatedeactivateslas` attribute to the `<templateconfig>` element.
 
 ```xml
-<configdatastorage activatedeactivateslas="false">
-</configdatastorage>
+<templateconfig activatedeactivateslas="false">
+</templateconfig>
 ```
 
 #### Set SLAs as default
 
-You can configure which SLAs should be set as default after import by adding a `defaultslas` within the `configdatastorage` element of the `ImportConfig.xml`.
+Set SLAs as default after the deployment by setting the `isdefault` attribute on an `<sla>` element.
 
 ```xml
-<configdatastorage>
-    <defaultslas>
-        <defaultsla>The name of the SLA</defaultsla>
-    </defaultslas>
-</configdatastorage>
+<templateconfig>
+    <slas>
+        <sla name="The name of the SLA<" isdefault="true" />
+    </slas>
+</templateconfig>
 ```
 
 ### Processes
 
-#### Deactivate processes
+#### Set process states
 
-You can specify which processes to deactivate post-import by adding a `processestodeactivate` element within the `configdatastorage` element of the `ImportConfig.xml` file. This executes before data is imported (unless the data is explictly imported before solutions).
-
-```xml
-<configdatastorage>
-    <processestodeactivate>
-        <processtodeactivate>The name of the process</processtodeactivate>
-    </processestodeactivate>
-</configdatastorage>
-```
-
-#### Activate processes
-
-You can specify which processes to activate after your post-solution data is imported by adding a `processestoactivate` element within the `configdatastorage` element of the `ImportConfig.xml` file. 
-
-This can be useful where you want to activate processes that are dependent on data that imports after your solutions (e.g. any data for custom entities. Another example might be where you use this in conjunction with `processestodeactivate` for any worklows that you don't want active during the data import but that you do want active after the package has been deployed.
+All processes within the deployed solution(s) are activated by default after the deployment. You can manually set the state of processes after the deployment by setting the `state` attribute on a `<process>` element.
 
 ```xml
-<configdatastorage>
-    <processestoactivate>
-        <processtoactivate>The name of the process</processtoactivate>
-    </processestoactivate>
-</configdatastorage>
+<templateconfig>
+    <processes>
+        <process name="The name of the process" state="Inactive" />
+    </processes>
+</templateconfig>
 ```
+
+If your deployment is running as an application user then you may face [some issues](https://github.com/MicrosoftDocs/power-automate-docs/issues/216) if your solution contains flows. If you wish to continue deploying as an application user, you can pass the `LicensedUsername` and `LicensedPassword` runtime settings to the Package Deployer (or set the `PACKAGEDEPLOYER_SETTINGS_LICENSEDUSERNAME and `PACKAGEDEPLOYER_SETTINGS_LICENSEDPASSWORD` environment variables) and these credentials will be used for flow activation.
+
+> You can also activate or deactivate processes that are not in your package by setting the `external` attribute to `true` on a `<process>` element. Be careful when doing this - deploying your package may introduce side-effects to an environment that make it incompatible with other solutions.
 
 ### SDK steps
 
-#### Deactivate SDK steps
+#### Set SDK step states
 
-You can specify which plug-in steps to deactivate on import by adding an `sdkstepstodeactivate` element within the `configdatastorage` element of the `ImportConfig.xml`. This executes before data is imported (unless the data is explictly imported before solutions).
-
-```xml
-<configdatastorage>
-    <sdkstepstodeactivate>
-        <sdksteptodeactivate name="The name of the SDK step" />
-    </sdkstepstodeactivate>
-</configdatastorage>
-```
-### Flows
-
-#### Deactivate flows
-
-You can configure which flows should be disabled after import by adding a `flowstodeactivate` element within the `configdatastorage` element of the `ImportConfig.xml`. Any flows not listed here will be enabled by default. 
+All SDK steps within the deployed solution(s) are activated by default after the deployment. You can manually set the state of SDK steps after the deployment by setting the `state` attribute on an `<sdkstep>` element.
 
 ```xml
-<configdatastorage>
-    <flowstodeactivate>
-        <flowtodeactivate>Name of the flow to deactivate</flowtodeactivate>
-    </flowstodeactivate>
-</configdatastorage>
+<templateconfig>
+    <sdksteps>
+        <sdkstep name="The name of the SDK step" state="Inactive" />
+    </sdksteps>
+</templateconfig>
 ```
 
-If your deployment is running as an application user then you may face [some issues](https://github.com/MicrosoftDocs/power-automate-docs/issues/216). If you wish to continue deploying as an application user, you can pass the `LicensedUsername` and `LicensedPassword` runtime settings to the Package Deployer (or set the `PACKAGEDEPLOYER_SETTINGS_LICENSEDUSERNAME and `PACKAGEDEPLOYER_SETTINGS_LICENSEDPASSWORD` environment variables) and these credentials will be used for interacting with flows.
+> You can also activate or deactivate SDK steps that are not in your package by setting the `external` attribute to `true` on an `<sdkstep>` element. Be careful when doing this - deploying your package may introduce side-effects to an environment that make it incompatible with other solutions.
+
+### Connection references
 
 #### Set connection references
 
@@ -156,35 +135,35 @@ As above, you will need to pass licensed user credentials via runtime settings o
 
 #### Import data
 
-You can migrate data using Capgemini's [data migrator tool](https://github.com/Capgemini/xrm-datamigration) by adding a `dataimports` element within the `configdatastorage` element of the `ImportConfig.xml`. There are three attributes that can be added to the individual `dataimport` elements.
+You can migrate data using the Dataverse [data migrator tool](https://github.com/Capgemini/xrm-datamigration) by adding a `<dataimports>` element within the `<templateconfig>`. There are three attributes that can be added to the individual `<dataimport>` elements.
 
 - `datafolderpath` - this is the path to the folder that contains the data files extracted using the data migrator tool.
 - `importconfigpath` - this is the path to the json file containing the import configuration for the data migrator tool
 - `importbeforesolutions` - this allows you to specify whether the data should be imported before or after importing the solutions.
 
 ```xml
-<configdatastorage>
+<templateconfig>
     <dataimports>
         <dataimport 
             datafolderpath="ConfigurationData/Extract"
             importconfigpath="ConfigurationData/ImportConfig.json"
             importbeforesolutions="true"/>
     </dataimports>
-</configdatastorage>
+</templateconfig>
 ```
 
 ### Word templates
 
 #### Import word templates
 
-You can import word templates by adding a `wordtemplates` element within the `configdatastorage` element of the `ImportConfig.xml`.
+You can import word templates by adding `<documenttemplate>` elements.
 
 ```xml
-<configdatastorage>
-    <wordtemplates>
-        <wordtemplates name="Word Template.docx">
-    </wordtemplates>
-</configdatastorage>
+<templateconfig>
+    <documenttemplates>
+        <documenttemplate path="Word Template.docx">
+    </documenttemplates>
+</templateconfig>
 ```
 
 ## Contributing

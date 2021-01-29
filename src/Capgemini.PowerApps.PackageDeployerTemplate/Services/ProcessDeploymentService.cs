@@ -4,7 +4,6 @@
     using System.Collections.Generic;
     using System.Linq;
     using Capgemini.PowerApps.PackageDeployerTemplate.Adapters;
-    using Capgemini.PowerApps.PackageDeployerTemplate.Extensions;
     using Microsoft.Extensions.Logging;
     using Microsoft.Xrm.Sdk;
     using Microsoft.Xrm.Sdk.Query;
@@ -12,7 +11,7 @@
     /// <summary>
     /// Deployment functionality relating to processes.
     /// </summary>
-    public class ProcessDeploymentService
+    public class ProcessDeploymentService : IComponentStateSettingService
     {
         private readonly ILogger logger;
         private readonly ICrmServiceAdapter crmSvc;
@@ -28,54 +27,86 @@
             this.crmSvc = crmSvc ?? throw new ArgumentNullException(nameof(crmSvc));
         }
 
-        /// <summary>
-        /// Activates the provided processes.
-        /// </summary>
-        /// <param name="processesToActivate">The names of the processes to activate.</param>
-        public void Activate(IEnumerable<string> processesToActivate)
+        /// <inheritdoc/>
+        public void SetStatesBySolution(IEnumerable<string> solutions, IEnumerable<string> componentsToDeactivate = null)
         {
-            if (processesToActivate is null || !processesToActivate.Any())
+            this.logger.LogInformation("Setting process states in solution(s).");
+
+            if (solutions == null || !solutions.Any())
             {
-                this.logger.LogInformation("No processes to activate have been configured.");
+                this.logger.LogInformation("No solutions were provided to activate processes for.");
                 return;
             }
 
-            var queryResponse = this.QueryWorkflowsByName(processesToActivate);
-            var executeMultipleResponse = this.crmSvc.UpdateStateAndStatusForEntityInBatch(queryResponse, Constants.Workflow.StateCodeActive, Constants.Workflow.StatusCodeActive);
-            if (executeMultipleResponse.IsFaulted)
-            {
-                this.logger.LogError($"Error activating processes.");
-                this.logger.LogExecuteMultipleErrors(executeMultipleResponse);
-            }
+            var deployedProcesses = this.crmSvc.RetrieveDeployedSolutionComponents(
+                solutions,
+                Constants.SolutionComponent.ComponentTypeWorkflow,
+                Constants.Workflow.LogicalName,
+                new ColumnSet(Constants.Workflow.Fields.Name)).Entities;
+
+            this.SetStates(deployedProcesses, componentsToDeactivate);
         }
 
-        /// <summary>
-        /// Deactivates the provided processes.
-        /// </summary>
-        /// <param name="processesToDeactivate">The names of the processes to deactivate.</param>
-        public void Deactivate(IEnumerable<string> processesToDeactivate)
+        /// <inheritdoc/>
+        public void SetStates(IEnumerable<string> componentsToActivate, IEnumerable<string> componentsToDeactivate = null)
         {
-            if (processesToDeactivate is null || !processesToDeactivate.Any())
+            this.logger.LogInformation("Setting process states.");
+
+            if (componentsToActivate is null)
             {
-                this.logger.LogInformation("No processes to deactivate have been configured.");
+                throw new ArgumentNullException(nameof(componentsToActivate));
+            }
+
+            var allProcesses = componentsToDeactivate != null ? componentsToActivate.Concat(componentsToDeactivate) : componentsToActivate;
+            if (!allProcesses.Any())
+            {
+                this.logger.LogInformation($"No processes were provided.");
                 return;
             }
 
-            var queryResponse = this.QueryWorkflowsByName(processesToDeactivate);
-            var executeMultipleResponse = this.crmSvc.UpdateStateAndStatusForEntityInBatch(queryResponse, Constants.Workflow.StateCodeInactive, Constants.Workflow.StatusCodeInactive);
-            if (executeMultipleResponse.IsFaulted)
+            var processes = this.RetrieveProcesses(allProcesses).Entities;
+            if (!processes.Any())
             {
-                this.logger.LogError($"Error deactivating processes.");
-                this.logger.LogExecuteMultipleErrors(executeMultipleResponse);
+                this.logger.LogInformation($"No processes were found with the names provided.");
+                return;
+            }
+
+            this.logger.LogInformation($"Found {processes.Count} matching processes.");
+            if (processes.Count != allProcesses.Count())
+            {
+                this.logger.LogWarning($"Found {processes.Count} deployed processes but expected {allProcesses.Count()}.");
+            }
+
+            this.SetStates(processes, componentsToDeactivate);
+        }
+
+        private void SetStates(IEnumerable<Entity> processes, IEnumerable<string> processesToDeactivate = null)
+        {
+            if (processes is null)
+            {
+                throw new ArgumentNullException(nameof(processes));
+            }
+
+            foreach (var deployedProcess in processes)
+            {
+                var stateCode = Constants.Workflow.StateCodeActive;
+                var statusCode = Constants.Workflow.StatusCodeActive;
+
+                if (processesToDeactivate != null && processesToDeactivate.Contains(deployedProcess[Constants.Workflow.Fields.Name]))
+                {
+                    stateCode = Constants.Workflow.StateCodeInactive;
+                    statusCode = Constants.Workflow.StatusCodeInactive;
+                }
+
+                this.logger.LogInformation($"Setting process status for {deployedProcess[Constants.Workflow.Fields.Name]} with statecode {stateCode} and statuscode {statusCode}");
+                if (!this.crmSvc.UpdateStateAndStatusForEntity(Constants.Workflow.LogicalName, deployedProcess.Id, stateCode, statusCode))
+                {
+                    this.logger.LogError($"Status for process {deployedProcess.Attributes[Constants.Workflow.Fields.Name]} could not be set. Please check the processes for errors e.g. missing reference data.");
+                }
             }
         }
 
-        /// <summary>
-        /// Get workflows with the provided names.
-        /// </summary>
-        /// <param name="names">The names.</param>
-        /// <returns>An <see cref="EntityCollection"/> containing the workflow records.</returns>
-        public EntityCollection QueryWorkflowsByName(IEnumerable<string> names)
+        private EntityCollection RetrieveProcesses(IEnumerable<string> names)
         {
             var query = new QueryExpression(Constants.Workflow.LogicalName)
             {

@@ -6,7 +6,6 @@
     using Capgemini.PowerApps.PackageDeployerTemplate.Config;
     using Capgemini.PowerApps.PackageDeployerTemplate.Services;
     using Microsoft.Extensions.Logging;
-    using Microsoft.Xrm.Sdk;
     using Moq;
     using Xunit;
 

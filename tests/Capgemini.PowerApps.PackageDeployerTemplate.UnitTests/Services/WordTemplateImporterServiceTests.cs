@@ -5,7 +5,6 @@
     using Capgemini.PowerApps.PackageDeployerTemplate.Adapters;
     using Capgemini.PowerApps.PackageDeployerTemplate.Services;
     using Microsoft.Extensions.Logging;
-    using Microsoft.Xrm.Sdk;
     using Moq;
     using Xunit;
 
@@ -14,14 +13,14 @@
         private readonly Mock<ILogger> loggerMock;
         private readonly Mock<ICrmServiceAdapter> crmServiceAdapterMock;
 
-        private readonly WordTemplateImporterService wordTemplateImporterService;
+        private readonly DocumentTemplateDeploymentService wordTemplateImporterService;
 
         public WordTemplateImporterServiceTests()
         {
             this.loggerMock = new Mock<ILogger>();
             this.crmServiceAdapterMock = new Mock<ICrmServiceAdapter>();
 
-            this.wordTemplateImporterService = new WordTemplateImporterService(this.loggerMock.Object, this.crmServiceAdapterMock.Object);
+            this.wordTemplateImporterService = new DocumentTemplateDeploymentService(this.loggerMock.Object, this.crmServiceAdapterMock.Object);
         }
 
         [Fact]
@@ -29,7 +28,7 @@
         {
             Assert.Throws<ArgumentNullException>(() =>
             {
-                new WordTemplateImporterService(null, this.crmServiceAdapterMock.Object);
+                new DocumentTemplateDeploymentService(null, this.crmServiceAdapterMock.Object);
             });
         }
 
@@ -38,24 +37,24 @@
         {
             Assert.Throws<ArgumentNullException>(() =>
             {
-                new WordTemplateImporterService(this.loggerMock.Object, null);
+                new DocumentTemplateDeploymentService(this.loggerMock.Object, null);
             });
         }
 
         [Fact]
-        public void ImportWordTemplates_NullTemplatesToImport_LogNoConfig()
+        public void Import_NullTemplatesToImport_LogNoConfig()
         {
-            this.wordTemplateImporterService.ImportWordTemplates(null, string.Empty);
+            this.wordTemplateImporterService.Import(null, string.Empty);
 
-            this.loggerMock.VerifyLog(x => x.LogInformation("No Work Template to import."));
+            this.loggerMock.VerifyLog(x => x.LogInformation("No Word template to import."));
         }
 
         [Fact]
-        public void ImportWordTemplates_EmptyTemplatesToImport_LogNoConfig()
+        public void Import_EmptyTemplatesToImport_LogNoConfig()
         {
-            this.wordTemplateImporterService.ImportWordTemplates(Array.Empty<string>(), string.Empty);
+            this.wordTemplateImporterService.Import(Array.Empty<string>(), string.Empty);
 
-            this.loggerMock.VerifyLog(x => x.LogInformation("No Work Template to import."));
+            this.loggerMock.VerifyLog(x => x.LogInformation("No Word template to import."));
         }
 
         [Fact]
@@ -64,7 +63,7 @@
             var workTemplatesToImport = new string[] { "word_template_one", "word_template_two" };
             var packageFolderPath = "F:/fake_directory_to_templates/";
 
-            this.wordTemplateImporterService.ImportWordTemplates(workTemplatesToImport, packageFolderPath);
+            this.wordTemplateImporterService.Import(workTemplatesToImport, packageFolderPath);
 
             this.crmServiceAdapterMock.Verify(
                 x => x.ImportWordTemplate(It.IsIn(
@@ -78,12 +77,12 @@
             var workTemplatesToImport = new string[] { "word_template_one", "word_template_two" };
             var packageFolderPath = "F:/fake_directory_to_templates/";
 
-            this.wordTemplateImporterService.ImportWordTemplates(workTemplatesToImport, packageFolderPath);
+            this.wordTemplateImporterService.Import(workTemplatesToImport, packageFolderPath);
 
             foreach (var workTemplate in workTemplatesToImport)
             {
                 this.loggerMock.VerifyLog(
-                    x => x.LogInformation($"{nameof(WordTemplateImporterService)}: Word Template imported - {workTemplate}"), Times.Once);
+                    x => x.LogInformation($"{nameof(DocumentTemplateDeploymentService)}: Word Template imported - {workTemplate}"), Times.Once);
             }
         }
     }

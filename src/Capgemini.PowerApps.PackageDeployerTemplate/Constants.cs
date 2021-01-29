@@ -168,6 +168,16 @@
             /// <summary>
             /// An active state code.
             /// </summary>
+            public const int StateCodeActive = 0;
+
+            /// <summary>
+            /// An active status code.
+            /// </summary>
+            public const int StatusCodeActive = 1;
+
+            /// <summary>
+            /// An active state code.
+            /// </summary>
             public const int StateCodeInactive = 1;
 
             /// <summary>
@@ -250,9 +260,14 @@
             public const int ComponentTypeConnectionReference = 10016;
 
             /// <summary>
-            /// Solution component type for flows.
+            /// Solution component type for workflows.
             /// </summary>
-            public const int ComponentTypeFlow = 29;
+            public const int ComponentTypeWorkflow = 29;
+
+            /// <summary>
+            /// Solution component type for SDK steps.
+            /// </summary>
+            public const int ComponentTypeSdkStep = 92;
 
             /// <summary>
             /// Field logical names.

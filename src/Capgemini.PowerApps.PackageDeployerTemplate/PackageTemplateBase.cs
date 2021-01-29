@@ -2,7 +2,6 @@
 {
     using System;
     using System.Collections.Generic;
-    using System.ComponentModel.Composition;
     using System.Diagnostics;
     using System.Globalization;
     using System.IO;
@@ -20,15 +19,15 @@
     {
         private ICrmServiceAdapter crmServiceAdapter;
         private ICrmServiceAdapter licensedCrmServiceAdapter;
-        private ConfigDataStorage configDataStorage;
+        private TemplateConfig templateConfig;
         private IList<string> processedSolutions;
         private TraceLoggerAdapter traceLoggerAdapter;
-        private DataImporterService dataImporterService;
-        private ProcessDeploymentService processDeploymentService;
-        private SlaDeploymentService slaDeploymentService;
-        private WordTemplateImporterService wordTemplateImporterService;
-        private SdkStepDeploymentService sdkStepsDeploymentService;
-        private FlowDeploymentService flowDeploymentService;
+        private DataImporterService dataImporterSvc;
+        private ProcessDeploymentService processSvc;
+        private SlaDeploymentService slaDeploymentSvc;
+        private DocumentTemplateDeploymentService documentTemplateSvc;
+        private SdkStepDeploymentService sdkStepsSvc;
+        private ConnectionReferenceDeploymentService connectionReferenceSvc;
 
         /// <summary>
         /// Gets the path to the package folder.
@@ -88,7 +87,7 @@
                     }
                     else
                     {
-                        this.PackageLog.Log("Attempted to establish a licensed connection when no licensed credentials were configured", TraceEventType.Warning);
+                        this.PackageLog.Log("No licensed user credentials found.", TraceEventType.Information);
                     }
                 }
 
@@ -119,12 +118,12 @@
         {
             get
             {
-                if (this.dataImporterService == null)
+                if (this.dataImporterSvc == null)
                 {
-                    this.dataImporterService = new DataImporterService(this.TraceLoggerAdapter, this.CrmServiceAdapter);
+                    this.dataImporterSvc = new DataImporterService(this.TraceLoggerAdapter, this.CrmServiceAdapter);
                 }
 
-                return this.dataImporterService;
+                return this.dataImporterSvc;
             }
         }
 
@@ -135,12 +134,12 @@
         {
             get
             {
-                if (this.processDeploymentService == null)
+                if (this.processSvc == null)
                 {
-                    this.processDeploymentService = new ProcessDeploymentService(this.TraceLoggerAdapter, this.CrmServiceAdapter);
+                    this.processSvc = new ProcessDeploymentService(this.TraceLoggerAdapter, this.LicensedCrmServiceAdapter ?? this.CrmServiceAdapter);
                 }
 
-                return this.processDeploymentService;
+                return this.processSvc;
             }
         }
 
@@ -151,76 +150,76 @@
         {
             get
             {
-                if (this.slaDeploymentService == null)
+                if (this.slaDeploymentSvc == null)
                 {
-                    this.slaDeploymentService = new SlaDeploymentService(this.TraceLoggerAdapter, this.CrmServiceAdapter);
+                    this.slaDeploymentSvc = new SlaDeploymentService(this.TraceLoggerAdapter, this.CrmServiceAdapter);
                 }
 
-                return this.slaDeploymentService;
+                return this.slaDeploymentSvc;
             }
         }
 
         /// <summary>
         /// Gets provides deployment functionality relating to word templates.
         /// </summary>
-        protected WordTemplateImporterService WordTemplateImporterService
+        protected DocumentTemplateDeploymentService DocumentTemplateSvc
         {
             get
             {
-                if (this.wordTemplateImporterService == null)
+                if (this.documentTemplateSvc == null)
                 {
-                    this.wordTemplateImporterService = new WordTemplateImporterService(this.TraceLoggerAdapter, this.CrmServiceAdapter);
+                    this.documentTemplateSvc = new DocumentTemplateDeploymentService(this.TraceLoggerAdapter, this.CrmServiceAdapter);
                 }
 
-                return this.wordTemplateImporterService;
+                return this.documentTemplateSvc;
             }
         }
 
         /// <summary>
         /// Gets provides deployment functionality relating to SDK steps.
         /// </summary>
-        protected SdkStepDeploymentService SdkStepDeploymentService
+        protected SdkStepDeploymentService SdkStepSvc
         {
             get
             {
-                if (this.sdkStepsDeploymentService == null)
+                if (this.sdkStepsSvc == null)
                 {
-                    this.sdkStepsDeploymentService = new SdkStepDeploymentService(this.TraceLoggerAdapter, this.CrmServiceAdapter);
+                    this.sdkStepsSvc = new SdkStepDeploymentService(this.TraceLoggerAdapter, this.CrmServiceAdapter);
                 }
 
-                return this.sdkStepsDeploymentService;
+                return this.sdkStepsSvc;
             }
         }
 
         /// <summary>
         /// Gets provides deployment functionality relating to flows.
         /// </summary>
-        protected FlowDeploymentService FlowDeploymentService
+        protected ConnectionReferenceDeploymentService ConnectionReferenceSvc
         {
             get
             {
-                if (this.flowDeploymentService == null)
+                if (this.connectionReferenceSvc == null)
                 {
-                    this.flowDeploymentService = new FlowDeploymentService(this.TraceLoggerAdapter, this.LicensedCrmServiceAdapter ?? this.CrmServiceAdapter);
+                    this.connectionReferenceSvc = new ConnectionReferenceDeploymentService(this.TraceLoggerAdapter, this.LicensedCrmServiceAdapter ?? this.CrmServiceAdapter);
                 }
 
-                return this.flowDeploymentService;
+                return this.connectionReferenceSvc;
             }
         }
 
         /// <summary>
-        /// Gets provides access to the configdatastorage section of the ImportConfig.xml.
+        /// Gets provides access to the templateconfig section of the ImportConfig.xml.
         /// </summary>
-        protected ConfigDataStorage ConfigDataStorage
+        protected TemplateConfig TemplateConfig
         {
             get
             {
-                if (this.configDataStorage == null)
+                if (this.templateConfig == null)
                 {
-                    this.configDataStorage = ConfigDataStorage.Load(this.ImportConfigFilePath);
+                    this.templateConfig = TemplateConfig.Load(this.ImportConfigFilePath);
                 }
 
-                return this.configDataStorage;
+                return this.templateConfig;
             }
         }
 
@@ -252,13 +251,13 @@
         {
             this.ExecuteLifecycleEvent(nameof(this.BeforePrimaryImport), () =>
             {
-                if (this.ConfigDataStorage.ActivateDeactivateSLAs)
+                if (this.TemplateConfig.ActivateDeactivateSLAs)
                 {
                     this.SlaDeploymentService.DeactivateAll();
                 }
 
                 this.DataImporterService.Import(
-                    this.ConfigDataStorage.DataImports?.Where(c => c.ImportBeforeSolutions),
+                    this.TemplateConfig.PreDeployDataImports,
                     this.PackageFolderPath);
             });
         }
@@ -287,19 +286,43 @@
         {
             this.ExecuteLifecycleEvent(nameof(this.AfterPrimaryImport), () =>
             {
-                if (this.ConfigDataStorage.ActivateDeactivateSLAs)
+                if (this.TemplateConfig.ActivateDeactivateSLAs)
                 {
                     this.SlaDeploymentService.ActivateAll();
-                    this.SlaDeploymentService.SetDefaultSlas(this.ConfigDataStorage.DefaultSlas);
+                    this.SlaDeploymentService.SetDefaultSlas(this.TemplateConfig.DefaultSlas.Select(sla => sla.Name));
                 }
 
-                this.ProcessDeploymentService.Deactivate(this.ConfigDataStorage.ProcessesToDeactivate);
-                this.SdkStepDeploymentService.Deactivate(this.ConfigDataStorage.SdkStepsToDeactivate);
-                this.DataImporterService.Import(this.ConfigDataStorage.DataImports?.Where(c => !c.ImportBeforeSolutions), this.PackageFolderPath);
-                this.ProcessDeploymentService.Activate(this.ConfigDataStorage.ProcessesToActivate);
-                this.WordTemplateImporterService.ImportWordTemplates(this.ConfigDataStorage.WordTemplates, this.PackageFolderPath);
-                this.FlowDeploymentService.ConnectConnectionReferences(this.ConnectionReferenceMappings);
-                this.FlowDeploymentService.ActivateFlows(this.ProcessedSolutions, this.ConfigDataStorage.FlowsToDeactivate);
+                this.DataImporterService.Import(
+                    this.TemplateConfig.PostDeployDataImports,
+                    this.PackageFolderPath);
+
+                this.SdkStepSvc.SetStatesBySolution(
+                    this.ProcessedSolutions,
+                    this.TemplateConfig.SdkStepsToDeactivate.Select(s => s.Name));
+
+                if (this.TemplateConfig.SdkSteps.Any(p => p.External))
+                {
+                    this.SdkStepSvc.SetStates(
+                        this.TemplateConfig.SdkStepsToActivate.Where(s => s.External).Select(s => s.Name),
+                        this.TemplateConfig.SdkStepsToDeactivate.Where(s => s.External).Select(s => s.Name));
+                }
+
+                this.ConnectionReferenceSvc.ConnectConnectionReferences(this.ConnectionReferenceMappings);
+
+                this.ProcessDeploymentService.SetStatesBySolution(
+                    this.ProcessedSolutions,
+                    this.TemplateConfig.ProcessesToDeactivate.Select(p => p.Name));
+
+                if (this.TemplateConfig.Processes.Any(p => p.External))
+                {
+                    this.ProcessDeploymentService.SetStates(
+                        this.TemplateConfig.ProcessesToActivate.Where(p => p.External).Select(p => p.Name),
+                        this.TemplateConfig.ProcessesToDeactivate.Where(p => p.External).Select(p => p.Name));
+                }
+
+                this.DocumentTemplateSvc.Import(
+                    this.TemplateConfig.DocumentTemplates.Select(d => d.Path),
+                    this.PackageFolderPath);
             });
 
             return true;

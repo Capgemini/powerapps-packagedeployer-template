@@ -43,7 +43,7 @@
         }
 
         /// <inheritdoc/>
-        public IEnumerable<Guid> GetSolutionComponentObjectIdsByType(string solutionName, int componentType)
+        public IEnumerable<Guid> RetieveSolutionComponentsObjectIds(string solutionName, int componentType)
         {
             var queryExpression = new QueryExpression(Constants.SolutionComponent.LogicalName)
             {
@@ -169,6 +169,30 @@
             {
                 this.crmSvc.Update(documentTemplate);
             }
+        }
+
+        /// <inheritdoc/>
+        public EntityCollection RetrieveDeployedSolutionComponents(IEnumerable<string> solutions, int solutionComponentType, string componentLogicalName, ColumnSet columnSet = null)
+        {
+            if (solutions is null)
+            {
+                throw new ArgumentNullException(nameof(solutions));
+            }
+
+            if (!solutions.Any())
+            {
+                return new EntityCollection();
+            }
+
+            var objectIds = solutions.SelectMany(s => this.RetieveSolutionComponentsObjectIds(s, solutionComponentType));
+            var entityQuery = new QueryExpression(componentLogicalName)
+            {
+                ColumnSet = columnSet ?? new ColumnSet(false),
+                Criteria = new FilterExpression(),
+            };
+            entityQuery.Criteria.AddCondition($"{componentLogicalName}id", ConditionOperator.In, objectIds.Cast<object>().ToArray());
+
+            return this.RetrieveMultiple(entityQuery);
         }
 
         /// <inheritdoc/>
