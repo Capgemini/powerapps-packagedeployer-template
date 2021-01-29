@@ -87,7 +87,7 @@
                     }
                     else
                     {
-                        this.PackageLog.Log("Attempted to establish a licensed connection when no licensed credentials were configured", TraceEventType.Warning);
+                        this.PackageLog.Log("No licensed user credentials found.", TraceEventType.Information);
                     }
                 }
 
@@ -136,7 +136,7 @@
             {
                 if (this.processSvc == null)
                 {
-                    this.processSvc = new ProcessDeploymentService(this.TraceLoggerAdapter, this.CrmServiceAdapter);
+                    this.processSvc = new ProcessDeploymentService(this.TraceLoggerAdapter, this.LicensedCrmServiceAdapter ?? this.CrmServiceAdapter);
                 }
 
                 return this.processSvc;
