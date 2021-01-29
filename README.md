@@ -48,7 +48,7 @@ All configuration for the package is placed within a `<templateconfig>` element 
 
 #### Deactivate SLAs during import
 
-Deploying SLAs to an instance where they are already activated can cause problems during solution import. The package template will automatically deactivate all SLAs pre-deployment and activate all SLAs post-deployment. If you want to disable this functionality, you can add an `activatedeactivateslas` attribute to the `templateconfig` element.
+Deploying SLAs to an instance where they are already activated can cause problems during solution import. The package template will automatically deactivate all SLAs pre-deployment and activate all SLAs post-deployment. If you want to disable this functionality, you can add an `activatedeactivateslas` attribute to the `<templateconfig>` element.
 
 ```xml
 <templateconfig activatedeactivateslas="false">
@@ -57,7 +57,7 @@ Deploying SLAs to an instance where they are already activated can cause problem
 
 #### Set SLAs as default
 
-Set SLAs as default after the deployment by setting the `isdefault` attribute on an `<sla?` element.
+Set SLAs as default after the deployment by setting the `isdefault` attribute on an `<sla>` element.
 
 ```xml
 <templateconfig>
