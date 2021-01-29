@@ -114,10 +114,10 @@ namespace Capgemini.PowerApps.PackageDeployerTemplate.Config
         public IEnumerable<SlaConfig> DefaultSlas => this.Slas.Where(sla => sla.IsDefault);
 
         /// <summary>
-        /// Gets or sets a value indicating whether to activate/deactivate SLAs before/after deployment.
+        /// Gets or sets a value indicating whether to deactivate all SLAs before deployment and activate all SLAs after deployment. Active SLAs in a solution can cause deployment issues.
         /// </summary>
         /// <value>
-        /// A value indicating whether to activate/deactivate SLAs before/after deployment.
+        /// A value indicating whether to deactivate all SLAs before deployment and activate all SLAs after deployment.
         /// </value>
         [XmlAttribute("activatedeactivateslas")]
         public bool ActivateDeactivateSLAs { get; set; } = true;
