@@ -292,18 +292,9 @@
                     this.SlaDeploymentService.SetDefaultSlas(this.TemplateConfig.DefaultSlas.Select(sla => sla.Name));
                 }
 
-                this.ConnectionReferenceSvc.ConnectConnectionReferences(this.ConnectionReferenceMappings);
-
-                this.ProcessDeploymentService.SetStatesBySolution(
-                    this.ProcessedSolutions,
-                    this.TemplateConfig.ProcessesToDeactivate.Select(p => p.Name));
-
-                if (this.TemplateConfig.Processes.Any(p => p.External))
-                {
-                    this.ProcessDeploymentService.SetStates(
-                        this.TemplateConfig.ProcessesToActivate.Where(p => p.External).Select(p => p.Name),
-                        this.TemplateConfig.ProcessesToDeactivate.Where(p => p.External).Select(p => p.Name));
-                }
+                this.DataImporterService.Import(
+                    this.TemplateConfig.PostDeployDataImports,
+                    this.PackageFolderPath);
 
                 this.SdkStepSvc.SetStatesBySolution(
                     this.ProcessedSolutions,
@@ -316,9 +307,18 @@
                         this.TemplateConfig.SdkStepsToDeactivate.Where(s => s.External).Select(s => s.Name));
                 }
 
-                this.DataImporterService.Import(
-                    this.TemplateConfig.PostDeployDataImports,
-                    this.PackageFolderPath);
+                this.ConnectionReferenceSvc.ConnectConnectionReferences(this.ConnectionReferenceMappings);
+
+                this.ProcessDeploymentService.SetStatesBySolution(
+                    this.ProcessedSolutions,
+                    this.TemplateConfig.ProcessesToDeactivate.Select(p => p.Name));
+
+                if (this.TemplateConfig.Processes.Any(p => p.External))
+                {
+                    this.ProcessDeploymentService.SetStates(
+                        this.TemplateConfig.ProcessesToActivate.Where(p => p.External).Select(p => p.Name),
+                        this.TemplateConfig.ProcessesToDeactivate.Where(p => p.External).Select(p => p.Name));
+                }
 
                 this.DocumentTemplateSvc.Import(
                     this.TemplateConfig.DocumentTemplates.Select(d => d.Path),
