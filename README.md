@@ -81,7 +81,7 @@ All processes within the deployed solution(s) are activated by default after the
 </templateconfig>
 ```
 
-If your deployment is running as an application user then you may face [some issues](https://github.com/MicrosoftDocs/power-automate-docs/issues/216) if your solution contains flows. If you wish to continue deploying as an application user, you can pass the `LicensedUsername` and `LicensedPassword` runtime settings to the Package Deployer (or set the `PACKAGEDEPLOYER_SETTINGS_LICENSEDUSERNAME and `PACKAGEDEPLOYER_SETTINGS_LICENSEDPASSWORD` environment variables) and these credentials will be used for flow activation.
+If your deployment is running as an application user then you may face [some issues](https://github.com/MicrosoftDocs/power-automate-docs/issues/216) if your solution contains flows. If you wish to continue deploying as an application user, you can pass the `LicensedUsername` and `LicensedPassword` runtime settings to the Package Deployer (or set the `PACKAGEDEPLOYER_SETTINGS_LICENSEDUSERNAME` and `PACKAGEDEPLOYER_SETTINGS_LICENSEDPASSWORD` environment variables) and these credentials will be used for flow activation.
 
 > You can also activate or deactivate processes that are not in your package by setting the `external` attribute to `true` on a `<process>` element. Be careful when doing this - deploying your package may introduce side-effects to an environment that make it incompatible with other solutions.
 
