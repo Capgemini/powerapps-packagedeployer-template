@@ -14,9 +14,15 @@
         }
 
         [Fact]
-        public void Load_TemplateConfigElementPresenet_TemplateConfigIsDeserialised()
+        public void Load_TemplateConfigElementPresent_TemplateConfigIsDeserialised()
         {
             this.config.Should().NotBeNull();
+        }
+
+        [Fact]
+        public void Load_TemplateConfigElementNotPresent_TemplateConfigIsDefaulted()
+        {
+            Load("EmptyImportConfig.xml").Should().NotBeNull();
         }
 
         [Fact]
