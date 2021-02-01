@@ -43,7 +43,7 @@
         }
 
         /// <inheritdoc/>
-        public IEnumerable<Guid> RetieveSolutionComponentsObjectIds(string solutionName, int componentType)
+        public IEnumerable<Guid> RetrieveSolutionComponentObjectIds(string solutionName, int componentType)
         {
             var queryExpression = new QueryExpression(Constants.SolutionComponent.LogicalName)
             {
@@ -184,7 +184,12 @@
                 return new EntityCollection();
             }
 
-            var objectIds = solutions.SelectMany(s => this.RetieveSolutionComponentsObjectIds(s, solutionComponentType));
+            var objectIds = solutions.SelectMany(s => this.RetrieveSolutionComponentObjectIds(s, solutionComponentType));
+            if (!objectIds.Any())
+            {
+                return new EntityCollection();
+            }
+
             var entityQuery = new QueryExpression(componentLogicalName)
             {
                 ColumnSet = columnSet ?? new ColumnSet(false),
