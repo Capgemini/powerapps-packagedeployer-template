@@ -80,11 +80,11 @@
             this.SetStates(sdkSteps, componentsToDeactivate);
         }
 
-        private void SetStates(DataCollection<Entity> sdkSteps, IEnumerable<string> sdkStepsToDeactivate)
+        private void SetStates(IEnumerable<Entity> sdkSteps, IEnumerable<string> sdkStepsToDeactivate)
         {
             if (sdkSteps is null)
             {
-                throw new ArgumentNullException(nameof(sdkSteps));
+                return;
             }
 
             foreach (var deployedSdkStep in sdkSteps)

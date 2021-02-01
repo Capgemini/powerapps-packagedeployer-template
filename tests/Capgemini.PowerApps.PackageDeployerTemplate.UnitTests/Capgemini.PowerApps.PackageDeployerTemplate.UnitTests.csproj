@@ -64,6 +64,9 @@
     <ProjectReference Include="..\..\src\Capgemini.PowerApps.PackageDeployerTemplate\Capgemini.PowerApps.PackageDeployerTemplate.csproj" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="Resources\EmptyImportConfig.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <Content Include="Resources\ImportConfig.xml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>

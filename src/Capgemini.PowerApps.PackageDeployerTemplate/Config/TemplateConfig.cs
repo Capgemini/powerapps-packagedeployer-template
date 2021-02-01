@@ -12,6 +12,18 @@ namespace Capgemini.PowerApps.PackageDeployerTemplate.Config
     public class TemplateConfig
     {
         /// <summary>
+        /// Initializes a new instance of the <see cref="TemplateConfig"/> class.
+        /// </summary>
+        public TemplateConfig()
+        {
+            this.Processes = Array.Empty<ProcessConfig>();
+            this.SdkSteps = Array.Empty<SdkStepConfig>();
+            this.DocumentTemplates = Array.Empty<DocumentTemplateConfig>();
+            this.DataImports = Array.Empty<DataImportConfig>();
+            this.Slas = Array.Empty<SlaConfig>();
+        }
+
+        /// <summary>
         /// Gets or sets a collection of processes and their deployment configuration.
         /// </summary>
         /// <value>
@@ -19,7 +31,7 @@ namespace Capgemini.PowerApps.PackageDeployerTemplate.Config
         /// </value>
         [XmlArray("processes")]
         [XmlArrayItem("process")]
-        public ProcessConfig[] Processes { get; set; } = Array.Empty<ProcessConfig>();
+        public ProcessConfig[] Processes { get; set; }
 
         /// <summary>
         /// Gets processes configured to be inactive after deployment.
@@ -43,7 +55,7 @@ namespace Capgemini.PowerApps.PackageDeployerTemplate.Config
         /// </value>
         [XmlArray("sdksteps")]
         [XmlArrayItem("sdkstep")]
-        public SdkStepConfig[] SdkSteps { get; set; } = Array.Empty<SdkStepConfig>();
+        public SdkStepConfig[] SdkSteps { get; set; }
 
         /// <summary>
         /// Gets SDK steps configured to be inactive after deployment.
@@ -67,7 +79,7 @@ namespace Capgemini.PowerApps.PackageDeployerTemplate.Config
         /// </value>
         [XmlArray("documenttemplates")]
         [XmlArrayItem("documenttemplate")]
-        public DocumentTemplateConfig[] DocumentTemplates { get; set; } = Array.Empty<DocumentTemplateConfig>();
+        public DocumentTemplateConfig[] DocumentTemplates { get; set; }
 
         /// <summary>
         /// Gets or sets a list of data import configurations.
@@ -78,7 +90,7 @@ namespace Capgemini.PowerApps.PackageDeployerTemplate.Config
         /// </value>
         [XmlArray("dataimports")]
         [XmlArrayItem("dataimport")]
-        public DataImportConfig[] DataImports { get; set; } = Array.Empty<DataImportConfig>();
+        public DataImportConfig[] DataImports { get; set; }
 
         /// <summary>
         /// Gets a collection of data import configurations to run post-deployment.
@@ -102,7 +114,7 @@ namespace Capgemini.PowerApps.PackageDeployerTemplate.Config
         /// </value>
         [XmlArray("slas")]
         [XmlArrayItem("sla")]
-        public SlaConfig[] Slas { get; set; } = Array.Empty<SlaConfig>();
+        public SlaConfig[] Slas { get; set; }
 
         /// <summary>
         /// Gets SLAs configured to be set as default.
@@ -120,7 +132,7 @@ namespace Capgemini.PowerApps.PackageDeployerTemplate.Config
         /// A value indicating whether to deactivate all SLAs before deployment and activate all SLAs after deployment.
         /// </value>
         [XmlAttribute("activatedeactivateslas")]
-        public bool ActivateDeactivateSLAs { get; set; } = true;
+        public bool ActivateDeactivateSLAs { get; set; }
 
         /// <summary>
         /// Load the template config from the specified path.

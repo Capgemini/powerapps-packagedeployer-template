@@ -84,7 +84,7 @@
         {
             if (processes is null)
             {
-                throw new ArgumentNullException(nameof(processes));
+                return;
             }
 
             foreach (var deployedProcess in processes)

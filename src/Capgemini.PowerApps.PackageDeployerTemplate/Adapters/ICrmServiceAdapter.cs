@@ -61,7 +61,7 @@
         /// <param name="solutionName">The unique name of the solution.</param>
         /// <param name="componentType">The type of the components.</param>
         /// <returns>A collection of object IDs.</returns>
-        IEnumerable<Guid> RetieveSolutionComponentsObjectIds(string solutionName, int componentType);
+        IEnumerable<Guid> RetrieveSolutionComponentObjectIds(string solutionName, int componentType);
 
         /// <summary>
         /// Retrieve deployed component records for the given solution(s) and component type.

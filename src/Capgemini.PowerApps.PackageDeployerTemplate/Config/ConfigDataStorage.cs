@@ -9,6 +9,14 @@
     public class ConfigDataStorage
     {
         /// <summary>
+        /// Initializes a new instance of the <see cref="ConfigDataStorage"/> class.
+        /// </summary>
+        public ConfigDataStorage()
+        {
+            this.TemplateConfig = new TemplateConfig();
+        }
+
+        /// <summary>
         /// Gets or sets the configuration used by <see cref="PackageTemplateBase"/>.
         /// </summary>
         /// <value>
