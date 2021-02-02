@@ -80,12 +80,17 @@
                 throw new ArgumentNullException(nameof(values));
             }
 
-            var query = new QueryByAttribute(entity)
+            var query = new QueryExpression(entity)
             {
-                Attributes = { attribute },
                 ColumnSet = columnSet ?? new ColumnSet(false),
+                Criteria = new FilterExpression()
+                {
+                    Conditions =
+                    {
+                        new ConditionExpression(attribute, ConditionOperator.In, values.ToArray()),
+                    },
+                },
             };
-            query.Values.AddRange(values);
 
             return this.crmSvc.RetrieveMultiple(query);
         }
