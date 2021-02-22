@@ -66,7 +66,7 @@
         private Guid UpdateEmailAddress(MailboxConfig mailboxConfig)
         {
             var retrieveMultipleResponse = this.crmSvc.RetrieveMultipleByAttribute(Constants.Mailbox.Queue.LogicalName, Constants.Mailbox.Queue.Fields.EmailAddress, new object[] { mailboxConfig.SourceEmailaddress });
-            var entity = retrieveMultipleResponse != null ? retrieveMultipleResponse.Entities.FirstOrDefault() : null;
+            var entity = retrieveMultipleResponse?.Entities?.FirstOrDefault();
             if (entity == null)
             {
                 this.logger.LogInformation($"No queue exist with emailaddress:{mailboxConfig.SourceEmailaddress}.");
