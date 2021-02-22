@@ -342,7 +342,7 @@
                     this.PackageFolderPath);
 
                 this.MailboxSvc.UpdateApproveAndEnableMailboxes(this.TemplateConfig.Mailboxes
-                    .Where(m => m.EnvironmentPrefix == Environment.GetEnvironmentVariable(Constants.Settings.EnvironmentPrefix)));
+                    .Where(m => m.EnvironmentPrefix == this.GetSetting<string>(Constants.Settings.EnvironmentPrefix)));
             });
 
             return true;
