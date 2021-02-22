@@ -28,6 +28,7 @@
         private DocumentTemplateDeploymentService documentTemplateSvc;
         private SdkStepDeploymentService sdkStepsSvc;
         private ConnectionReferenceDeploymentService connectionReferenceSvc;
+        private MailboxDeploymentService mailboxSvc;
 
         /// <summary>
         /// Gets the path to the package folder.
@@ -208,6 +209,22 @@
         }
 
         /// <summary>
+        /// Gets provides deployment functionality relating to mailboxes.
+        /// </summary>
+        protected MailboxDeploymentService MailboxSvc
+        {
+            get
+            {
+                if (this.mailboxSvc == null)
+                {
+                    this.mailboxSvc = new MailboxDeploymentService(this.TraceLoggerAdapter, this.LicensedCrmServiceAdapter ?? this.CrmServiceAdapter);
+                }
+
+                return this.mailboxSvc;
+            }
+        }
+
+        /// <summary>
         /// Gets provides access to the templateconfig section of the ImportConfig.xml.
         /// </summary>
         protected TemplateConfig TemplateConfig
@@ -323,6 +340,9 @@
                 this.DocumentTemplateSvc.Import(
                     this.TemplateConfig.DocumentTemplates.Select(d => d.Path),
                     this.PackageFolderPath);
+
+                this.MailboxSvc.UpdateApproveAndEnableMailboxes(this.TemplateConfig.Mailboxes
+                    .Where(m => m.EnvironmentPrefix == Environment.GetEnvironmentVariable(Constants.Settings.EnvironmentPrefix)));
             });
 
             return true;

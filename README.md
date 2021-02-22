@@ -23,6 +23,8 @@ This project's aim is to build a powerful base Package Deployer template that si
     - [Import data](#Import-data)
   - [Word templates](#Word-templates)
     - [Import word templates](#Import-word-templates)
+  - [Mailboxes](#Mailboxes)
+    - [Update, approve and test&enable shared mailboxes](#Update,-approve-and-test&enable-shared-mailboxes)
 - [Contributing](#Contributing)
 - [Licence](#Licence)
 
@@ -164,6 +166,29 @@ You can import word templates by adding `<documenttemplate>` elements.
         <documenttemplate path="Word Template.docx">
     </documenttemplates>
 </templateconfig>
+```
+
+### Mailboxes
+
+#### Update, approve and test&enable shared mailboxes
+
+You can update shared mailboxes with target email address, approve and test&enable by adding `<mailboxes>` elements.
+
+Environment variable name for the target environment must be "PACKAGEDEPLOYER_SETTINGS_ENVIRONMENT_PREFIX".
+
+**Environment variable**
+
+```powershell
+$env:PACKAGEDEPLOYER_SETTINGS_ENVIRONMENT_PREFIX = "prod"
+```
+
+```xml
+<mailboxes>
+    <mailbox
+        environmentprefix="prod"
+        sourceemailaddress="support-dev@fake.com"
+        targetemailaddress="support-prod@fake.com" />
+</mailboxes>
 ```
 
 ## Contributing

@@ -29,6 +29,11 @@
             /// The password of a licensed deployment user.
             /// </summary>
             public const string LicensedPassword = "LicensedPassword";
+
+            /// <summary>
+            /// The prefix for of a target environment.
+            /// </summary>
+            public const string EnvironmentPrefix = "PACKAGEDEPLOYER_SETTINGS_ENVIRONMENT_PREFIX";
         }
 
         /// <summary>
@@ -347,6 +352,65 @@
                 /// The logical name of the connection reference.
                 /// </summary>
                 public const string ConnectionReferenceLogicalName = "connectionreferencelogicalname";
+            }
+        }
+
+        /// <summary>
+        /// Constants related to the mailbox.
+        /// </summary>
+        public static class Mailbox
+        {
+            /// <summary>
+            /// The logical name.
+            /// </summary>
+            public const string LogicalName = "mailbox";
+
+            /// <summary>
+            /// Field logical names.
+            /// </summary>
+            public static class Fields
+            {
+                /// <summary>
+                /// The mailbox regarding object ID.
+                /// </summary>
+                public const string RegardingObjectid = "regardingobjectid";
+
+                /// <summary>
+                /// The Test Email Configuration Scheduled.
+                /// </summary>
+                public const string TestEmailConfigurationScheduled = "testemailconfigurationscheduled";
+
+                /// <summary>
+                /// The Mailbox Status.
+                /// </summary>
+                public const string MailboxStatus = "mailboxstatus";
+            }
+
+            /// <summary>
+            /// Constants related to the queue entity.
+            /// </summary>
+            public static class Queue
+            {
+                /// <summary>
+                /// The logical name.
+                /// </summary>
+                public const string LogicalName = "queue";
+
+                /// <summary>
+                /// Field logical names.
+                /// </summary>
+                public static class Fields
+                {
+                    /// <summary>
+                    /// The Email Address.
+                    /// </summary>
+                    public const string EmailAddress = "emailaddress";
+
+                    /// <summary>
+                    /// The Emailrouter Access Approval.
+                    /// </summary>
+                    public const string EmailrouterAccessApproval = "emailrouteraccessapproval";
+                }
             }
         }
     }

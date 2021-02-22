@@ -135,6 +135,16 @@ namespace Capgemini.PowerApps.PackageDeployerTemplate.Config
         public bool ActivateDeactivateSLAs { get; set; }
 
         /// <summary>
+        /// Gets or sets a collection of Mailboxes and their deployment configuration.
+        /// </summary>
+        /// <value>
+        /// A collection of Mailboxes and their deployment configuration.
+        /// </value>
+        [XmlArray("mailboxes")]
+        [XmlArrayItem("mailbox")]
+        public MailboxConfig[] Mailboxes { get; set; } = Array.Empty<MailboxConfig>();
+
+        /// <summary>
         /// Load the template config from the specified path.
         /// </summary>
         /// <param name="importConfigPath">The path of the import config file.</param>

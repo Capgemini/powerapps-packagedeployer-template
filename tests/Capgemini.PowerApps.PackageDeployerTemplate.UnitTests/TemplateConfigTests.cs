@@ -1,5 +1,6 @@
 ﻿namespace Capgemini.PowerApps.PackageDeployerTemplate.UnitTests
 {
+    using System.Linq;
     using Capgemini.PowerApps.PackageDeployerTemplate.Config;
     using FluentAssertions;
     using Xunit;
@@ -156,6 +157,26 @@
         public void Load_ActivateDeactivateSlasPopulated_ActivateDeactivateSlasDeserialized()
         {
             this.config.ActivateDeactivateSLAs.Should().BeTrue();
+        }
+
+        [Fact]
+        public void Load_MailboxesElementNotPresent_MailboxesIsDefaulted()
+        {
+            this.defaultConfig.Mailboxes.Should().NotBeNull();
+        }
+
+        [Fact]
+        public void Load_MailboxesPresent_MailboxesIsDeserialized()
+        {
+            this.config.Mailboxes.Should().Contain(d => d.SourceEmailaddress == "source@fake.com");
+        }
+
+        [Fact]
+        public void Load_MailboxesPresent_RelatedEnvironment_MailboxesIsDeserialized()
+        {
+            string envionmentPrefix = "prod";
+            var mailBoxes = this.config.Mailboxes.Where(m => m.EnvironmentPrefix == envionmentPrefix);
+            mailBoxes.Should().Contain(d => d.TargetEmailaddress == "target-prod@fake.com");
         }
 
         private static TemplateConfig Load(string path)
