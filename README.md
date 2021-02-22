@@ -24,7 +24,7 @@ This project's aim is to build a powerful base Package Deployer template that si
   - [Word templates](#Word-templates)
     - [Import word templates](#Import-word-templates)
   - [Mailboxes](#Mailboxes)
-    - [Update, approve and test&enable shared mailboxes](#Update,-approve-and-test&enable-shared-mailboxes)
+    - [Update Approve and test&enable shared mailboxes](#Update-Approve-and-test&enable-shared-mailboxes)
 - [Contributing](#Contributing)
 - [Licence](#Licence)
 
@@ -170,7 +170,7 @@ You can import word templates by adding `<documenttemplate>` elements.
 
 ### Mailboxes
 
-#### Update, approve and test&enable shared mailboxes
+#### Update-Approve and test&enable shared mailboxes
 
 You can update shared mailboxes with target email address, approve and test&enable by adding `<mailboxes>` elements.
 
