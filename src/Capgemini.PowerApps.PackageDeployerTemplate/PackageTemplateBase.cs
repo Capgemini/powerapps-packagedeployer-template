@@ -47,6 +47,12 @@
         protected IDictionary<string, string> ConnectionReferenceMappings => this.GetSettings(Constants.Settings.ConnectionReferencePrefix);
 
         /// <summary>
+        /// Gets the mailbox mappings.
+        /// </summary>
+        /// <returns>The mailbox mappings.</returns>
+        protected IDictionary<string, string> MailboxMappings => this.GetSettings(Constants.Settings.MailboxPrefix);
+
+        /// <summary>
         /// Gets an extended <see cref="Microsoft.Xrm.Sdk.IOrganizationService"/>.
         /// </summary>
         /// <value>
@@ -341,8 +347,7 @@
                     this.TemplateConfig.DocumentTemplates.Select(d => d.Path),
                     this.PackageFolderPath);
 
-                this.MailboxSvc.UpdateApproveAndEnableMailboxes(this.TemplateConfig.Mailboxes
-                    .Where(m => m.EnvironmentPrefix == this.GetSetting<string>(Constants.Settings.EnvironmentPrefix)));
+                this.MailboxSvc.UpdateApproveAndEnableMailboxes(this.MailboxMappings);
             });
 
             return true;

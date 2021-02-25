@@ -33,7 +33,7 @@
         /// Update, approve and enable mailboxes.
         /// </summary>
         /// <param name="mailboxConfigs">The mailbox configs to use.</param>
-        public void UpdateApproveAndEnableMailboxes(IEnumerable<MailboxConfig> mailboxConfigs)
+        public void UpdateApproveAndEnableMailboxes(IDictionary<string, string> mailboxConfigs)
         {
             this.logger.LogInformation($"{nameof(MailboxDeploymentService)}: START Approve-Test&Enable Mailboxes");
             if (mailboxConfigs is null || !mailboxConfigs.Any())
@@ -44,15 +44,20 @@
 
             foreach (var mailboxConfig in mailboxConfigs)
             {
-                this.logger.LogInformation($"{nameof(MailboxDeploymentService)}: Mailbox Approval Process Started:{mailboxConfig.SourceEmailaddress}");
-                Guid entityid = this.UpdateEmailAddress(mailboxConfig);
+                MailboxConfig config = new MailboxConfig
+                {
+                    SourceEmailAddress = mailboxConfig.Key,
+                    TargetEmailAddress = mailboxConfig.Value,
+                };
+                this.logger.LogInformation($"{nameof(MailboxDeploymentService)}: Mailbox Approval Process Started:{config.SourceEmailAddress}");
+                Guid entityid = this.UpdateEmailAddress(config);
                 if (entityid != Guid.Empty)
                 {
                     var isApproved = this.ApproveEmail(entityid);
                     if (isApproved)
                     {
                         this.EnableMailbox(entityid);
-                        this.logger.LogInformation($"{nameof(MailboxDeploymentService)}: Mailbox Approved and Enabled:{mailboxConfig.TargetEmailaddress}");
+                        this.logger.LogInformation($"{nameof(MailboxDeploymentService)}: Mailbox Approved and Enabled:{config.TargetEmailAddress}");
                     }
                 }
             }
@@ -65,15 +70,15 @@
         /// <returns>Returns Queue ID.</returns>
         private Guid UpdateEmailAddress(MailboxConfig mailboxConfig)
         {
-            var retrieveMultipleResponse = this.crmSvc.RetrieveMultipleByAttribute(Constants.Mailbox.Queue.LogicalName, Constants.Mailbox.Queue.Fields.EmailAddress, new object[] { mailboxConfig.SourceEmailaddress });
+            var retrieveMultipleResponse = this.crmSvc.RetrieveMultipleByAttribute(Constants.Queue.LogicalName, Constants.Queue.Fields.EmailAddress, new object[] { mailboxConfig.SourceEmailAddress });
             var entity = retrieveMultipleResponse?.Entities?.FirstOrDefault();
             if (entity == null)
             {
-                this.logger.LogInformation($"No queue exist with emailaddress:{mailboxConfig.SourceEmailaddress}.");
+                this.logger.LogInformation($"No queue exist with emailaddress:{mailboxConfig.SourceEmailAddress}.");
                 return Guid.Empty;
             }
 
-            entity[Constants.Mailbox.Queue.Fields.EmailAddress] = mailboxConfig.TargetEmailaddress;
+            entity[Constants.Queue.Fields.EmailAddress] = mailboxConfig.TargetEmailAddress;
             this.crmSvc.Update(entity);
             return entity.Id;
         }
@@ -86,31 +91,31 @@
         private bool ApproveEmail(Guid entityid)
         {
             bool isApproved = true;
-            Entity updateEntity = new Entity(Constants.Mailbox.Queue.LogicalName, entityid);
-            updateEntity.Attributes.Add(new KeyValuePair<string, object>(Constants.Mailbox.Queue.Fields.EmailrouterAccessApproval, new OptionSetValue((int)EmailRouterAccessApproval.Approved)));
+            Entity updateEntity = new Entity(Constants.Queue.LogicalName, entityid);
+            updateEntity.Attributes.Add(new KeyValuePair<string, object>(Constants.Queue.Fields.EmailRouterAccessApproval, new OptionSetValue((int)EmailRouterAccessApproval.Approved)));
             this.crmSvc.Update(updateEntity);
 
-            var entity = this.crmSvc.Retrieve(updateEntity.LogicalName, entityid, new ColumnSet(Constants.Mailbox.Queue.Fields.EmailrouterAccessApproval));
+            var entity = this.crmSvc.Retrieve(updateEntity.LogicalName, entityid, new ColumnSet(Constants.Queue.Fields.EmailRouterAccessApproval));
 
             int i = 0;
             int count = 1;
             int delay = 30;
-            while (entity.GetAttributeValue<OptionSetValue>(Constants.Mailbox.Queue.Fields.EmailrouterAccessApproval).Value != (int)EmailRouterAccessApproval.Approved)
+            while (entity.GetAttributeValue<OptionSetValue>(Constants.Queue.Fields.EmailRouterAccessApproval).Value != (int)EmailRouterAccessApproval.Approved)
             {
                 i++;
                 if (i > count)
                 {
-                    this.logger.LogInformation("[Failure] Email Address not Approved within allotted timeframe.");
+                    this.logger.LogWarning("[Failure] Email Address not Approved within allotted timeframe.");
                     break;
                 }
 
                 Thread.Sleep(1000 * delay);
-                entity = this.crmSvc.Retrieve(updateEntity.LogicalName, entityid, new ColumnSet(Constants.Mailbox.Queue.Fields.EmailrouterAccessApproval));
+                entity = this.crmSvc.Retrieve(updateEntity.LogicalName, entityid, new ColumnSet(Constants.Queue.Fields.EmailRouterAccessApproval));
             }
 
-            if (entity.GetAttributeValue<OptionSetValue>(Constants.Mailbox.Queue.Fields.EmailrouterAccessApproval).Value != (int)EmailRouterAccessApproval.Approved)
+            if (entity.GetAttributeValue<OptionSetValue>(Constants.Queue.Fields.EmailRouterAccessApproval).Value != (int)EmailRouterAccessApproval.Approved)
             {
-                this.logger.LogInformation("[Failure] Email Address not Approved.");
+                this.logger.LogWarning("[Failure] Email Address not Approved.");
                 isApproved = false;
             }
 
@@ -124,14 +129,13 @@
         private void EnableMailbox(Guid entityid)
         {
             var retrieveMultipleResponse = this.crmSvc.RetrieveMultipleByAttribute(Constants.Mailbox.LogicalName, Constants.Mailbox.Fields.RegardingObjectid, new object[] { entityid });
-            var entity = retrieveMultipleResponse != null ? retrieveMultipleResponse.Entities.FirstOrDefault() : null;
+            var entity = retrieveMultipleResponse?.Entities?.FirstOrDefault();
             if (entity == null)
             {
                 this.logger.LogInformation($"No mailbox exist.");
                 return;
             }
 
-            Entity updateEntity = new Entity(Constants.Mailbox.LogicalName, entity.Id);
             entity.Attributes.Add(new KeyValuePair<string, object>(Constants.Mailbox.Fields.TestEmailConfigurationScheduled, true));
             this.crmSvc.Update(entity);
 
@@ -145,7 +149,7 @@
                 i++;
                 if (i > count)
                 {
-                    this.logger.LogInformation("[Failure] Mailbox is not Approved within allotted timeframe.");
+                    this.logger.LogWarning("[Failure] Mailbox is not Approved within allotted timeframe.");
                     break;
                 }
 
@@ -155,7 +159,7 @@
 
             if (updatedEntity.GetAttributeValue<OptionSetValue>(Constants.Mailbox.Fields.MailboxStatus).Value != (int)MailboxStatus.Success)
             {
-                this.logger.LogInformation("[Failure] Mailbox is not enabled");
+                this.logger.LogWarning("[Failure] Mailbox is not enabled");
             }
         }
     }

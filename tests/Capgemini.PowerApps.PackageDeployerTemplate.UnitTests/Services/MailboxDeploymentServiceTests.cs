@@ -53,117 +53,80 @@
         }
 
         [Fact]
-        public void UpdateApproveAndEnableMailboxes_NoEnviromentPrefix_LogNoConfig()
-        {
-            var sourceEmails = new string[] { "source_1@fake.com" };
-            var mailboxConfig = new MailboxConfig
-            {
-                EnvironmentPrefix = "dev",
-                SourceEmailaddress = "source_2@fake.com",
-            };
-
-            List<MailboxConfig> mailboxConfigs = new List<MailboxConfig>();
-            mailboxConfigs.Add(mailboxConfig);
-
-            var entityCollection = new EntityCollection
-            {
-                EntityName = Constants.Mailbox.Queue.LogicalName,
-                Entities =
-                {
-                    new Entity(Constants.Mailbox.Queue.LogicalName, Guid.NewGuid()),
-                },
-            };
-            this.mailboxDeploymentService.UpdateApproveAndEnableMailboxes(mailboxConfigs
-                .Where(m => m.EnvironmentPrefix == Environment.GetEnvironmentVariable(Constants.Settings.EnvironmentPrefix)));
-            this.loggerMock.VerifyLog(x => x.LogInformation("No mailboxes have been configured."));
-        }
-
-        [Fact]
         public void UpdateApproveAndEnableMailboxes_LogNoQueueExist()
         {
             var sourceEmails = new string[] { "source_1@fake.com" };
-            var mailboxConfig = new MailboxConfig
+            var mailboxConfigs = new Dictionary<string, string>
             {
-                SourceEmailaddress = "source_2@fake.com",
+                { "source@fake.com", "target@fake.com" },
             };
-
-            List<MailboxConfig> mailboxConfigs = new List<MailboxConfig>();
-            mailboxConfigs.Add(mailboxConfig);
 
             var entityCollection = new EntityCollection
             {
-                EntityName = Constants.Mailbox.Queue.LogicalName,
+                EntityName = Constants.Queue.LogicalName,
                 Entities =
                 {
-                    new Entity(Constants.Mailbox.Queue.LogicalName, Guid.NewGuid()),
+                    new Entity(Constants.Queue.LogicalName, Guid.NewGuid()),
                 },
             };
             this.crmServiceAdapterMock
-                .Setup(x => x.RetrieveMultipleByAttribute(Constants.Mailbox.Queue.LogicalName, Constants.Mailbox.Queue.Fields.EmailAddress, sourceEmails, null))
+                .Setup(x => x.RetrieveMultipleByAttribute(Constants.Queue.LogicalName, Constants.Queue.Fields.EmailAddress, sourceEmails, null))
                 .Returns(entityCollection).Verifiable();
 
             this.mailboxDeploymentService.UpdateApproveAndEnableMailboxes(mailboxConfigs);
-            this.loggerMock.VerifyLog(x => x.LogInformation($"No queue exist with emailaddress:{mailboxConfig.SourceEmailaddress}."));
+            this.loggerMock.VerifyLog(x => x.LogInformation($"No queue exist with emailaddress:{mailboxConfigs.ElementAt(0).Key}."));
         }
 
         [Fact]
         public void UpdateApproveAndEnableMailboxes_LogEmailNotApproved()
         {
             var sourceEmails = new string[] { "source@fake.com" };
-            var mailboxConfig = new MailboxConfig
+            var mailboxConfigs = new Dictionary<string, string>
             {
-                SourceEmailaddress = "source@fake.com",
-                TargetEmailaddress = "target@fake.com",
+                { "source@fake.com", "target@fake.com" },
             };
-
-            List<MailboxConfig> mailboxConfigs = new List<MailboxConfig>();
-            mailboxConfigs.Add(mailboxConfig);
 
             var entity = new Entity
             {
-                LogicalName = Constants.Mailbox.Queue.LogicalName,
+                LogicalName = Constants.Queue.LogicalName,
                 Id = Guid.NewGuid(),
             };
-            entity.Attributes.Add(new KeyValuePair<string, object>(Constants.Mailbox.Queue.Fields.EmailrouterAccessApproval, new OptionSetValue((int)EmailRouterAccessApproval.Empty)));
+            entity.Attributes.Add(new KeyValuePair<string, object>(Constants.Queue.Fields.EmailRouterAccessApproval, new OptionSetValue((int)EmailRouterAccessApproval.Empty)));
             var entityCollection = new EntityCollection
             {
-                EntityName = Constants.Mailbox.Queue.LogicalName,
+                EntityName = Constants.Queue.LogicalName,
             };
             entityCollection.Entities.AddRange(entity);
             this.crmServiceAdapterMock
-                .Setup(x => x.RetrieveMultipleByAttribute(Constants.Mailbox.Queue.LogicalName, Constants.Mailbox.Queue.Fields.EmailAddress, sourceEmails, null))
+                .Setup(x => x.RetrieveMultipleByAttribute(Constants.Queue.LogicalName, Constants.Queue.Fields.EmailAddress, sourceEmails, null))
                 .Returns(entityCollection).Verifiable();
             this.crmServiceAdapterMock.Setup(t => t.Retrieve(
-                It.Is<string>(e => e.ToUpper() == Constants.Mailbox.Queue.LogicalName.ToUpper()),
+                It.Is<string>(e => e.ToUpper() == Constants.Queue.LogicalName.ToUpper()),
                 It.Is<Guid>(e => e == entity.Id),
                 It.IsAny<ColumnSet>()))
                 .Returns(entity);
             this.mailboxDeploymentService.UpdateApproveAndEnableMailboxes(mailboxConfigs);
-            this.loggerMock.VerifyLog(x => x.LogInformation("[Failure] Email Address not Approved."));
+            this.loggerMock.VerifyLog(x => x.LogWarning("[Failure] Email Address not Approved."));
         }
 
         [Fact]
         public void UpdateApproveAndEnableMailboxes_LogNoMailboxExist()
         {
             var sourceEmails = new string[] { "source@fake.com" };
-            var mailboxConfig = new MailboxConfig
+            var mailboxConfigs = new Dictionary<string, string>
             {
-                SourceEmailaddress = "source@fake.com",
-                TargetEmailaddress = "target@fake.com",
+                { "source@fake.com", "target@fake.com" },
             };
-
-            List<MailboxConfig> mailboxConfigs = new List<MailboxConfig>();
-            mailboxConfigs.Add(mailboxConfig);
 
             var entity = new Entity
             {
-                LogicalName = Constants.Mailbox.Queue.LogicalName,
+                LogicalName = Constants.Queue.LogicalName,
                 Id = Guid.NewGuid(),
             };
-            entity.Attributes.Add(new KeyValuePair<string, object>(Constants.Mailbox.Queue.Fields.EmailrouterAccessApproval, new OptionSetValue((int)EmailRouterAccessApproval.Approved)));
+            entity.Attributes.Add(new KeyValuePair<string, object>(Constants.Queue.Fields.EmailRouterAccessApproval, new OptionSetValue((int)EmailRouterAccessApproval.Approved)));
             var entityCollection = new EntityCollection
             {
-                EntityName = Constants.Mailbox.Queue.LogicalName,
+                EntityName = Constants.Queue.LogicalName,
             };
             entityCollection.Entities.AddRange(entity);
             var mailboxEntity = new Entity
@@ -177,10 +140,10 @@
             };
             mailboxEntityCollection.Entities.AddRange(mailboxEntity);
             this.crmServiceAdapterMock
-                .Setup(x => x.RetrieveMultipleByAttribute(Constants.Mailbox.Queue.LogicalName, Constants.Mailbox.Queue.Fields.EmailAddress, sourceEmails, null))
+                .Setup(x => x.RetrieveMultipleByAttribute(Constants.Queue.LogicalName, Constants.Queue.Fields.EmailAddress, sourceEmails, null))
                 .Returns(entityCollection).Verifiable();
             this.crmServiceAdapterMock.Setup(t => t.Retrieve(
-                It.Is<string>(e => e.ToUpper() == Constants.Mailbox.Queue.LogicalName.ToUpper()),
+                It.Is<string>(e => e.ToUpper() == Constants.Queue.LogicalName.ToUpper()),
                 It.Is<Guid>(e => e == entity.Id),
                 It.IsAny<ColumnSet>()))
                 .Returns(entity);
@@ -195,24 +158,20 @@
         public void UpdateApproveAndEnableMailboxes_LogMailboxNotEnabled()
         {
             var sourceEmails = new string[] { "source@fake.com" };
-            var mailboxConfig = new MailboxConfig
+            var mailboxConfigs = new Dictionary<string, string>
             {
-                SourceEmailaddress = "source@fake.com",
-                TargetEmailaddress = "target@fake.com",
+                { "source@fake.com", "target@fake.com" },
             };
-
-            List<MailboxConfig> mailboxConfigs = new List<MailboxConfig>();
-            mailboxConfigs.Add(mailboxConfig);
 
             var entity = new Entity
             {
-                LogicalName = Constants.Mailbox.Queue.LogicalName,
+                LogicalName = Constants.Queue.LogicalName,
                 Id = Guid.NewGuid(),
             };
-            entity.Attributes.Add(new KeyValuePair<string, object>(Constants.Mailbox.Queue.Fields.EmailrouterAccessApproval, new OptionSetValue((int)EmailRouterAccessApproval.Approved)));
+            entity.Attributes.Add(new KeyValuePair<string, object>(Constants.Queue.Fields.EmailRouterAccessApproval, new OptionSetValue((int)EmailRouterAccessApproval.Approved)));
             var entityCollection = new EntityCollection
             {
-                EntityName = Constants.Mailbox.Queue.LogicalName,
+                EntityName = Constants.Queue.LogicalName,
             };
             entityCollection.Entities.AddRange(entity);
             var mailboxEntity = new Entity
@@ -227,10 +186,10 @@
             };
             mailboxEntityCollection.Entities.AddRange(mailboxEntity);
             this.crmServiceAdapterMock
-                .Setup(x => x.RetrieveMultipleByAttribute(Constants.Mailbox.Queue.LogicalName, Constants.Mailbox.Queue.Fields.EmailAddress, sourceEmails, null))
+                .Setup(x => x.RetrieveMultipleByAttribute(Constants.Queue.LogicalName, Constants.Queue.Fields.EmailAddress, sourceEmails, null))
                 .Returns(entityCollection).Verifiable();
             this.crmServiceAdapterMock.Setup(t => t.Retrieve(
-                It.Is<string>(e => e.ToUpper() == Constants.Mailbox.Queue.LogicalName.ToUpper()),
+                It.Is<string>(e => e.ToUpper() == Constants.Queue.LogicalName.ToUpper()),
                 It.Is<Guid>(e => e == entity.Id),
                 It.IsAny<ColumnSet>()))
                 .Returns(entity);
@@ -243,7 +202,7 @@
                 It.IsAny<ColumnSet>()))
                 .Returns(mailboxEntity);
             this.mailboxDeploymentService.UpdateApproveAndEnableMailboxes(mailboxConfigs);
-            this.loggerMock.VerifyLog(x => x.LogInformation("[Failure] Mailbox is not enabled"));
+            this.loggerMock.VerifyLog(x => x.LogWarning("[Failure] Mailbox is not enabled"));
         }
     }
 }

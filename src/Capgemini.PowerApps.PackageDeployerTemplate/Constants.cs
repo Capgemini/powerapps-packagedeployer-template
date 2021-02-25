@@ -31,9 +31,9 @@
             public const string LicensedPassword = "LicensedPassword";
 
             /// <summary>
-            /// The prefix for of a target environment.
+            /// The prefix for all mailbox settings.
             /// </summary>
-            public const string EnvironmentPrefix = "PACKAGEDEPLOYER_SETTINGS_ENVIRONMENT_PREFIX";
+            public const string MailboxPrefix = "Mailbox";
         }
 
         /// <summary>
@@ -385,32 +385,32 @@
                 /// </summary>
                 public const string MailboxStatus = "mailboxstatus";
             }
+        }
+
+        /// <summary>
+        /// Constants related to the queue entity.
+        /// </summary>
+        public static class Queue
+        {
+            /// <summary>
+            /// The logical name.
+            /// </summary>
+            public const string LogicalName = "queue";
 
             /// <summary>
-            /// Constants related to the queue entity.
+            /// Field logical names.
             /// </summary>
-            public static class Queue
+            public static class Fields
             {
                 /// <summary>
-                /// The logical name.
+                /// The Email Address.
                 /// </summary>
-                public const string LogicalName = "queue";
+                public const string EmailAddress = "emailaddress";
 
                 /// <summary>
-                /// Field logical names.
+                /// The Email Router Access Approval.
                 /// </summary>
-                public static class Fields
-                {
-                    /// <summary>
-                    /// The Email Address.
-                    /// </summary>
-                    public const string EmailAddress = "emailaddress";
-
-                    /// <summary>
-                    /// The Emailrouter Access Approval.
-                    /// </summary>
-                    public const string EmailrouterAccessApproval = "emailrouteraccessapproval";
-                }
+                public const string EmailRouterAccessApproval = "emailrouteraccessapproval";
             }
         }
     }

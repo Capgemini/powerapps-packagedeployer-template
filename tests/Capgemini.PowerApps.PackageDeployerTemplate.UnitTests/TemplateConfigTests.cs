@@ -159,26 +159,6 @@
             this.config.ActivateDeactivateSLAs.Should().BeTrue();
         }
 
-        [Fact]
-        public void Load_MailboxesElementNotPresent_MailboxesIsDefaulted()
-        {
-            this.defaultConfig.Mailboxes.Should().NotBeNull();
-        }
-
-        [Fact]
-        public void Load_MailboxesPresent_MailboxesIsDeserialized()
-        {
-            this.config.Mailboxes.Should().Contain(d => d.SourceEmailaddress == "source@fake.com");
-        }
-
-        [Fact]
-        public void Load_MailboxesPresent_RelatedEnvironment_MailboxesIsDeserialized()
-        {
-            string envionmentPrefix = "prod";
-            var mailBoxes = this.config.Mailboxes.Where(m => m.EnvironmentPrefix == envionmentPrefix);
-            mailBoxes.Should().Contain(d => d.TargetEmailaddress == "target-prod@fake.com");
-        }
-
         private static TemplateConfig Load(string path)
         {
             return TemplateConfig.Load(TestUtilities.GetResourcePath(path));
