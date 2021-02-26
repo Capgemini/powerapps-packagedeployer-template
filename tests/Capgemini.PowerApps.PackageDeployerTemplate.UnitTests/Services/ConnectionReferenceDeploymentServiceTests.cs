@@ -29,11 +29,19 @@ namespace Capgemini.PowerApps.PackageDeployerTemplate.UnitTests.Services
         }
 
         [Fact]
-        public void ConnectConnectionReferences_NullConnectionMap_Throws()
+        public void ConnectConnectionReferences_NullConnectionMap_DoesNotThrow()
         {
             Action callingConnectConnectionReferencesWithNullConnectionMap = () => this.connectionReferenceSvc.ConnectConnectionReferences(null);
 
-            callingConnectConnectionReferencesWithNullConnectionMap.Should().Throw<ArgumentNullException>();
+            callingConnectConnectionReferencesWithNullConnectionMap.Should().NotThrow<ArgumentNullException>();
+        }
+
+        [Fact]
+        public void ConnectConnectionReferences_EmptyConnectionMap_DoesNotThrow()
+        {
+            Action callingConnectConnectionReferencesWithNullConnectionMap = () => this.connectionReferenceSvc.ConnectConnectionReferences(new Dictionary<string, string>());
+
+            callingConnectConnectionReferencesWithNullConnectionMap.Should().NotThrow<ArgumentNullException>();
         }
 
         [Fact]

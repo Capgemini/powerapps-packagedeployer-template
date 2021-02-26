@@ -35,9 +35,11 @@ namespace Capgemini.PowerApps.PackageDeployerTemplate.Services
         /// <param name="connectionMap">Connection name by connection reference ID.</param>
         public void ConnectConnectionReferences(IDictionary<string, string> connectionMap)
         {
-            if (connectionMap is null)
+            if (connectionMap is null || !connectionMap.Any())
             {
-                throw new ArgumentNullException(nameof(connectionMap));
+                this.logger.LogInformation("No connections have been configured.");
+
+                return;
             }
 
             var updateRequests = this
