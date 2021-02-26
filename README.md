@@ -23,6 +23,8 @@ This project's aim is to build a powerful base Package Deployer template that si
     - [Import data](#Import-data)
   - [Word templates](#Word-templates)
     - [Import word templates](#Import-word-templates)
+  - [Mailboxes](#Mailboxes)
+    - [Update, approve, test and enable shared mailboxes](#Update-approve-test-and-enable-shared-mailboxes)
 - [Contributing](#Contributing)
 - [Licence](#Licence)
 
@@ -165,6 +167,33 @@ You can import word templates by adding `<documenttemplate>` elements.
     </documenttemplates>
 </templateconfig>
 ```
+
+### Mailboxes
+
+#### Update, approve, test and enable shared mailboxes
+
+You can update shared mailboxes with target email address, approve and test&enable by setting configurations either through environment variables (for example, those [exposed on Azure Pipelines](https://docs.microsoft.com/en-us/azure/devops/pipelines/process/variables?view=azure-devops&tabs=yaml%2Cbatch#access-variables-through-the-environment) from your variables or variable groups) or through Package Deployer [runtime settings](https://docs.microsoft.com/en-us/power-platform/admin/deploy-packages-using-package-deployer-windows-powershell#use-the-cmdlet-to-deploy-packages).
+
+Environment variables must be prefixed with `PACKAGEDEPLOYER_SETTINGS_MAILBOX_` and followed by the source email address. Similarly, runtime settings must be prefixed with `Mailbox:` and followed by the source email address. For example, if a source email address was `support-dev@fake.com`, this could be set via either of the following:
+
+**Environment variable**
+
+```powershell
+$env:PACKAGEDEPLOYER_SETTINGS_MAILBOX_SUPPORT-DEV@FAKE.COM = "support-prod@fake.com"
+```
+
+**Runtime setting**
+
+```powershell
+$runtimeSettings = @{ 
+    "Mailbox:support-dev@fake.com" = "support-prod@fake.com" 
+}
+
+Import-CrmPackage –CrmConnection $conn –PackageDirectory $packageDir –PackageName Package.dll –RuntimePackageSettings $runtimeSettings
+```
+
+The runtime setting takes precedence if both an environment variable and runtime setting are found for the same shared mailbox.
+
 
 ## Contributing
 

@@ -1,5 +1,6 @@
 ﻿namespace Capgemini.PowerApps.PackageDeployerTemplate.UnitTests
 {
+    using System.Linq;
     using Capgemini.PowerApps.PackageDeployerTemplate.Config;
     using FluentAssertions;
     using Xunit;

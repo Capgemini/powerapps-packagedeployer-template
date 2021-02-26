@@ -28,6 +28,7 @@
         private DocumentTemplateDeploymentService documentTemplateSvc;
         private SdkStepDeploymentService sdkStepsSvc;
         private ConnectionReferenceDeploymentService connectionReferenceSvc;
+        private MailboxDeploymentService mailboxSvc;
 
         /// <summary>
         /// Gets the path to the package folder.
@@ -44,6 +45,12 @@
         /// </summary>
         /// <returns>The connection reference to connection name mappings.</returns>
         protected IDictionary<string, string> ConnectionReferenceMappings => this.GetSettings(Constants.Settings.ConnectionReferencePrefix);
+
+        /// <summary>
+        /// Gets the mailbox mappings.
+        /// </summary>
+        /// <returns>The mailbox mappings.</returns>
+        protected IDictionary<string, string> MailboxMappings => this.GetSettings(Constants.Settings.MailboxPrefix);
 
         /// <summary>
         /// Gets an extended <see cref="Microsoft.Xrm.Sdk.IOrganizationService"/>.
@@ -208,6 +215,22 @@
         }
 
         /// <summary>
+        /// Gets provides deployment functionality relating to mailboxes.
+        /// </summary>
+        protected MailboxDeploymentService MailboxSvc
+        {
+            get
+            {
+                if (this.mailboxSvc == null)
+                {
+                    this.mailboxSvc = new MailboxDeploymentService(this.TraceLoggerAdapter, this.LicensedCrmServiceAdapter ?? this.CrmServiceAdapter);
+                }
+
+                return this.mailboxSvc;
+            }
+        }
+
+        /// <summary>
         /// Gets provides access to the templateconfig section of the ImportConfig.xml.
         /// </summary>
         protected TemplateConfig TemplateConfig
@@ -323,6 +346,8 @@
                 this.DocumentTemplateSvc.Import(
                     this.TemplateConfig.DocumentTemplates.Select(d => d.Path),
                     this.PackageFolderPath);
+
+                this.MailboxSvc.UpdateApproveAndEnableMailboxes(this.MailboxMappings);
             });
 
             return true;

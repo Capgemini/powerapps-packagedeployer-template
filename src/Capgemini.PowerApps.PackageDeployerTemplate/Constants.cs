@@ -29,6 +29,11 @@
             /// The password of a licensed deployment user.
             /// </summary>
             public const string LicensedPassword = "LicensedPassword";
+
+            /// <summary>
+            /// The prefix for all mailbox settings.
+            /// </summary>
+            public const string MailboxPrefix = "Mailbox";
         }
 
         /// <summary>
@@ -347,6 +352,85 @@
                 /// The logical name of the connection reference.
                 /// </summary>
                 public const string ConnectionReferenceLogicalName = "connectionreferencelogicalname";
+            }
+        }
+
+        /// <summary>
+        /// Constants related to the mailbox.
+        /// </summary>
+        public static class Mailbox
+        {
+            /// <summary>
+            /// The logical name.
+            /// </summary>
+            public const string LogicalName = "mailbox";
+
+            /// <summary>
+            /// A not run mailbox status.
+            /// </summary>
+            public const int MailboxStatusNotRun = 0;
+
+            /// <summary>
+            /// A success mailbox status.
+            /// </summary>
+            public const int MailboxStatusSuccess = 1;
+
+            /// <summary>
+            /// Field logical names.
+            /// </summary>
+            public static class Fields
+            {
+                /// <summary>
+                /// The mailbox regarding object ID.
+                /// </summary>
+                public const string RegardingObjectid = "regardingobjectid";
+
+                /// <summary>
+                /// The Test Email Configuration Scheduled.
+                /// </summary>
+                public const string TestEmailConfigurationScheduled = "testemailconfigurationscheduled";
+
+                /// <summary>
+                /// The Mailbox Status.
+                /// </summary>
+                public const string MailboxStatus = "mailboxstatus";
+            }
+        }
+
+        /// <summary>
+        /// Constants related to the queue entity.
+        /// </summary>
+        public static class Queue
+        {
+            /// <summary>
+            /// The logical name.
+            /// </summary>
+            public const string LogicalName = "queue";
+
+            /// <summary>
+            /// An empty email router access approval.
+            /// </summary>
+            public const int EmailRouterAccessApprovalEmpty = 0;
+
+            /// <summary>
+            /// An approved email router access approval.
+            /// </summary>
+            public const int EmailRouterAccessApprovalApproved = 1;
+
+            /// <summary>
+            /// Field logical names.
+            /// </summary>
+            public static class Fields
+            {
+                /// <summary>
+                /// The Email Address.
+                /// </summary>
+                public const string EmailAddress = "emailaddress";
+
+                /// <summary>
+                /// The Email Router Access Approval.
+                /// </summary>
+                public const string EmailRouterAccessApproval = "emailrouteraccessapproval";
             }
         }
     }
