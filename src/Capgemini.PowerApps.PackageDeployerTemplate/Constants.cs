@@ -366,6 +366,16 @@
             public const string LogicalName = "mailbox";
 
             /// <summary>
+            /// A not run mailbox status.
+            /// </summary>
+            public const int MailboxStatusNotRun = 0;
+
+            /// <summary>
+            /// A success mailbox status.
+            /// </summary>
+            public const int MailboxStatusSuccess = 1;
+
+            /// <summary>
             /// Field logical names.
             /// </summary>
             public static class Fields
@@ -396,6 +406,16 @@
             /// The logical name.
             /// </summary>
             public const string LogicalName = "queue";
+
+            /// <summary>
+            /// An empty email router access approval.
+            /// </summary>
+            public const int EmailRouterAccessApprovalEmpty = 0;
+
+            /// <summary>
+            /// An approved email router access approval.
+            /// </summary>
+            public const int EmailRouterAccessApprovalApproved = 1;
 
             /// <summary>
             /// Field logical names.

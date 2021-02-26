@@ -91,7 +91,7 @@
                 LogicalName = Constants.Queue.LogicalName,
                 Id = Guid.NewGuid(),
             };
-            entity.Attributes.Add(new KeyValuePair<string, object>(Constants.Queue.Fields.EmailRouterAccessApproval, new OptionSetValue((int)EmailRouterAccessApproval.Empty)));
+            entity.Attributes.Add(new KeyValuePair<string, object>(Constants.Queue.Fields.EmailRouterAccessApproval, new OptionSetValue(Constants.Queue.EmailRouterAccessApprovalEmpty)));
             var entityCollection = new EntityCollection
             {
                 EntityName = Constants.Queue.LogicalName,
@@ -123,7 +123,7 @@
                 LogicalName = Constants.Queue.LogicalName,
                 Id = Guid.NewGuid(),
             };
-            entity.Attributes.Add(new KeyValuePair<string, object>(Constants.Queue.Fields.EmailRouterAccessApproval, new OptionSetValue((int)EmailRouterAccessApproval.Approved)));
+            entity.Attributes.Add(new KeyValuePair<string, object>(Constants.Queue.Fields.EmailRouterAccessApproval, new OptionSetValue(Constants.Queue.EmailRouterAccessApprovalApproved)));
             var entityCollection = new EntityCollection
             {
                 EntityName = Constants.Queue.LogicalName,
@@ -168,7 +168,7 @@
                 LogicalName = Constants.Queue.LogicalName,
                 Id = Guid.NewGuid(),
             };
-            entity.Attributes.Add(new KeyValuePair<string, object>(Constants.Queue.Fields.EmailRouterAccessApproval, new OptionSetValue((int)EmailRouterAccessApproval.Approved)));
+            entity.Attributes.Add(new KeyValuePair<string, object>(Constants.Queue.Fields.EmailRouterAccessApproval, new OptionSetValue(Constants.Queue.EmailRouterAccessApprovalApproved)));
             var entityCollection = new EntityCollection
             {
                 EntityName = Constants.Queue.LogicalName,
@@ -179,7 +179,7 @@
                 LogicalName = Constants.Mailbox.LogicalName,
                 Id = Guid.NewGuid(),
             };
-            mailboxEntity.Attributes.Add(new KeyValuePair<string, object>(Constants.Mailbox.Fields.MailboxStatus, new OptionSetValue((int)MailboxStatus.NotRun)));
+            mailboxEntity.Attributes.Add(new KeyValuePair<string, object>(Constants.Mailbox.Fields.MailboxStatus, new OptionSetValue(Constants.Mailbox.MailboxStatusNotRun)));
             var mailboxEntityCollection = new EntityCollection
             {
                 EntityName = Constants.Mailbox.LogicalName,

@@ -44,20 +44,15 @@
 
             foreach (var mailboxConfig in mailboxConfigs)
             {
-                MailboxConfig config = new MailboxConfig
-                {
-                    SourceEmailAddress = mailboxConfig.Key,
-                    TargetEmailAddress = mailboxConfig.Value,
-                };
-                this.logger.LogInformation($"{nameof(MailboxDeploymentService)}: Mailbox Approval Process Started:{config.SourceEmailAddress}");
-                Guid entityid = this.UpdateEmailAddress(config);
+                this.logger.LogInformation($"{nameof(MailboxDeploymentService)}: Mailbox Approval Process Started:{mailboxConfig.Key}");
+                Guid entityid = this.UpdateEmailAddress(mailboxConfig);
                 if (entityid != Guid.Empty)
                 {
                     var isApproved = this.ApproveEmail(entityid);
                     if (isApproved)
                     {
                         this.EnableMailbox(entityid);
-                        this.logger.LogInformation($"{nameof(MailboxDeploymentService)}: Mailbox Approved and Enabled:{config.TargetEmailAddress}");
+                        this.logger.LogInformation($"{nameof(MailboxDeploymentService)}: Mailbox Approved and Enabled:{mailboxConfig.Value}");
                     }
                 }
             }
@@ -68,17 +63,17 @@
         /// </summary>
         /// <param name="mailboxConfig">The mailbox config to use.</param>
         /// <returns>Returns Queue ID.</returns>
-        private Guid UpdateEmailAddress(MailboxConfig mailboxConfig)
+        private Guid UpdateEmailAddress(KeyValuePair<string, string> mailboxConfig)
         {
-            var retrieveMultipleResponse = this.crmSvc.RetrieveMultipleByAttribute(Constants.Queue.LogicalName, Constants.Queue.Fields.EmailAddress, new object[] { mailboxConfig.SourceEmailAddress });
+            var retrieveMultipleResponse = this.crmSvc.RetrieveMultipleByAttribute(Constants.Queue.LogicalName, Constants.Queue.Fields.EmailAddress, new object[] { mailboxConfig.Key });
             var entity = retrieveMultipleResponse?.Entities?.FirstOrDefault();
             if (entity == null)
             {
-                this.logger.LogInformation($"No queue exist with emailaddress:{mailboxConfig.SourceEmailAddress}.");
+                this.logger.LogInformation($"No queue exist with emailaddress:{mailboxConfig.Key}.");
                 return Guid.Empty;
             }
 
-            entity[Constants.Queue.Fields.EmailAddress] = mailboxConfig.TargetEmailAddress;
+            entity[Constants.Queue.Fields.EmailAddress] = mailboxConfig.Value;
             this.crmSvc.Update(entity);
             return entity.Id;
         }
@@ -92,7 +87,7 @@
         {
             bool isApproved = true;
             Entity updateEntity = new Entity(Constants.Queue.LogicalName, entityid);
-            updateEntity.Attributes.Add(new KeyValuePair<string, object>(Constants.Queue.Fields.EmailRouterAccessApproval, new OptionSetValue((int)EmailRouterAccessApproval.Approved)));
+            updateEntity.Attributes.Add(new KeyValuePair<string, object>(Constants.Queue.Fields.EmailRouterAccessApproval, new OptionSetValue(Constants.Queue.EmailRouterAccessApprovalApproved)));
             this.crmSvc.Update(updateEntity);
 
             var entity = this.crmSvc.Retrieve(updateEntity.LogicalName, entityid, new ColumnSet(Constants.Queue.Fields.EmailRouterAccessApproval));
@@ -100,7 +95,7 @@
             int i = 0;
             int count = 1;
             int delay = 30;
-            while (entity.GetAttributeValue<OptionSetValue>(Constants.Queue.Fields.EmailRouterAccessApproval).Value != (int)EmailRouterAccessApproval.Approved)
+            while (entity.GetAttributeValue<OptionSetValue>(Constants.Queue.Fields.EmailRouterAccessApproval).Value != Constants.Queue.EmailRouterAccessApprovalApproved)
             {
                 i++;
                 if (i > count)
@@ -113,7 +108,7 @@
                 entity = this.crmSvc.Retrieve(updateEntity.LogicalName, entityid, new ColumnSet(Constants.Queue.Fields.EmailRouterAccessApproval));
             }
 
-            if (entity.GetAttributeValue<OptionSetValue>(Constants.Queue.Fields.EmailRouterAccessApproval).Value != (int)EmailRouterAccessApproval.Approved)
+            if (entity.GetAttributeValue<OptionSetValue>(Constants.Queue.Fields.EmailRouterAccessApproval).Value != Constants.Queue.EmailRouterAccessApprovalApproved)
             {
                 this.logger.LogWarning("[Failure] Email Address not Approved.");
                 isApproved = false;
@@ -144,7 +139,7 @@
             int i = 0;
             int count = 3;
             int delay = 30;
-            while (updatedEntity.GetAttributeValue<OptionSetValue>(Constants.Mailbox.Fields.MailboxStatus).Value != (int)MailboxStatus.Success)
+            while (updatedEntity.GetAttributeValue<OptionSetValue>(Constants.Mailbox.Fields.MailboxStatus).Value != Constants.Mailbox.MailboxStatusSuccess)
             {
                 i++;
                 if (i > count)
@@ -157,7 +152,7 @@
                 updatedEntity = this.crmSvc.Retrieve(entity.LogicalName, entity.Id, new ColumnSet(new string[] { Constants.Mailbox.Fields.MailboxStatus }));
             }
 
-            if (updatedEntity.GetAttributeValue<OptionSetValue>(Constants.Mailbox.Fields.MailboxStatus).Value != (int)MailboxStatus.Success)
+            if (updatedEntity.GetAttributeValue<OptionSetValue>(Constants.Mailbox.Fields.MailboxStatus).Value != Constants.Mailbox.MailboxStatusSuccess)
             {
                 this.logger.LogWarning("[Failure] Mailbox is not enabled");
             }
