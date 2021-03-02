@@ -474,11 +474,11 @@
         {
             if (this.TraceLoggerAdapter.Errors.Any())
             {
-                this.TraceLoggerAdapter.LogError("##vso[task.complete result=Failed;]DONE");
+                Console.WriteLine("##vso[task.complete result=Failed;]DONE");
             }
             else if (this.TraceLoggerAdapter.Warnings.Any())
             {
-                this.TraceLoggerAdapter.LogWarning("##vso[task.complete result=SucceededWithIssues;]DONE");
+                Console.WriteLine("##vso[task.complete result=SucceededWithIssues;]DONE");
             }
         }
     }
