@@ -3,12 +3,14 @@
     using System;
     using System.Collections.Generic;
     using System.Diagnostics;
+    using System.Diagnostics.CodeAnalysis;
     using Microsoft.Extensions.Logging;
     using Microsoft.Xrm.Tooling.PackageDeployment.CrmPackageExtentionBase;
 
     /// <summary>
     /// An adapter class from <see cref="TraceLogger"/> to <see cref="ILogger"/>.
     /// </summary>
+    [ExcludeFromCodeCoverage]
     public class TraceLoggerAdapter : ILogger
     {
         private static readonly Dictionary<LogLevel, TraceEventType> LogLevelMap = new Dictionary<LogLevel, TraceEventType>

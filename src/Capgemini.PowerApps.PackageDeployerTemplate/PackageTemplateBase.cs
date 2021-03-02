@@ -2,7 +2,7 @@
 {
     using System;
     using System.Collections.Generic;
-    using System.Diagnostics;
+    using System.Diagnostics.CodeAnalysis;
     using System.Globalization;
     using System.IO;
     using System.Linq;
@@ -470,6 +470,8 @@
             this.TraceLoggerAdapter.LogInformation($"{nameof(PackageTemplateBase)}.{lifecycleEvent} completed.");
         }
 
+        // Excluded as it would require our CI or PR validation pipelines to be partially succeeding or failing
+        [ExcludeFromCodeCoverage]
         private void LogTaskCompleteResult()
         {
             if (this.TraceLoggerAdapter.Errors.Any())
