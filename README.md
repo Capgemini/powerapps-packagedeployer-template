@@ -25,6 +25,7 @@ This project's aim is to build a powerful base Package Deployer template that si
     - [Import word templates](#Import-word-templates)
   - [Mailboxes](#Mailboxes)
     - [Update, approve, test and enable shared mailboxes](#Update-approve-test-and-enable-shared-mailboxes)
+- [Azure Pipelines](#Azure-pipelines)
 - [Contributing](#Contributing)
 - [Licence](#Licence)
 
@@ -195,6 +196,12 @@ Import-CrmPackage –CrmConnection $conn –PackageDirectory $packageDir –Pack
 The runtime setting takes precedence if both an environment variable and runtime setting are found for the same shared mailbox.
 
 
+## Azure Pipelines
+
+The template will automatically detect if your deployment is running on Azure Pipelines and will log with the appropriate [logging commands](https://docs.microsoft.com/en-us/azure/devops/pipelines/scripts/logging-commands) to ensure that warnings and errors are reported on your pipeline or release.
+
+Use the `TraceLoggerAdapter` rather than the `PackageLog` to ensure that your extensions also integrate seamlessly with Azure Pipelines.
+ 
 ## Contributing
 
 Please refer to the [Contributing](./CONTRIBUTING.md) guide.
