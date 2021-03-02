@@ -9,7 +9,7 @@
     /// <summary>
     /// An adapter class from <see cref="TraceLogger"/> to <see cref="ILogger"/>.
     /// </summary>
-    public class TraceLoggerAdapter : ILogger
+    internal class TraceLoggerAdapter : ILogger
     {
         private static readonly Dictionary<LogLevel, TraceEventType> LogLevelMap = new Dictionary<LogLevel, TraceEventType>
         {
