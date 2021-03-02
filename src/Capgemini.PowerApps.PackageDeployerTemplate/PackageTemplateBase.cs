@@ -9,6 +9,7 @@
     using Capgemini.PowerApps.PackageDeployerTemplate.Adapters;
     using Capgemini.PowerApps.PackageDeployerTemplate.Config;
     using Capgemini.PowerApps.PackageDeployerTemplate.Services;
+    using Microsoft.Extensions.Logging;
     using Microsoft.Xrm.Tooling.Connector;
     using Microsoft.Xrm.Tooling.PackageDeployment.CrmPackageExtentionBase;
 
@@ -29,6 +30,11 @@
         private SdkStepDeploymentService sdkStepsSvc;
         private ConnectionReferenceDeploymentService connectionReferenceSvc;
         private MailboxDeploymentService mailboxSvc;
+
+        /// <summary>
+        /// Gets a value indicating whether whether the deployment is running on Azure DevOps.
+        /// </summary>
+        protected static bool RunningOnAzureDevOps => bool.TryParse(Environment.GetEnvironmentVariable("TF_BUILD"), out var tfBuild) && tfBuild;
 
         /// <summary>
         /// Gets the path to the package folder.
@@ -94,7 +100,7 @@
                     }
                     else
                     {
-                        this.PackageLog.Log("No licensed user credentials found.", TraceEventType.Information);
+                        this.TraceLoggerAdapter.LogInformation("No licensed user credentials found.");
                     }
                 }
 
@@ -252,7 +258,12 @@
             {
                 if (this.traceLoggerAdapter == null)
                 {
-                    this.traceLoggerAdapter = new TraceLoggerAdapter(this.PackageLog);
+                    this.traceLoggerAdapter = new TraceLoggerAdapter(
+                        this.PackageLog,
+                        new LoggerSettings
+                        {
+                            LoggingCommands = RunningOnAzureDevOps,
+                        });
                 }
 
                 return this.traceLoggerAdapter;
@@ -348,6 +359,11 @@
                     this.PackageFolderPath);
 
                 this.MailboxSvc.UpdateApproveAndEnableMailboxes(this.MailboxMappings);
+
+                if (RunningOnAzureDevOps)
+                {
+                    this.LogTaskCompleteResult();
+                }
             });
 
             return true;
@@ -403,7 +419,7 @@
         /// <returns>The setting value (if found).</returns>
         protected IDictionary<string, string> GetSettings(string prefix)
         {
-            this.PackageLog.Log($"Getting {prefix} settings", TraceEventType.Verbose);
+            this.TraceLoggerAdapter.LogDebug($"Getting {prefix} settings");
 
             var environmentVariables = Environment.GetEnvironmentVariables();
             var mappings = environmentVariables.Keys
@@ -413,7 +429,7 @@
                     k => k.Remove(0, Constants.Settings.EnvironmentVariablePrefix.Length + prefix.Length + 1).ToLower(),
                     v => environmentVariables[v].ToString());
 
-            this.PackageLog.Log($"{mappings.Count} matching settings found in environment variables", TraceEventType.Verbose);
+            this.TraceLoggerAdapter.LogDebug($"{mappings.Count} matching settings found in environment variables");
 
             if (this.RuntimeSettings == null)
             {
@@ -424,13 +440,13 @@
                 .Where(s => s.Key.StartsWith($"{prefix}:"))
                 .ToDictionary(s => s.Key.Remove(0, prefix.Length + 1), s => s.Value.ToString());
 
-            this.PackageLog.Log($"{mappings.Count} matching settings found in runtime settings", TraceEventType.Verbose);
+            this.TraceLoggerAdapter.LogDebug($"{mappings.Count} matching settings found in runtime settings");
 
             foreach (var runtimeSettingsMapping in runtimeSettingMappings)
             {
                 if (mappings.ContainsKey(runtimeSettingsMapping.Key))
                 {
-                    this.PackageLog.Log($"Overriding environment variable setting with runtime setting for {runtimeSettingsMapping.Key}.");
+                    this.TraceLoggerAdapter.LogInformation($"Overriding environment variable setting with runtime setting for {runtimeSettingsMapping.Key}.");
                 }
 
                 mappings[runtimeSettingsMapping.Key] = runtimeSettingsMapping.Value;
@@ -448,12 +464,24 @@
 
         private void LogLifecycleEventStart(string lifecycleEvent)
         {
-            this.PackageLog.Log($"{nameof(PackageTemplateBase)}.{lifecycleEvent} running...", TraceEventType.Information);
+            this.TraceLoggerAdapter.LogInformation($"{nameof(PackageTemplateBase)}.{lifecycleEvent} running...");
         }
 
         private void LogLifecycleEventEnd(string lifecycleEvent)
         {
-            this.PackageLog.Log($"{nameof(PackageTemplateBase)}.{lifecycleEvent} completed.", TraceEventType.Information);
+            this.TraceLoggerAdapter.LogInformation($"{nameof(PackageTemplateBase)}.{lifecycleEvent} completed.");
+        }
+
+        private void LogTaskCompleteResult()
+        {
+            if (this.TraceLoggerAdapter.Errors.Any())
+            {
+                this.TraceLoggerAdapter.LogError("##vso[task.complete result=Failed;]DONE");
+            }
+            else if (this.TraceLoggerAdapter.Warnings.Any())
+            {
+                this.TraceLoggerAdapter.LogWarning("##vso[task.complete result=SucceededWithIssues;]DONE");
+            }
         }
     }
 }
