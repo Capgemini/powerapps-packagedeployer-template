@@ -252,18 +252,16 @@
             }
         }
 
-        private TraceLoggerAdapter TraceLoggerAdapter
+        /// <summary>
+        /// Gets a <see cref="TraceLogger"/> adapter that provides additional functionality (e.g. for Azure Pipelines).
+        /// </summary>
+        protected TraceLoggerAdapter TraceLoggerAdapter
         {
             get
             {
                 if (this.traceLoggerAdapter == null)
                 {
-                    this.traceLoggerAdapter = new TraceLoggerAdapter(
-                        this.PackageLog,
-                        new LoggerSettings
-                        {
-                            LoggingCommands = RunningOnAzureDevOps,
-                        });
+                    this.traceLoggerAdapter = RunningOnAzureDevOps ? new AzureDevOpsTraceLoggerAdapter(this.PackageLog) : new TraceLoggerAdapter(this.PackageLog);
                 }
 
                 return this.traceLoggerAdapter;

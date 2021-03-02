@@ -9,7 +9,7 @@
     /// <summary>
     /// An adapter class from <see cref="TraceLogger"/> to <see cref="ILogger"/>.
     /// </summary>
-    internal class TraceLoggerAdapter : ILogger
+    public class TraceLoggerAdapter : ILogger
     {
         private static readonly Dictionary<LogLevel, TraceEventType> LogLevelMap = new Dictionary<LogLevel, TraceEventType>
         {
@@ -22,30 +22,19 @@
         };
 
         private readonly TraceLogger traceLogger;
-        private readonly LoggerSettings loggerSettings;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="TraceLoggerAdapter"/> class.
         /// </summary>
         /// <param name="traceLogger">The <see cref="TraceLogger"/>.</param>
         public TraceLoggerAdapter(TraceLogger traceLogger)
-            : this(traceLogger, new LoggerSettings())
-        {
-        }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="TraceLoggerAdapter"/> class.
-        /// </summary>
-        /// <param name="traceLogger">The <see cref="TraceLogger"/>.</param>
-        /// <param name="loggerSettings">The <see cref="LoggerSettings"/>.</param>
-        public TraceLoggerAdapter(TraceLogger traceLogger, LoggerSettings loggerSettings)
         {
             if (traceLogger is null)
             {
                 throw new ArgumentNullException(nameof(traceLogger));
             }
 
-            (this.traceLogger, this.loggerSettings, this.Warnings, this.Errors) = (traceLogger, loggerSettings, new List<string>(), new List<string>());
+            (this.traceLogger, this.Warnings, this.Errors) = (traceLogger, new List<string>(), new List<string>());
         }
 
         /// <summary>
@@ -83,27 +72,18 @@
             }
 
             this.traceLogger.Log(
-                $"{this.GetLoggingCommand(logLevel)}{message} {(exception != null ? exception.StackTrace : string.Empty)}",
+                $"{this.GetPrefix(logLevel)}{message} {(exception != null ? exception.StackTrace : string.Empty)}",
                 LogLevelMap[logLevel]);
         }
 
-        private string GetLoggingCommand(LogLevel logLevel)
+        /// <summary>
+        /// Gets the prefix for a given log level.
+        /// </summary>
+        /// <param name="logLevel">The log level.</param>
+        /// <returns>The prefix.</returns>
+        protected virtual string GetPrefix(LogLevel logLevel)
         {
-            if (!this.loggerSettings.LoggingCommands)
-            {
-                return string.Empty;
-            }
-
-            switch (logLevel)
-            {
-                case LogLevel.Warning:
-                    return "##[task.logissue type=warning]";
-                case LogLevel.Error:
-                case LogLevel.Critical:
-                    return "##[task.logissue type=error]";
-                default:
-                    return string.Empty;
-            }
+            return string.Empty;
         }
     }
 }
