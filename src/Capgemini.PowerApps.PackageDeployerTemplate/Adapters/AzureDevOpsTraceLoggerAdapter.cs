@@ -1,5 +1,6 @@
 ﻿namespace Capgemini.PowerApps.PackageDeployerTemplate.Adapters
 {
+    using System;
     using System.Diagnostics.CodeAnalysis;
     using Microsoft.Extensions.Logging;
     using Microsoft.Xrm.Tooling.PackageDeployment.CrmPackageExtentionBase;
@@ -20,17 +21,25 @@
         }
 
         /// <inheritdoc/>
-        protected override string GetPrefix(LogLevel logLevel)
+        public override void Log<TState>(LogLevel logLevel, EventId eventId, TState state, Exception exception, Func<TState, Exception, string> formatter)
         {
+            base.Log(logLevel, eventId, state, exception, formatter);
+
+            if (!this.IsEnabled(logLevel))
+            {
+                return;
+            }
+
+            var message = formatter(state, exception);
             switch (logLevel)
             {
                 case LogLevel.Warning:
-                    return "##[task.logissue type=warning]";
+                    Console.Write($"##[task.logissue type=warning]{message}");
+                    break;
                 case LogLevel.Error:
                 case LogLevel.Critical:
-                    return "##[task.logissue type=error]";
-                default:
-                    return string.Empty;
+                    Console.WriteLine($"##[task.logissue type=error]{message}");
+                    break;
             }
         }
     }

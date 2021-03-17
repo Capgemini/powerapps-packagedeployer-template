@@ -56,7 +56,7 @@
         public bool IsEnabled(LogLevel logLevel) => logLevel != LogLevel.None;
 
         /// <inheritdoc/>
-        public void Log<TState>(LogLevel logLevel, EventId eventId, TState state, Exception exception, Func<TState, Exception, string> formatter)
+        public virtual void Log<TState>(LogLevel logLevel, EventId eventId, TState state, Exception exception, Func<TState, Exception, string> formatter)
         {
             if (!this.IsEnabled(logLevel))
             {
@@ -74,18 +74,8 @@
             }
 
             this.traceLogger.Log(
-                $"{this.GetPrefix(logLevel)}{message} {(exception != null ? exception.StackTrace : string.Empty)}",
+                $"{message} {(exception != null ? exception.StackTrace : string.Empty)}",
                 LogLevelMap[logLevel]);
-        }
-
-        /// <summary>
-        /// Gets the prefix for a given log level.
-        /// </summary>
-        /// <param name="logLevel">The log level.</param>
-        /// <returns>The prefix.</returns>
-        protected virtual string GetPrefix(LogLevel logLevel)
-        {
-            return string.Empty;
         }
     }
 }
