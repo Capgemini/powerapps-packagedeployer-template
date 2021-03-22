@@ -6,22 +6,6 @@
     public static class Constants
     {
         /// <summary>
-        /// Common field logical names.
-        /// </summary>
-        public static class Fields
-        {
-            /// <summary>
-            /// Status.
-            /// </summary>
-            public const string StateCode = "statecode";
-
-            /// <summary>
-            /// Status reason.
-            /// </summary>
-            public const string StatusCode = "statuscode";
-        }
-
-        /// <summary>
         /// Constants relating to settings.
         /// </summary>
         public static class Settings
