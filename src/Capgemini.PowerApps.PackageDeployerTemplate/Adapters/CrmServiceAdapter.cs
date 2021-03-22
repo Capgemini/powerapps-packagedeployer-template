@@ -26,6 +26,9 @@
         }
 
         /// <inheritdoc/>
+        public Guid? CallerAADObjectId { get => this.crmSvc.CallerAADObjectId; set => this.crmSvc.CallerAADObjectId = value; }
+
+        /// <inheritdoc/>
         public ExecuteMultipleResponse ExecuteMultiple(IEnumerable<OrganizationRequest> requests, bool continueOnError = true, bool returnResponses = true)
         {
             var executeMultipleRequest = new ExecuteMultipleRequest
@@ -203,6 +206,46 @@
             entityQuery.Criteria.AddCondition($"{componentLogicalName}id", ConditionOperator.In, objectIds.Cast<object>().ToArray());
 
             return this.RetrieveMultiple(entityQuery);
+        }
+
+        /// <inheritdoc/>
+        /// <exception cref="ArgumentException">Thrown if a user with the given domain name does not exist.</exception>
+        public Guid RetrieveAzureAdObjectIdByDomainName(string domainName)
+        {
+            var systemUser = this.RetrieveMultipleByAttribute(
+                Constants.SystemUser.LogicalName,
+                Constants.SystemUser.Fields.DomainName,
+                new string[] { domainName },
+                new ColumnSet(Constants.SystemUser.Fields.AzureActiveDirectoryObjectId)).Entities.FirstOrDefault();
+
+            if (systemUser == null)
+            {
+                throw new ArgumentException($"Unable to find a system user with a domain name of {domainName}");
+            }
+
+            return systemUser.GetAttributeValue<Guid>(Constants.SystemUser.Fields.AzureActiveDirectoryObjectId);
+        }
+
+        /// <inheritdoc/>
+        public OrganizationResponse Execute(OrganizationRequest request, string username)
+        {
+            if (request is null)
+            {
+                throw new ArgumentNullException(nameof(request));
+            }
+
+            if (username is null)
+            {
+                throw new ArgumentNullException(nameof(username));
+            }
+
+            var previousCallerObjectId = this.CallerAADObjectId;
+
+            this.CallerAADObjectId = this.RetrieveAzureAdObjectIdByDomainName(username);
+            var response = this.Execute(request);
+            this.CallerAADObjectId = previousCallerObjectId;
+
+            return response;
         }
 
         /// <inheritdoc/>

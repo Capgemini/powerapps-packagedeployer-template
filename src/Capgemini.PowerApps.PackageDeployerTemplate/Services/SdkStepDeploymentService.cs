@@ -11,7 +11,7 @@
     /// <summary>
     /// Deployment functionality related to SDK steps.
     /// </summary>
-    public class SdkStepDeploymentService : IComponentStateSettingService
+    public class SdkStepDeploymentService
     {
         private readonly ILogger logger;
         private readonly ICrmServiceAdapter crmSvc;
@@ -27,7 +27,11 @@
             this.crmSvc = crmSvc ?? throw new ArgumentNullException(nameof(crmSvc));
         }
 
-        /// <inheritdoc/>
+        /// <summary>
+        /// Activates SDK steps in the given solutions unless otherwise specified.
+        /// </summary>
+        /// <param name="solutions">The solutions to activate SDK steps in.</param>
+        /// <param name="componentsToDeactivate">The names of any SDK steps to deactivate.</param>
         public void SetStatesBySolution(IEnumerable<string> solutions, IEnumerable<string> componentsToDeactivate = null)
         {
             this.logger.LogInformation("Setting SDK steps states in solution(s).");
@@ -47,7 +51,11 @@
             this.SetStates(deployedSdkSteps, componentsToDeactivate);
         }
 
-        /// <inheritdoc/>
+        /// <summary>
+        /// Sets the states of SDK steps.
+        /// </summary>
+        /// <param name="componentsToActivate">The SDK steps to activate.</param>
+        /// <param name="componentsToDeactivate">The SDK steps to deactivate.</param>
         public void SetStates(IEnumerable<string> componentsToActivate, IEnumerable<string> componentsToDeactivate = null)
         {
             this.logger.LogInformation("Setting SDK steps states.");

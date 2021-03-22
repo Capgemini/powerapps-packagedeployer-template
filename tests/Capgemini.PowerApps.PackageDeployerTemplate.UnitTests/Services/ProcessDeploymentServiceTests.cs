@@ -8,6 +8,7 @@
     using FluentAssertions;
     using Microsoft.Extensions.Logging;
     using Microsoft.Xrm.Sdk;
+    using Microsoft.Xrm.Sdk.Messages;
     using Microsoft.Xrm.Sdk.Query;
     using Moq;
     using Xunit;
@@ -73,12 +74,35 @@
             this.processDeploymentSvc.SetStatesBySolution(Solutions, new List<string> { processToDeactivateName });
 
             this.crmServiceAdapterMock.Verify(
-                c => c.UpdateStateAndStatusForEntity(
-                    Constants.Workflow.LogicalName,
-                    solutionProcesses[0].Id,
-                    Constants.Workflow.StateCodeInactive,
-                    Constants.Workflow.StatusCodeInactive),
+                svc => svc.Execute(
+                    It.Is<UpdateRequest>(u =>
+                        u.Target.LogicalName == Constants.Workflow.LogicalName &&
+                        u.Target.Id == solutionProcesses[0].Id &&
+                        u.Target.GetAttributeValue<OptionSetValue>(Constants.Fields.StateCode).Value == Constants.Workflow.StateCodeInactive &&
+                        u.Target.GetAttributeValue<OptionSetValue>(Constants.Fields.StatusCode).Value == Constants.Workflow.StatusCodeInactive)),
                 Times.Once());
+        }
+
+        [Fact]
+        public void SetStatesBySolution_WithUserParameter_ExecutesAsUser()
+        {
+            var userToImpersonate = "licenseduser@domaincom";
+            var solutionProcesses = new List<Entity>
+            {
+                new Entity(Constants.Workflow.LogicalName)
+                {
+                    Id = Guid.NewGuid(),
+                    Attributes =
+                    {
+                        { Constants.Workflow.Fields.Name, "A process" },
+                    },
+                },
+            };
+            this.MockBySolutionProcesses(solutionProcesses);
+
+            this.processDeploymentSvc.SetStatesBySolution(Solutions, user: userToImpersonate);
+
+            this.crmServiceAdapterMock.Verify(svc => svc.Execute(It.IsAny<UpdateRequest>(), userToImpersonate));
         }
 
         [Fact]
@@ -149,11 +173,12 @@
             });
 
             this.crmServiceAdapterMock.Verify(
-                svc => svc.UpdateStateAndStatusForEntity(
-                    Constants.Workflow.LogicalName,
-                    foundProcesses.First().Id,
-                    Constants.Workflow.StateCodeActive,
-                    Constants.Workflow.StatusCodeActive),
+                svc => svc.Execute(
+                    It.Is<UpdateRequest>(u =>
+                        u.Target.LogicalName == Constants.Workflow.LogicalName &&
+                        u.Target.Id == foundProcesses.First().Id &&
+                        u.Target.GetAttributeValue<OptionSetValue>(Constants.Fields.StateCode).Value == Constants.Workflow.StateCodeActive &&
+                        u.Target.GetAttributeValue<OptionSetValue>(Constants.Fields.StatusCode).Value == Constants.Workflow.StatusCodeActive)),
                 Times.Once());
         }
 
@@ -172,12 +197,34 @@
             });
 
             this.crmServiceAdapterMock.Verify(
-                svc => svc.UpdateStateAndStatusForEntity(
-                    Constants.Workflow.LogicalName,
-                    foundProcesses.First().Id,
-                    Constants.Workflow.StateCodeInactive,
-                    Constants.Workflow.StatusCodeInactive),
+                svc => svc.Execute(
+                    It.Is<UpdateRequest>(u =>
+                        u.Target.LogicalName == Constants.Workflow.LogicalName &&
+                        u.Target.Id == foundProcesses.First().Id &&
+                        u.Target.GetAttributeValue<OptionSetValue>(Constants.Fields.StateCode).Value == Constants.Workflow.StateCodeInactive &&
+                        u.Target.GetAttributeValue<OptionSetValue>(Constants.Fields.StatusCode).Value == Constants.Workflow.StatusCodeInactive)),
                 Times.Once());
+        }
+
+        [Fact]
+        public void SetStates_WithUserParameter_ExecutesAsUser()
+        {
+            var foundProcesses = new List<Entity>
+            {
+                new Entity(Constants.Workflow.LogicalName) { Attributes = { { Constants.Workflow.Fields.Name, "Found process" } } },
+            };
+            this.MockSetStatesProcesses(foundProcesses);
+            var userToImpersonate = "licenseduser@domaincom";
+
+            this.processDeploymentSvc.SetStates(
+                new List<string>
+                {
+                    foundProcesses.First().GetAttributeValue<string>(Constants.Workflow.Fields.Name),
+                },
+                Enumerable.Empty<string>(),
+                userToImpersonate);
+
+            this.crmServiceAdapterMock.Verify(svc => svc.Execute(It.IsAny<UpdateRequest>(), userToImpersonate));
         }
 
         private void MockSetStatesProcesses(IList<Entity> processes)

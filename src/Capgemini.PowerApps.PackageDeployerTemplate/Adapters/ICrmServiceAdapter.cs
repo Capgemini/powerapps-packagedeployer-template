@@ -12,6 +12,11 @@
     public interface ICrmServiceAdapter : IOrganizationService
     {
         /// <summary>
+        /// Gets or sets the AAD object ID of the caller.
+        /// </summary>
+        Guid? CallerAADObjectId { get; set; }
+
+        /// <summary>
         /// Imports a word template.
         /// </summary>
         /// <param name="filePath">The path to the word template.</param>
@@ -54,6 +59,23 @@
         /// <param name="returnResponses">Whether to return responses.</param>
         /// <returns>The <see cref="ExecuteMultipleResponse"/>.</returns>
         ExecuteMultipleResponse ExecuteMultiple(IEnumerable<OrganizationRequest> requests, bool continueOnError = true, bool returnResponses = true);
+
+        /// <summary>
+        /// Retrives the Azure AD object ID for a user by domain name (or null if not found).
+        /// </summary>
+        /// <param name="domainName">The domain name of the system user.</param>
+        /// <returns>The Azure AD object ID (or null if not found).</returns>
+        /// <exception cref="ArgumentException">Thrown when the specified user doesn't exist.</exception>
+        Guid RetrieveAzureAdObjectIdByDomainName(string domainName);
+
+        /// <summary>
+        /// Executes a request as a particular user.
+        /// </summary>
+        /// <param name="request">The request.</param>
+        /// <param name="username">The user to impersonate.</param>
+        /// <returns>The response.</returns>
+        /// <exception cref="ArgumentException">Thrown when the specified user doesn't exist.</exception>
+        OrganizationResponse Execute(OrganizationRequest request, string username);
 
         /// <summary>
         /// Retrieve solution component object IDs of a given type and solution.

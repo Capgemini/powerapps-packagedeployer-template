@@ -6,6 +6,22 @@
     public static class Constants
     {
         /// <summary>
+        /// Common field logical names.
+        /// </summary>
+        public static class Fields
+        {
+            /// <summary>
+            /// Status.
+            /// </summary>
+            public const string StateCode = "statecode";
+
+            /// <summary>
+            /// Status reason.
+            /// </summary>
+            public const string StatusCode = "statuscode";
+        }
+
+        /// <summary>
         /// Constants relating to settings.
         /// </summary>
         public static class Settings
@@ -21,14 +37,9 @@
             public const string EnvironmentVariablePrefix = "PACKAGEDEPLOYER_SETTINGS_";
 
             /// <summary>
-            /// The username of a licensed deployment user.
+            /// The (optional) username of a licensed user to use for connecting connection references and activating flows.
             /// </summary>
             public const string LicensedUsername = "LicensedUsername";
-
-            /// <summary>
-            /// The password of a licensed deployment user.
-            /// </summary>
-            public const string LicensedPassword = "LicensedPassword";
 
             /// <summary>
             /// The prefix for all mailbox settings.
@@ -431,6 +442,33 @@
                 /// The Email Router Access Approval.
                 /// </summary>
                 public const string EmailRouterAccessApproval = "emailrouteraccessapproval";
+            }
+        }
+
+        /// <summary>
+        /// Constants relating to the systemuser entity.
+        /// </summary>
+        public static class SystemUser
+        {
+            /// <summary>
+            /// The logical name.
+            /// </summary>
+            public const string LogicalName = "systemuser";
+
+            /// <summary>
+            /// Field logical names.
+            /// </summary>
+            public static class Fields
+            {
+                /// <summary>
+                /// The domain name.
+                /// </summary>
+                public const string DomainName = "domainname";
+
+                /// <summary>
+                /// The Azure AD object ID.
+                /// </summary>
+                public const string AzureActiveDirectoryObjectId = "azureactivedirectoryobjectid";
             }
         }
     }
