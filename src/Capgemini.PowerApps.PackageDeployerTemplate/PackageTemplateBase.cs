@@ -19,7 +19,7 @@
     public abstract class PackageTemplateBase : ImportExtension
     {
         private ICrmServiceAdapter crmServiceAdapter;
-        private ICrmServiceAdapter licensedCrmServiceAdapter;
+        private string licensedUsername;
         private TemplateConfig templateConfig;
         private IList<string> processedSolutions;
         private TraceLoggerAdapter traceLoggerAdapter;
@@ -47,6 +47,22 @@
         protected string ImportConfigFilePath => Path.Combine(this.PackageFolderPath, "ImportConfig.xml");
 
         /// <summary>
+        /// Gets the username of an (optional) licensed user to impersonate when connecting connection references or activating flows. Useful when deploying as an application user, as they can't own connections or activate flows.
+        /// </summary>
+        protected string LicensedUsername
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(this.licensedUsername))
+                {
+                    this.licensedUsername = this.GetSetting<string>(Constants.Settings.LicensedUsername);
+                }
+
+                return this.licensedUsername;
+            }
+        }
+
+        /// <summary>
         /// Gets the connection reference to connection name mappings.
         /// </summary>
         /// <returns>The connection reference to connection name mappings.</returns>
@@ -70,41 +86,10 @@
             {
                 if (this.crmServiceAdapter == null)
                 {
-                    this.crmServiceAdapter = new CrmServiceAdapter(this.CrmSvc);
+                    this.crmServiceAdapter = new CrmServiceAdapter(this.CrmSvc, this.TraceLoggerAdapter);
                 }
 
                 return this.crmServiceAdapter;
-            }
-        }
-
-        /// <summary>
-        /// Gets an extended <see cref="Microsoft.Xrm.Sdk.IOrganizationService"/> authenticated as a licensed user (if configured).
-        /// </summary>
-        /// <value>
-        /// An extended <see cref="Microsoft.Xrm.Sdk.IOrganizationService"/> authenticated as a licensed user (if configured).
-        /// </value>
-        protected ICrmServiceAdapter LicensedCrmServiceAdapter
-        {
-            get
-            {
-                if (this.licensedCrmServiceAdapter == null)
-                {
-                    var username = this.GetSetting<string>(Constants.Settings.LicensedUsername);
-                    var password = this.GetSetting<string>(Constants.Settings.LicensedPassword);
-
-                    if (!string.IsNullOrEmpty(username) && !string.IsNullOrEmpty(password))
-                    {
-                        this.licensedCrmServiceAdapter = new CrmServiceAdapter(
-                            new CrmServiceClient(
-                                $"AuthType=OAuth; Username={username}; Password={password}; Url={this.CrmSvc.ConnectedOrgPublishedEndpoints.First().Value}; AppId=51f81489-12ee-4a9e-aaae-a2591f45987d; RedirectUri=app://58145B91-0C36-4500-8554-080854F2AC97; LoginPrompt=Never"));
-                    }
-                    else
-                    {
-                        this.TraceLoggerAdapter.LogInformation("No licensed user credentials found.");
-                    }
-                }
-
-                return this.licensedCrmServiceAdapter;
             }
         }
 
@@ -149,7 +134,7 @@
             {
                 if (this.processSvc == null)
                 {
-                    this.processSvc = new ProcessDeploymentService(this.TraceLoggerAdapter, this.LicensedCrmServiceAdapter ?? this.CrmServiceAdapter);
+                    this.processSvc = new ProcessDeploymentService(this.TraceLoggerAdapter, this.CrmServiceAdapter);
                 }
 
                 return this.processSvc;
@@ -213,7 +198,7 @@
             {
                 if (this.connectionReferenceSvc == null)
                 {
-                    this.connectionReferenceSvc = new ConnectionReferenceDeploymentService(this.TraceLoggerAdapter, this.LicensedCrmServiceAdapter ?? this.CrmServiceAdapter);
+                    this.connectionReferenceSvc = new ConnectionReferenceDeploymentService(this.TraceLoggerAdapter, this.CrmServiceAdapter);
                 }
 
                 return this.connectionReferenceSvc;
@@ -229,7 +214,7 @@
             {
                 if (this.mailboxSvc == null)
                 {
-                    this.mailboxSvc = new MailboxDeploymentService(this.TraceLoggerAdapter, this.LicensedCrmServiceAdapter ?? this.CrmServiceAdapter);
+                    this.mailboxSvc = new MailboxDeploymentService(this.TraceLoggerAdapter, this.CrmServiceAdapter);
                 }
 
                 return this.mailboxSvc;
@@ -339,17 +324,19 @@
                         this.TemplateConfig.SdkStepsToDeactivate.Where(s => s.External).Select(s => s.Name));
                 }
 
-                this.ConnectionReferenceSvc.ConnectConnectionReferences(this.ConnectionReferenceMappings);
+                this.ConnectionReferenceSvc.ConnectConnectionReferences(this.ConnectionReferenceMappings, this.LicensedUsername);
 
                 this.ProcessDeploymentService.SetStatesBySolution(
                     this.ProcessedSolutions,
-                    this.TemplateConfig.ProcessesToDeactivate.Select(p => p.Name));
+                    this.TemplateConfig.ProcessesToDeactivate.Select(p => p.Name),
+                    this.LicensedUsername);
 
                 if (this.TemplateConfig.Processes.Any(p => p.External))
                 {
                     this.ProcessDeploymentService.SetStates(
                         this.TemplateConfig.ProcessesToActivate.Where(p => p.External).Select(p => p.Name),
-                        this.TemplateConfig.ProcessesToDeactivate.Where(p => p.External).Select(p => p.Name));
+                        this.TemplateConfig.ProcessesToDeactivate.Where(p => p.External).Select(p => p.Name),
+                        this.LicensedUsername);
                 }
 
                 this.DocumentTemplateSvc.Import(

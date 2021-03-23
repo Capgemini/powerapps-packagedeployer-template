@@ -4,6 +4,7 @@
     using System.Collections.Generic;
     using System.Linq;
     using Capgemini.PowerApps.PackageDeployerTemplate.Adapters;
+    using Microsoft.Crm.Sdk.Messages;
     using Microsoft.Extensions.Logging;
     using Microsoft.Xrm.Sdk;
     using Microsoft.Xrm.Sdk.Query;
@@ -11,7 +12,7 @@
     /// <summary>
     /// Deployment functionality relating to processes.
     /// </summary>
-    public class ProcessDeploymentService : IComponentStateSettingService
+    public class ProcessDeploymentService
     {
         private readonly ILogger logger;
         private readonly ICrmServiceAdapter crmSvc;
@@ -27,8 +28,13 @@
             this.crmSvc = crmSvc ?? throw new ArgumentNullException(nameof(crmSvc));
         }
 
-        /// <inheritdoc/>
-        public void SetStatesBySolution(IEnumerable<string> solutions, IEnumerable<string> componentsToDeactivate = null)
+        /// <summary>
+        /// Activates processes in the given solutions unless otherwise specified.
+        /// </summary>
+        /// <param name="solutions">The solutions to activate processes in.</param>
+        /// <param name="componentsToDeactivate">The names of any processes to deactivate.</param>
+        /// <param name="user">The username of the user to impersonate (use this when activating flows if you're authenticated as an application user).</param>
+        public void SetStatesBySolution(IEnumerable<string> solutions, IEnumerable<string> componentsToDeactivate = null, string user = null)
         {
             this.logger.LogInformation("Setting process states in solution(s).");
 
@@ -44,11 +50,16 @@
                 Constants.Workflow.LogicalName,
                 new ColumnSet(Constants.Workflow.Fields.Name)).Entities;
 
-            this.SetStates(deployedProcesses, componentsToDeactivate);
+            this.SetStates(deployedProcesses, componentsToDeactivate, user);
         }
 
-        /// <inheritdoc/>
-        public void SetStates(IEnumerable<string> componentsToActivate, IEnumerable<string> componentsToDeactivate = null)
+        /// <summary>
+        /// Sets the states of processes.
+        /// </summary>
+        /// <param name="componentsToActivate">The processes to activate.</param>
+        /// <param name="componentsToDeactivate">The processes to deactivate.</param>
+        /// <param name="user">The username of the user to impersonate (use this when activating flows if you're authenticated as an application user).</param>
+        public void SetStates(IEnumerable<string> componentsToActivate, IEnumerable<string> componentsToDeactivate = null, string user = null)
         {
             this.logger.LogInformation("Setting process states.");
 
@@ -77,31 +88,53 @@
                 this.logger.LogWarning($"Found {processes.Count} deployed processes but expected {allProcesses.Count()}.");
             }
 
-            this.SetStates(processes, componentsToDeactivate);
+            this.SetStates(processes, componentsToDeactivate, user);
         }
 
-        private void SetStates(IEnumerable<Entity> processes, IEnumerable<string> processesToDeactivate = null)
+        private void SetStates(IEnumerable<Entity> processes, IEnumerable<string> processesToDeactivate = null, string user = null)
         {
             if (processes is null)
             {
                 return;
             }
 
+            if (!string.IsNullOrEmpty(user))
+            {
+                this.logger.LogInformation($"Activating processes as {user}.");
+            }
+
             foreach (var deployedProcess in processes)
             {
-                var stateCode = Constants.Workflow.StateCodeActive;
-                var statusCode = Constants.Workflow.StatusCodeActive;
+                var stateCode = new OptionSetValue(Constants.Workflow.StateCodeActive);
+                var statusCode = new OptionSetValue(Constants.Workflow.StatusCodeActive);
 
                 if (processesToDeactivate != null && processesToDeactivate.Contains(deployedProcess[Constants.Workflow.Fields.Name]))
                 {
-                    stateCode = Constants.Workflow.StateCodeInactive;
-                    statusCode = Constants.Workflow.StatusCodeInactive;
+                    stateCode.Value = Constants.Workflow.StateCodeInactive;
+                    statusCode.Value = Constants.Workflow.StatusCodeInactive;
                 }
 
-                this.logger.LogInformation($"Setting process status for {deployedProcess[Constants.Workflow.Fields.Name]} with statecode {stateCode} and statuscode {statusCode}");
-                if (!this.crmSvc.UpdateStateAndStatusForEntity(Constants.Workflow.LogicalName, deployedProcess.Id, stateCode, statusCode))
+                this.logger.LogInformation($"Setting process status for {deployedProcess[Constants.Workflow.Fields.Name]} with statecode {stateCode.Value} and statuscode {statusCode.Value}");
+
+                // SetStateRequest is supposedly deprecated but UpdateRequest doesn't work for deactivating active flows
+                var setStateRequest = new SetStateRequest { EntityMoniker = deployedProcess.ToEntityReference(), State = stateCode, Status = statusCode };
+
+                try
                 {
-                    this.logger.LogError($"Status for process {deployedProcess.Attributes[Constants.Workflow.Fields.Name]} could not be set. Please check the processes for errors e.g. missing reference data.");
+                    if (!string.IsNullOrEmpty(user))
+                    {
+                        this.logger.LogInformation($"Impersonating {user} to activate processes.");
+
+                        this.crmSvc.Execute<SetStateResponse>(setStateRequest, user, fallbackToExistingUser: true);
+                    }
+                    else
+                    {
+                        this.crmSvc.Execute(setStateRequest);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    this.logger.LogError(ex, $"Status for process {deployedProcess.Attributes[Constants.Workflow.Fields.Name]} could not be set. Please check the processes for errors e.g. missing reference data or connections.");
                 }
             }
         }

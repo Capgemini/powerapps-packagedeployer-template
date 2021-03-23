@@ -33,7 +33,8 @@ namespace Capgemini.PowerApps.PackageDeployerTemplate.Services
         /// Updates connection references to used the provided connection names.
         /// </summary>
         /// <param name="connectionMap">Connection name by connection reference ID.</param>
-        public void ConnectConnectionReferences(IDictionary<string, string> connectionMap)
+        /// <param name="connectionOwner">The username of the connection owner. If not provided, the authenticated user must be the owner of the connections.</param>
+        public void ConnectConnectionReferences(IDictionary<string, string> connectionMap, string connectionOwner = null)
         {
             if (connectionMap is null || !connectionMap.Any())
             {
@@ -62,11 +63,28 @@ namespace Capgemini.PowerApps.PackageDeployerTemplate.Services
                         },
                     },
                 }).ToList();
-
-            var result = this.crmSvc.ExecuteMultiple(updateRequests);
-            if (result.IsFaulted)
+            var executeMultipleRequest = new ExecuteMultipleRequest()
             {
-                this.logger.LogExecuteMultipleErrors(result);
+                Requests = new OrganizationRequestCollection(),
+                Settings = new ExecuteMultipleSettings { ContinueOnError = true, ReturnResponses = true },
+            };
+            executeMultipleRequest.Requests.AddRange(updateRequests);
+
+            ExecuteMultipleResponse response = null;
+            if (!string.IsNullOrEmpty(connectionOwner))
+            {
+                this.logger.LogInformation($"Impersonating {connectionOwner} as owner of connections.");
+
+                response = this.crmSvc.Execute<ExecuteMultipleResponse>(executeMultipleRequest, connectionOwner, fallbackToExistingUser: true);
+            }
+            else
+            {
+                response = (ExecuteMultipleResponse)this.crmSvc.Execute(executeMultipleRequest);
+            }
+
+            if (response.IsFaulted)
+            {
+                this.logger.LogExecuteMultipleErrors(response);
             }
         }
 

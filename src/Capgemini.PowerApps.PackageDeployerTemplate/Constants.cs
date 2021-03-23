@@ -21,14 +21,9 @@
             public const string EnvironmentVariablePrefix = "PACKAGEDEPLOYER_SETTINGS_";
 
             /// <summary>
-            /// The username of a licensed deployment user.
+            /// The (optional) username of a licensed user to use for connecting connection references and activating flows.
             /// </summary>
             public const string LicensedUsername = "LicensedUsername";
-
-            /// <summary>
-            /// The password of a licensed deployment user.
-            /// </summary>
-            public const string LicensedPassword = "LicensedPassword";
 
             /// <summary>
             /// The prefix for all mailbox settings.
@@ -431,6 +426,33 @@
                 /// The Email Router Access Approval.
                 /// </summary>
                 public const string EmailRouterAccessApproval = "emailrouteraccessapproval";
+            }
+        }
+
+        /// <summary>
+        /// Constants relating to the systemuser entity.
+        /// </summary>
+        public static class SystemUser
+        {
+            /// <summary>
+            /// The logical name.
+            /// </summary>
+            public const string LogicalName = "systemuser";
+
+            /// <summary>
+            /// Field logical names.
+            /// </summary>
+            public static class Fields
+            {
+                /// <summary>
+                /// The domain name.
+                /// </summary>
+                public const string DomainName = "domainname";
+
+                /// <summary>
+                /// The Azure AD object ID.
+                /// </summary>
+                public const string AzureActiveDirectoryObjectId = "azureactivedirectoryobjectid";
             }
         }
     }

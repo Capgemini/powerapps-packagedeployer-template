@@ -11,6 +11,9 @@
     {
         public PackageDeployerFixture()
         {
+            // Check approvals connection is set.
+            _ = this.GetApprovalsConnection();
+
             var process = new Process();
             var startInfo = new ProcessStartInfo
             {
@@ -28,9 +31,9 @@
 
             ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
             this.ServiceClient = new CrmServiceClient(
-                $"Url={Environment.GetEnvironmentVariable("CAPGEMINI_PACKAGE_DEPLOYER_TESTS_URL")}; " +
-                $"Username={Environment.GetEnvironmentVariable("CAPGEMINI_PACKAGE_DEPLOYER_TESTS_USERNAME")}; " +
-                $"Password={Environment.GetEnvironmentVariable("CAPGEMINI_PACKAGE_DEPLOYER_TESTS_PASSWORD")}; " +
+                $"Url={this.GetUrl()}; " +
+                $"Username={this.GetUsername()}; " +
+                $"Password={this.GetPassword()}; " +
                 "AuthType=OAuth; " +
                 "AppId=51f81489-12ee-4a9e-aaae-a2591f45987d; " +
                 "RedirectUri=app://58145B91-0C36-4500-8554-080854F2AC97");
@@ -47,6 +50,32 @@
             this.UninstallSolution();
 
             this.ServiceClient.Dispose();
+        }
+
+        protected string GetApprovalsConnection() =>
+            GetRequiredEnvironmentVariable("PACKAGEDEPLOYER_SETTINGS_CONNREF_PDT_SHAREDAPPROVALS_D7DCB", "No environment variable configured to set approvals connection.");
+
+        protected string GetLicensedUsername() =>
+            GetRequiredEnvironmentVariable("PACKAGEDEPLOYER_SETTINGS_LICENSEDUSERNAME", "No environment variable configured to connect and activate flows.");
+
+        protected string GetUrl() =>
+            GetRequiredEnvironmentVariable("CAPGEMINI_PACKAGE_DEPLOYER_TESTS_URL", "No environment variable configured to set deployment URL.");
+
+        protected string GetUsername() =>
+            GetRequiredEnvironmentVariable("CAPGEMINI_PACKAGE_DEPLOYER_TESTS_USERNAME", "No environment variable configured to set deployment username.");
+
+        protected string GetPassword() =>
+            GetRequiredEnvironmentVariable("CAPGEMINI_PACKAGE_DEPLOYER_TESTS_PASSWORD", "No environment variable configured to set deployment password.");
+
+        private static string GetRequiredEnvironmentVariable(string name, string exceptionMessage)
+        {
+            var url = Environment.GetEnvironmentVariable(name);
+            if (string.IsNullOrEmpty(url))
+            {
+                throw new Exception(exceptionMessage);
+            }
+
+            return url;
         }
 
         private void UninstallSolution()
