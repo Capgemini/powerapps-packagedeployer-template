@@ -85,19 +85,38 @@ namespace Capgemini.PowerApps.PackageDeployerTemplate.UnitTests.Services
         }
 
         [Fact]
-        public void ConnectConnectionReferences_WithErrorUpdating_LogsErrors()
+        public void ConnectConnectionReferences_WithErrorUpdating_Continues()
         {
             var connectionMap = new Dictionary<string, string>
             {
                 { "pdt_sharedapprovals_d7dcb", "12038109da0wud01" },
             };
             this.MockConnectionReferencesForConnectionMap(connectionMap);
-            var response = new ExecuteMultipleResponse { Results = { { "IsFaulted", true } } };
+            var response = new ExecuteMultipleResponse
+            {
+                Results =
+                {
+                    {
+                        "IsFaulted",
+                        true
+                    },
+                    {
+                        "Responses",
+                        new ExecuteMultipleResponseItemCollection()
+                        {
+                            new ExecuteMultipleResponseItem
+                            {
+                                Fault = new OrganizationServiceFault(),
+                            },
+                        }
+                    },
+                },
+            };
             this.MockUpdateConnectionReferencesResponse(response);
 
             this.connectionReferenceSvc.ConnectConnectionReferences(connectionMap);
 
-            this.loggerMock.VerifyLog(l => l.LogExecuteMultipleErrors(response));
+            this.loggerMock.VerifyLog(l => l.LogError(It.IsAny<string>()));
         }
 
         private void MockUpdateConnectionReferencesResponse(ExecuteMultipleResponse response)
