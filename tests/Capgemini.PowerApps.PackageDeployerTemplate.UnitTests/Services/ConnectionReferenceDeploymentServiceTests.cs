@@ -4,6 +4,7 @@ namespace Capgemini.PowerApps.PackageDeployerTemplate.UnitTests.Services
     using System.Collections.Generic;
     using System.Linq;
     using Capgemini.PowerApps.PackageDeployerTemplate.Adapters;
+    using Capgemini.PowerApps.PackageDeployerTemplate.Extensions;
     using Capgemini.PowerApps.PackageDeployerTemplate.Services;
     using FluentAssertions;
     using Microsoft.Extensions.Logging;
@@ -81,6 +82,22 @@ namespace Capgemini.PowerApps.PackageDeployerTemplate.UnitTests.Services
             this.connectionReferenceSvc.ConnectConnectionReferences(connectionMap, connectionOwner);
 
             this.crmSvc.Verify(svc => svc.Execute<ExecuteMultipleResponse>(It.IsAny<OrganizationRequest>(), connectionOwner, true));
+        }
+
+        [Fact]
+        public void ConnectConnectionReferences_WithErrorUpdating_LogsErrors()
+        {
+            var connectionMap = new Dictionary<string, string>
+            {
+                { "pdt_sharedapprovals_d7dcb", "12038109da0wud01" },
+            };
+            this.MockConnectionReferencesForConnectionMap(connectionMap);
+            var response = new ExecuteMultipleResponse { Results = { { "IsFaulted", true } } };
+            this.MockUpdateConnectionReferencesResponse(response);
+
+            this.connectionReferenceSvc.ConnectConnectionReferences(connectionMap);
+
+            this.loggerMock.VerifyLog(l => l.LogExecuteMultipleErrors(response));
         }
 
         private void MockUpdateConnectionReferencesResponse(ExecuteMultipleResponse response)

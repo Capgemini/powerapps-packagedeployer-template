@@ -3,6 +3,7 @@
     using System;
     using System.Collections.Generic;
     using System.Linq;
+    using System.ServiceModel;
     using Capgemini.PowerApps.PackageDeployerTemplate.Adapters;
     using Capgemini.PowerApps.PackageDeployerTemplate.Services;
     using FluentAssertions;
@@ -225,6 +226,29 @@
                 userToImpersonate);
 
             this.crmServiceAdapterMock.Verify(svc => svc.Execute<SetStateResponse>(It.IsAny<SetStateRequest>(), userToImpersonate, true));
+        }
+
+        [Fact]
+        public void SetStates_WithError_LogsError()
+        {
+            var foundProcesses = new List<Entity>
+            {
+                new Entity(Constants.Workflow.LogicalName) { Attributes = { { Constants.Workflow.Fields.Name, "Found process" } } },
+            };
+            this.MockSetStatesProcesses(foundProcesses);
+            var exception = new FaultException();
+            this.crmServiceAdapterMock
+                .Setup(svc => svc.Execute(It.IsAny<SetStateRequest>()))
+                .Throws(exception);
+
+            this.processDeploymentSvc.SetStates(
+                new List<string>
+                {
+                    foundProcesses.First().GetAttributeValue<string>(Constants.Workflow.Fields.Name),
+                },
+                Enumerable.Empty<string>());
+
+            this.loggerMock.VerifyLog(l => l.LogError(exception, It.IsAny<string>()));
         }
 
         private void MockSetStatesProcesses(IList<Entity> processes)
