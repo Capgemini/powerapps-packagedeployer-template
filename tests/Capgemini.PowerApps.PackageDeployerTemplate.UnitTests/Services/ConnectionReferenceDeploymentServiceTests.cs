@@ -80,13 +80,13 @@ namespace Capgemini.PowerApps.PackageDeployerTemplate.UnitTests.Services
 
             this.connectionReferenceSvc.ConnectConnectionReferences(connectionMap, connectionOwner);
 
-            this.crmSvc.Verify(svc => svc.Execute(It.IsAny<OrganizationRequest>(), connectionOwner));
+            this.crmSvc.Verify(svc => svc.Execute<ExecuteMultipleResponse>(It.IsAny<OrganizationRequest>(), connectionOwner, true));
         }
 
         private void MockUpdateConnectionReferencesResponse(ExecuteMultipleResponse response)
         {
             this.crmSvc.Setup(svc => svc.Execute(It.IsAny<ExecuteMultipleRequest>())).Returns(response);
-            this.crmSvc.Setup(svc => svc.Execute(It.IsAny<ExecuteMultipleRequest>(), It.IsAny<string>())).Returns(response);
+            this.crmSvc.Setup(svc => svc.Execute<ExecuteMultipleResponse>(It.IsAny<ExecuteMultipleRequest>(), It.IsAny<string>(), true)).Returns(response);
         }
 
         private EntityCollection MockConnectionReferencesForConnectionMap(Dictionary<string, string> connectionMap)

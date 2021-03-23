@@ -86,7 +86,7 @@
             {
                 if (this.crmServiceAdapter == null)
                 {
-                    this.crmServiceAdapter = new CrmServiceAdapter(this.CrmSvc);
+                    this.crmServiceAdapter = new CrmServiceAdapter(this.CrmSvc, this.TraceLoggerAdapter);
                 }
 
                 return this.crmServiceAdapter;

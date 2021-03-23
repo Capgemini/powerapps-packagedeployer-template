@@ -118,22 +118,16 @@
 
                 // SetStateRequest is supposedly deprecated but UpdateRequest doesn't work for deactivating active flows
                 var setStateRequest = new SetStateRequest { EntityMoniker = deployedProcess.ToEntityReference(), State = stateCode, Status = statusCode };
-                SetStateResponse response = null;
+
                 try
                 {
                     if (!string.IsNullOrEmpty(user))
                     {
-                        try
-                        {
-                            response = (SetStateResponse)this.crmSvc.Execute(setStateRequest, user);
-                        }
-                        catch (ArgumentException ex)
-                        {
-                            this.logger.LogWarning(ex, "Unable to find user to impersonate, attempting to activate as deployment user.");
-                        }
-                    }
+                        this.logger.LogInformation($"Impersonating {user} to activate processes.");
 
-                    if (response == null)
+                        this.crmSvc.Execute<SetStateResponse>(setStateRequest, user, fallbackToExistingUser: true);
+                    }
+                    else
                     {
                         this.crmSvc.Execute(setStateRequest);
                     }

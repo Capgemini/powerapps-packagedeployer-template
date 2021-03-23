@@ -74,17 +74,10 @@ namespace Capgemini.PowerApps.PackageDeployerTemplate.Services
             if (!string.IsNullOrEmpty(connectionOwner))
             {
                 this.logger.LogInformation($"Impersonating {connectionOwner} as owner of connections.");
-                try
-                {
-                    response = (ExecuteMultipleResponse)this.crmSvc.Execute(executeMultipleRequest, connectionOwner);
-                }
-                catch (ArgumentException ex)
-                {
-                    this.logger.LogWarning(ex, "Unable find connection owner to impersonate, attempting to connect as deployment user.");
-                }
-            }
 
-            if (response == null)
+                response = this.crmSvc.Execute<ExecuteMultipleResponse>(executeMultipleRequest, connectionOwner, fallbackToExistingUser: true);
+            }
+            else
             {
                 response = (ExecuteMultipleResponse)this.crmSvc.Execute(executeMultipleRequest);
             }

@@ -102,7 +102,7 @@
 
             this.processDeploymentSvc.SetStatesBySolution(Solutions, user: userToImpersonate);
 
-            this.crmServiceAdapterMock.Verify(svc => svc.Execute(It.IsAny<SetStateRequest>(), userToImpersonate));
+            this.crmServiceAdapterMock.Verify(svc => svc.Execute<SetStateResponse>(It.IsAny<SetStateRequest>(), userToImpersonate, true));
         }
 
         [Fact]
@@ -224,7 +224,7 @@
                 Enumerable.Empty<string>(),
                 userToImpersonate);
 
-            this.crmServiceAdapterMock.Verify(svc => svc.Execute(It.IsAny<SetStateRequest>(), userToImpersonate));
+            this.crmServiceAdapterMock.Verify(svc => svc.Execute<SetStateResponse>(It.IsAny<SetStateRequest>(), userToImpersonate, true));
         }
 
         private void MockSetStatesProcesses(IList<Entity> processes)

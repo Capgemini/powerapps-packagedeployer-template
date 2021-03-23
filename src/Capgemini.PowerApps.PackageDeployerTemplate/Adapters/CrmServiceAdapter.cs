@@ -4,6 +4,7 @@
     using System.Collections.Generic;
     using System.IO;
     using System.Linq;
+    using Microsoft.Extensions.Logging;
     using Microsoft.Xrm.Sdk;
     using Microsoft.Xrm.Sdk.Messages;
     using Microsoft.Xrm.Sdk.Query;
@@ -15,35 +16,21 @@
     public class CrmServiceAdapter : ICrmServiceAdapter, IDisposable
     {
         private readonly CrmServiceClient crmSvc;
+        private readonly ILogger logger;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="CrmServiceAdapter"/> class.
         /// </summary>
         /// <param name="crmSvc">The <see cref="CrmServiceClient"/>.</param>
-        public CrmServiceAdapter(CrmServiceClient crmSvc)
+        /// <param name="logger">The <see cref="ILogger"/>.</param>
+        public CrmServiceAdapter(CrmServiceClient crmSvc, ILogger logger)
         {
             this.crmSvc = crmSvc;
+            this.logger = logger;
         }
 
         /// <inheritdoc/>
         public Guid? CallerAADObjectId { get => this.crmSvc.CallerAADObjectId; set => this.crmSvc.CallerAADObjectId = value; }
-
-        /// <inheritdoc/>
-        public ExecuteMultipleResponse ExecuteMultiple(IEnumerable<OrganizationRequest> requests, bool continueOnError = true, bool returnResponses = true)
-        {
-            var executeMultipleRequest = new ExecuteMultipleRequest
-            {
-                Requests = new OrganizationRequestCollection(),
-                Settings = new ExecuteMultipleSettings
-                {
-                    ContinueOnError = continueOnError,
-                    ReturnResponses = returnResponses,
-                },
-            };
-            executeMultipleRequest.Requests.AddRange(requests);
-
-            return (ExecuteMultipleResponse)this.crmSvc.Execute(executeMultipleRequest);
-        }
 
         /// <inheritdoc/>
         public IEnumerable<Guid> RetrieveSolutionComponentObjectIds(string solutionName, int componentType)
@@ -227,7 +214,8 @@
         }
 
         /// <inheritdoc/>
-        public OrganizationResponse Execute(OrganizationRequest request, string username)
+        public TResponse Execute<TResponse>(OrganizationRequest request, string username, bool fallbackToExistingUser = true)
+            where TResponse : OrganizationResponse
         {
             if (request is null)
             {
@@ -239,13 +227,44 @@
                 throw new ArgumentNullException(nameof(username));
             }
 
+            this.logger.LogDebug($"Executing {request.RequestName} as {username}.");
+
             var previousCallerObjectId = this.CallerAADObjectId;
+            TResponse response = null;
+            try
+            {
+                this.CallerAADObjectId = this.RetrieveAzureAdObjectIdByDomainName(username);
+                response = (TResponse)this.Execute(request);
+            }
+            catch (Exception ex)
+            {
+                if (ex is ArgumentException)
+                {
+                    this.logger.LogWarning($"Failed to execute {request.RequestName} as {username} as the user was not found.");
+                }
+                else
+                {
+                    this.logger.LogWarning(ex, $"Failed to execute {request.RequestName} as {username}.");
+                }
 
-            this.CallerAADObjectId = this.RetrieveAzureAdObjectIdByDomainName(username);
-            var response = this.Execute(request);
-            this.CallerAADObjectId = previousCallerObjectId;
+                if (!fallbackToExistingUser)
+                {
+                    throw;
+                }
+            }
+            finally
+            {
+                this.CallerAADObjectId = previousCallerObjectId;
+            }
 
-            return response;
+            if (response != null)
+            {
+                return response;
+            }
+
+            this.logger.LogInformation($"Falling back to executing {request.RequestName} as {this.crmSvc.OAuthUserId}.");
+
+            return (TResponse)this.Execute(request);
         }
 
         /// <inheritdoc/>

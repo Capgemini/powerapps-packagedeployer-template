@@ -52,15 +52,6 @@
         bool UpdateStateAndStatusForEntity(string entityLogicalName, Guid entityId, int statecode, int status);
 
         /// <summary>
-        /// Execute multiple requests.
-        /// </summary>
-        /// <param name="requests">The requests.</param>
-        /// <param name="continueOnError">Whether to continue on error.</param>
-        /// <param name="returnResponses">Whether to return responses.</param>
-        /// <returns>The <see cref="ExecuteMultipleResponse"/>.</returns>
-        ExecuteMultipleResponse ExecuteMultiple(IEnumerable<OrganizationRequest> requests, bool continueOnError = true, bool returnResponses = true);
-
-        /// <summary>
         /// Retrives the Azure AD object ID for a user by domain name (or null if not found).
         /// </summary>
         /// <param name="domainName">The domain name of the system user.</param>
@@ -73,9 +64,12 @@
         /// </summary>
         /// <param name="request">The request.</param>
         /// <param name="username">The user to impersonate.</param>
+        /// <param name="fallbackToExistingUser">Whether to fallback to the authenticated user if the action fails as the specified user.</param>
+        /// <typeparam name="TResponse">The type of response.</typeparam>
         /// <returns>The response.</returns>
-        /// <exception cref="ArgumentException">Thrown when the specified user doesn't exist.</exception>
-        OrganizationResponse Execute(OrganizationRequest request, string username);
+        /// <exception cref="ArgumentException">Thrown when the specified user doesn't exist and fallback is disabled.</exception>
+        public TResponse Execute<TResponse>(OrganizationRequest request, string username, bool fallbackToExistingUser = true)
+            where TResponse : OrganizationResponse;
 
         /// <summary>
         /// Retrieve solution component object IDs of a given type and solution.
