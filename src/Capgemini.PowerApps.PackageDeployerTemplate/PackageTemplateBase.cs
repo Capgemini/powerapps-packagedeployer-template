@@ -2,13 +2,14 @@
 {
     using System;
     using System.Collections.Generic;
-    using System.Diagnostics;
+    using System.Diagnostics.CodeAnalysis;
     using System.Globalization;
     using System.IO;
     using System.Linq;
     using Capgemini.PowerApps.PackageDeployerTemplate.Adapters;
     using Capgemini.PowerApps.PackageDeployerTemplate.Config;
     using Capgemini.PowerApps.PackageDeployerTemplate.Services;
+    using Microsoft.Extensions.Logging;
     using Microsoft.Xrm.Tooling.Connector;
     using Microsoft.Xrm.Tooling.PackageDeployment.CrmPackageExtentionBase;
 
@@ -18,7 +19,7 @@
     public abstract class PackageTemplateBase : ImportExtension
     {
         private ICrmServiceAdapter crmServiceAdapter;
-        private ICrmServiceAdapter licensedCrmServiceAdapter;
+        private string licensedUsername;
         private TemplateConfig templateConfig;
         private IList<string> processedSolutions;
         private TraceLoggerAdapter traceLoggerAdapter;
@@ -29,6 +30,12 @@
         private SdkStepDeploymentService sdkStepsSvc;
         private ConnectionReferenceDeploymentService connectionReferenceSvc;
         private TableColumnProcessingService autonumberSeedSettingSvc;
+        private MailboxDeploymentService mailboxSvc;
+
+        /// <summary>
+        /// Gets a value indicating whether whether the deployment is running on Azure DevOps.
+        /// </summary>
+        protected static bool RunningOnAzureDevOps => bool.TryParse(Environment.GetEnvironmentVariable("TF_BUILD"), out var tfBuild) && tfBuild;
 
         /// <summary>
         /// Gets the path to the package folder.
@@ -41,10 +48,32 @@
         protected string ImportConfigFilePath => Path.Combine(this.PackageFolderPath, "ImportConfig.xml");
 
         /// <summary>
+        /// Gets the username of an (optional) licensed user to impersonate when connecting connection references or activating flows. Useful when deploying as an application user, as they can't own connections or activate flows.
+        /// </summary>
+        protected string LicensedUsername
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(this.licensedUsername))
+                {
+                    this.licensedUsername = this.GetSetting<string>(Constants.Settings.LicensedUsername);
+                }
+
+                return this.licensedUsername;
+            }
+        }
+
+        /// <summary>
         /// Gets the connection reference to connection name mappings.
         /// </summary>
         /// <returns>The connection reference to connection name mappings.</returns>
         protected IDictionary<string, string> ConnectionReferenceMappings => this.GetSettings(Constants.Settings.ConnectionReferencePrefix);
+
+        /// <summary>
+        /// Gets the mailbox mappings.
+        /// </summary>
+        /// <returns>The mailbox mappings.</returns>
+        protected IDictionary<string, string> MailboxMappings => this.GetSettings(Constants.Settings.MailboxPrefix);
 
         /// <summary>
         /// Gets an extended <see cref="Microsoft.Xrm.Sdk.IOrganizationService"/>.
@@ -58,41 +87,10 @@
             {
                 if (this.crmServiceAdapter == null)
                 {
-                    this.crmServiceAdapter = new CrmServiceAdapter(this.CrmSvc);
+                    this.crmServiceAdapter = new CrmServiceAdapter(this.CrmSvc, this.TraceLoggerAdapter);
                 }
 
                 return this.crmServiceAdapter;
-            }
-        }
-
-        /// <summary>
-        /// Gets an extended <see cref="Microsoft.Xrm.Sdk.IOrganizationService"/> authenticated as a licensed user (if configured).
-        /// </summary>
-        /// <value>
-        /// An extended <see cref="Microsoft.Xrm.Sdk.IOrganizationService"/> authenticated as a licensed user (if configured).
-        /// </value>
-        protected ICrmServiceAdapter LicensedCrmServiceAdapter
-        {
-            get
-            {
-                if (this.licensedCrmServiceAdapter == null)
-                {
-                    var username = this.GetSetting<string>(Constants.Settings.LicensedUsername);
-                    var password = this.GetSetting<string>(Constants.Settings.LicensedPassword);
-
-                    if (!string.IsNullOrEmpty(username) && !string.IsNullOrEmpty(password))
-                    {
-                        this.licensedCrmServiceAdapter = new CrmServiceAdapter(
-                            new CrmServiceClient(
-                                $"AuthType=OAuth; Username={username}; Password={password}; Url={this.CrmSvc.ConnectedOrgPublishedEndpoints.First().Value}; AppId=51f81489-12ee-4a9e-aaae-a2591f45987d; RedirectUri=app://58145B91-0C36-4500-8554-080854F2AC97; LoginPrompt=Never"));
-                    }
-                    else
-                    {
-                        this.PackageLog.Log("No licensed user credentials found.", TraceEventType.Information);
-                    }
-                }
-
-                return this.licensedCrmServiceAdapter;
             }
         }
 
@@ -137,7 +135,7 @@
             {
                 if (this.processSvc == null)
                 {
-                    this.processSvc = new ProcessDeploymentService(this.TraceLoggerAdapter, this.LicensedCrmServiceAdapter ?? this.CrmServiceAdapter);
+                    this.processSvc = new ProcessDeploymentService(this.TraceLoggerAdapter, this.CrmServiceAdapter);
                 }
 
                 return this.processSvc;
@@ -201,7 +199,7 @@
             {
                 if (this.connectionReferenceSvc == null)
                 {
-                    this.connectionReferenceSvc = new ConnectionReferenceDeploymentService(this.TraceLoggerAdapter, this.LicensedCrmServiceAdapter ?? this.CrmServiceAdapter);
+                    this.connectionReferenceSvc = new ConnectionReferenceDeploymentService(this.TraceLoggerAdapter, this.CrmServiceAdapter);
                 }
 
                 return this.connectionReferenceSvc;
@@ -217,10 +215,26 @@
             {
                 if (this.autonumberSeedSettingSvc == null)
                 {
-                    this.autonumberSeedSettingSvc = new TableColumnProcessingService(this.TraceLoggerAdapter, this.LicensedCrmServiceAdapter ?? this.CrmServiceAdapter);
+                    this.autonumberSeedSettingSvc = new TableColumnProcessingService(this.TraceLoggerAdapter, this.CrmServiceAdapter ?? this.CrmServiceAdapter);
                 }
 
                 return this.autonumberSeedSettingSvc;
+            }
+        }
+        
+        /// <summary>
+        /// Gets provides deployment functionality relating to mailboxes.
+        /// </summary>
+        protected MailboxDeploymentService MailboxSvc
+        {
+            get
+            {
+                if (this.mailboxSvc == null)
+                {
+                    this.mailboxSvc = new MailboxDeploymentService(this.TraceLoggerAdapter, this.CrmServiceAdapter);
+                }
+
+                return this.mailboxSvc;
             }
         }
 
@@ -240,13 +254,16 @@
             }
         }
 
-        private TraceLoggerAdapter TraceLoggerAdapter
+        /// <summary>
+        /// Gets a <see cref="TraceLogger"/> adapter that provides additional functionality (e.g. for Azure Pipelines).
+        /// </summary>
+        protected TraceLoggerAdapter TraceLoggerAdapter
         {
             get
             {
                 if (this.traceLoggerAdapter == null)
                 {
-                    this.traceLoggerAdapter = new TraceLoggerAdapter(this.PackageLog);
+                    this.traceLoggerAdapter = RunningOnAzureDevOps ? new AzureDevOpsTraceLoggerAdapter(this.PackageLog) : new TraceLoggerAdapter(this.PackageLog);
                 }
 
                 return this.traceLoggerAdapter;
@@ -324,17 +341,19 @@
                         this.TemplateConfig.SdkStepsToDeactivate.Where(s => s.External).Select(s => s.Name));
                 }
 
-                this.ConnectionReferenceSvc.ConnectConnectionReferences(this.ConnectionReferenceMappings);
+                this.ConnectionReferenceSvc.ConnectConnectionReferences(this.ConnectionReferenceMappings, this.LicensedUsername);
 
                 this.ProcessDeploymentService.SetStatesBySolution(
                     this.ProcessedSolutions,
-                    this.TemplateConfig.ProcessesToDeactivate.Select(p => p.Name));
+                    this.TemplateConfig.ProcessesToDeactivate.Select(p => p.Name),
+                    this.LicensedUsername);
 
                 if (this.TemplateConfig.Processes.Any(p => p.External))
                 {
                     this.ProcessDeploymentService.SetStates(
                         this.TemplateConfig.ProcessesToActivate.Where(p => p.External).Select(p => p.Name),
-                        this.TemplateConfig.ProcessesToDeactivate.Where(p => p.External).Select(p => p.Name));
+                        this.TemplateConfig.ProcessesToDeactivate.Where(p => p.External).Select(p => p.Name),
+                        this.LicensedUsername);
                 }
 
                 this.DocumentTemplateSvc.Import(
@@ -344,6 +363,12 @@
                 if (this.TemplateConfig.Tables.Any())
                 {
                     this.AutonumberSeedSettingSvc.ProcessTables(this.TemplateConfig.Tables);
+                this.MailboxSvc.UpdateApproveAndEnableMailboxes(this.MailboxMappings);
+                }
+
+                if (RunningOnAzureDevOps)
+                {
+                    this.LogTaskCompleteResult();
                 }
             });
 
@@ -400,7 +425,7 @@
         /// <returns>The setting value (if found).</returns>
         protected IDictionary<string, string> GetSettings(string prefix)
         {
-            this.PackageLog.Log($"Getting {prefix} settings", TraceEventType.Verbose);
+            this.TraceLoggerAdapter.LogDebug($"Getting {prefix} settings");
 
             var environmentVariables = Environment.GetEnvironmentVariables();
             var mappings = environmentVariables.Keys
@@ -410,7 +435,7 @@
                     k => k.Remove(0, Constants.Settings.EnvironmentVariablePrefix.Length + prefix.Length + 1).ToLower(),
                     v => environmentVariables[v].ToString());
 
-            this.PackageLog.Log($"{mappings.Count} matching settings found in environment variables", TraceEventType.Verbose);
+            this.TraceLoggerAdapter.LogDebug($"{mappings.Count} matching settings found in environment variables");
 
             if (this.RuntimeSettings == null)
             {
@@ -421,13 +446,13 @@
                 .Where(s => s.Key.StartsWith($"{prefix}:"))
                 .ToDictionary(s => s.Key.Remove(0, prefix.Length + 1), s => s.Value.ToString());
 
-            this.PackageLog.Log($"{mappings.Count} matching settings found in runtime settings", TraceEventType.Verbose);
+            this.TraceLoggerAdapter.LogDebug($"{mappings.Count} matching settings found in runtime settings");
 
             foreach (var runtimeSettingsMapping in runtimeSettingMappings)
             {
                 if (mappings.ContainsKey(runtimeSettingsMapping.Key))
                 {
-                    this.PackageLog.Log($"Overriding environment variable setting with runtime setting for {runtimeSettingsMapping.Key}.");
+                    this.TraceLoggerAdapter.LogInformation($"Overriding environment variable setting with runtime setting for {runtimeSettingsMapping.Key}.");
                 }
 
                 mappings[runtimeSettingsMapping.Key] = runtimeSettingsMapping.Value;
@@ -445,12 +470,26 @@
 
         private void LogLifecycleEventStart(string lifecycleEvent)
         {
-            this.PackageLog.Log($"{nameof(PackageTemplateBase)}.{lifecycleEvent} running...", TraceEventType.Information);
+            this.TraceLoggerAdapter.LogInformation($"{nameof(PackageTemplateBase)}.{lifecycleEvent} running...");
         }
 
         private void LogLifecycleEventEnd(string lifecycleEvent)
         {
-            this.PackageLog.Log($"{nameof(PackageTemplateBase)}.{lifecycleEvent} completed.", TraceEventType.Information);
+            this.TraceLoggerAdapter.LogInformation($"{nameof(PackageTemplateBase)}.{lifecycleEvent} completed.");
+        }
+
+        // Excluded as it would require our CI or PR validation pipelines to be partially succeeding or failing
+        [ExcludeFromCodeCoverage]
+        private void LogTaskCompleteResult()
+        {
+            if (this.TraceLoggerAdapter.Errors.Any())
+            {
+                Console.WriteLine("##vso[task.complete result=Failed;]DONE");
+            }
+            else if (this.TraceLoggerAdapter.Warnings.Any())
+            {
+                Console.WriteLine("##vso[task.complete result=SucceededWithIssues;]DONE");
+            }
         }
     }
 }

@@ -23,6 +23,9 @@ This project's aim is to build a powerful base Package Deployer template that si
     - [Import data](#Import-data)
   - [Word templates](#Word-templates)
     - [Import word templates](#Import-word-templates)
+  - [Mailboxes](#Mailboxes)
+    - [Update, approve, test and enable shared mailboxes](#Update-approve-test-and-enable-shared-mailboxes)
+- [Azure Pipelines](#Azure-pipelines)
 - [Contributing](#Contributing)
 - [Licence](#Licence)
 
@@ -81,7 +84,7 @@ All processes within the deployed solution(s) are activated by default after the
 </templateconfig>
 ```
 
-If your deployment is running as an application user then you may face [some issues](https://github.com/MicrosoftDocs/power-automate-docs/issues/216) if your solution contains flows. If you wish to continue deploying as an application user, you can pass the `LicensedUsername` and `LicensedPassword` runtime settings to the Package Deployer (or set the `PACKAGEDEPLOYER_SETTINGS_LICENSEDUSERNAME` and `PACKAGEDEPLOYER_SETTINGS_LICENSEDPASSWORD` environment variables) and these credentials will be used for flow activation.
+If your deployment is running as an application user then you may face [some issues](https://github.com/MicrosoftDocs/power-automate-docs/issues/216) if your solution contains flows. If you wish to continue deploying as an application user, you can pass the `LicensedUsername` runtime setting to the Package Deployer (or set the `PACKAGEDEPLOYER_SETTINGS_LICENSEDUSERNAME` environment variable) and this user will be impersonated for flow activation.
 
 > You can also activate or deactivate processes that are not in your package by setting the `external` attribute to `true` on a `<process>` element. Be careful when doing this - deploying your package may introduce side-effects to an environment that make it incompatible with other solutions.
 
@@ -129,7 +132,7 @@ The runtime setting takes precedence if both an environment variable and runtime
 
 To get your flow connection names, go to your environment and navigate to _Data -> Connections_ within the [Maker Portal](https://make.powerapps.com). Opening a connection will reveal the connection name in the URL, which will have a format of 'environments/environmentid/connections/apiname/_connectionname_/details'. 
 
-As above, you will need to pass licensed user credentials via runtime settings or environment variables if the Package Deployer is not running in the context of a licensed user. In addition, **the connections passed in need to be owned by the user doing the deployment**.
+As above, you will need to pass a licensed user's email via runtime settings or environment variables if the Package Deployer is not running in the context of a licensed user. In addition, **the connections passed in need to be owned by the user doing the deployment or impersonated by the deployment**.
 
 ### Data
 
@@ -187,6 +190,39 @@ When deploying auto-numbers, seed values can be defined in the template for each
 </templateconfig>
 ```
 
+### Mailboxes
+
+#### Update, approve, test and enable shared mailboxes
+
+You can update shared mailboxes with target email address, approve and test&enable by setting configurations either through environment variables (for example, those [exposed on Azure Pipelines](https://docs.microsoft.com/en-us/azure/devops/pipelines/process/variables?view=azure-devops&tabs=yaml%2Cbatch#access-variables-through-the-environment) from your variables or variable groups) or through Package Deployer [runtime settings](https://docs.microsoft.com/en-us/power-platform/admin/deploy-packages-using-package-deployer-windows-powershell#use-the-cmdlet-to-deploy-packages).
+
+Environment variables must be prefixed with `PACKAGEDEPLOYER_SETTINGS_MAILBOX_` and followed by the source email address. Similarly, runtime settings must be prefixed with `Mailbox:` and followed by the source email address. For example, if a source email address was `support-dev@fake.com`, this could be set via either of the following:
+
+**Environment variable**
+
+```powershell
+$env:PACKAGEDEPLOYER_SETTINGS_MAILBOX_SUPPORT-DEV@FAKE.COM = "support-prod@fake.com"
+```
+
+**Runtime setting**
+
+```powershell
+$runtimeSettings = @{ 
+    "Mailbox:support-dev@fake.com" = "support-prod@fake.com" 
+}
+
+Import-CrmPackage –CrmConnection $conn –PackageDirectory $packageDir –PackageName Package.dll –RuntimePackageSettings $runtimeSettings
+```
+
+The runtime setting takes precedence if both an environment variable and runtime setting are found for the same shared mailbox.
+
+
+## Azure Pipelines
+
+The template will automatically detect if your deployment is running on Azure Pipelines and will log with the appropriate [logging commands](https://docs.microsoft.com/en-us/azure/devops/pipelines/scripts/logging-commands) to ensure that warnings and errors are reported on your pipeline or release.
+
+Use the `TraceLoggerAdapter` rather than the `PackageLog` to ensure that your extensions also integrate seamlessly with Azure Pipelines.
+ 
 ## Contributing
 
 Please refer to the [Contributing](./CONTRIBUTING.md) guide.
