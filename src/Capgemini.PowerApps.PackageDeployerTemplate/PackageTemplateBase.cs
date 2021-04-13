@@ -28,6 +28,7 @@
         private DocumentTemplateDeploymentService documentTemplateSvc;
         private SdkStepDeploymentService sdkStepsSvc;
         private ConnectionReferenceDeploymentService connectionReferenceSvc;
+        private TableColumnProcessingService autonumberSeedSettingSvc;
 
         /// <summary>
         /// Gets the path to the package folder.
@@ -208,6 +209,22 @@
         }
 
         /// <summary>
+        /// Gets a service that provides functionality relating to setting autonumber seeds.
+        /// </summary>
+        protected TableColumnProcessingService AutonumberSeedSettingSvc
+        {
+            get
+            {
+                if (this.autonumberSeedSettingSvc == null)
+                {
+                    this.autonumberSeedSettingSvc = new TableColumnProcessingService(this.TraceLoggerAdapter, this.LicensedCrmServiceAdapter ?? this.CrmServiceAdapter);
+                }
+
+                return this.autonumberSeedSettingSvc;
+            }
+        }
+
+        /// <summary>
         /// Gets provides access to the templateconfig section of the ImportConfig.xml.
         /// </summary>
         protected TemplateConfig TemplateConfig
@@ -323,6 +340,11 @@
                 this.DocumentTemplateSvc.Import(
                     this.TemplateConfig.DocumentTemplates.Select(d => d.Path),
                     this.PackageFolderPath);
+
+                if (this.TemplateConfig.Tables.Any())
+                {
+                    this.AutonumberSeedSettingSvc.ProcessTables(this.TemplateConfig.Tables);
+                }
             });
 
             return true;

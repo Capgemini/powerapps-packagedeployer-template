@@ -135,6 +135,16 @@ namespace Capgemini.PowerApps.PackageDeployerTemplate.Config
         public bool ActivateDeactivateSLAs { get; set; }
 
         /// <summary>
+        /// Gets or sets a list of Tables with Columns that need configuration logic, i.e. Autonumber Seeds.
+        /// </summary>
+        /// <value>
+        /// A list of Tables and their columns to be configured in a given target environment.
+        /// </value>
+        [XmlArray("tables")]
+        [XmlArrayItem("table")]
+        public TableConfig[] Tables { get; set; }
+
+        /// <summary>
         /// Load the template config from the specified path.
         /// </summary>
         /// <param name="importConfigPath">The path of the import config file.</param>

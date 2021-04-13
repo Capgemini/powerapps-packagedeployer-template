@@ -166,6 +166,27 @@ You can import word templates by adding `<documenttemplate>` elements.
 </templateconfig>
 ```
 
+### Attribute specific functionality (Auto-number seed values)
+
+#### Set auto-number seed values
+
+When deploying auto-numbers, seed values can be defined in the template for each entity. These are set post-deployment. Setting the `<autonumberseedvalue>` element determines that the column is an auto-number.
+
+```xml
+<templateconfig>
+    <tables>
+      <table name="account">
+        <columns>
+          <column name="new_accountautonumber" autonumberseedvalue="1000"/>
+        </columns>
+      </table>
+      <table name="contact">
+        <columns>
+          <column name="new_contactautonumber" autonumberseedvalue="2000"/>
+        </columns>
+</templateconfig>
+```
+
 ## Contributing
 
 Please refer to the [Contributing](./CONTRIBUTING.md) guide.
