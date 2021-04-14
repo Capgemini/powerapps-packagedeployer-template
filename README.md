@@ -180,7 +180,7 @@ When deploying auto-numbers, seed values can be defined in the template for each
     <tables>
       <table name="account">
         <columns>
-          <column name="new_accountautonumber" autonumberseedvalue="1000"/>
+          <column name="new_accountautonumber" autonumberseedvalue="1"/>
         </columns>
       </table>
       <table name="contact">
