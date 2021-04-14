@@ -66,7 +66,7 @@
                     // Ensure the seed value has been populated. This indicates that this element is an auto-number configuration.
                     if (column.AutonumberSeedValue != null)
                     {
-                        this.logger.LogInformation("Adding auto-number seed request. Entity Name: Entity Name: " + tableConfig.Name + ". Auto-number Attribute: " + column.Name + ". Value: " + column.AutonumberSeedValue);
+                        this.logger.LogInformation("Adding auto-number seed request. Entity Name: ${tableConfig.Name}. Auto-number Attribute: ${column.Name}. Value: ${column.AutonumberSeedValue}");
                         autonumberSeedRequests.Add(new SetAutoNumberSeedRequest
                         {
                             EntityName = tableConfig.Name,
