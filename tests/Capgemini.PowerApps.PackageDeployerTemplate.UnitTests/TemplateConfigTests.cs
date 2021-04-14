@@ -3,7 +3,6 @@
     using System.Linq;
     using Capgemini.PowerApps.PackageDeployerTemplate.Config;
     using FluentAssertions;
-    using System.Linq;
     using Xunit;
 
     public class TemplateConfigTests
@@ -171,17 +170,17 @@
         public void Load_Tables_Autonumber_Columns_Populated()
         {
             var accountTable = this.config.Tables.Where(t => t.Name == "account").FirstOrDefault();
-            accountTable.Columns.Should().Contain(c => c.Name == "test_accountautonumber" && c.AutonumberSeedValue == 1000);
+            accountTable.Columns.Should().Contain(c => c.Name == "pdt_testautonumber" && c.AutonumberSeedValue == 1);
 
             var contactTable = this.config.Tables.Where(t => t.Name == "contact").FirstOrDefault();
-            contactTable.Columns.Should().Contain(c => c.Name == "test_contactautonumber" && c.AutonumberSeedValue == 2000);
+            contactTable.Columns.Should().Contain(c => c.Name == "pdt_testautonumber" && c.AutonumberSeedValue == 2000);
         }
 
         [Fact]
         public void Load_Tables_Autonumber_Columns_Should_Be_Nullable()
         {
             var contactTable = this.config.Tables.Where(t => t.Name == "contact").FirstOrDefault();
-            contactTable.Columns.Should().Contain(c => c.Name == "test_contactcolumnnameonly" && c.AutonumberSeedValue == null);
+            contactTable.Columns.Should().Contain(c => c.Name == "pdt_contactcolumnnameonly" && c.AutonumberSeedValue == null);
         }
 
         private static TemplateConfig Load(string path)

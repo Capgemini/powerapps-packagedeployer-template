@@ -33,13 +33,13 @@
     <tables>
       <table name="account">
         <columns>
-          <column name="test_accountautonumber" autonumberseedvalue="1000"/>
+          <column name="pdt_testautonumber" autonumberseedvalue="1"/>
         </columns>
       </table>
       <table name="contact">
         <columns>
-          <column name="test_contactautonumber" autonumberseedvalue="2000"/>
-          <column name="test_contactcolumnnameonly"/>
+          <column name="pdt_testautonumber" autonumberseedvalue="2000"/>  
+          <column name="pdt_contactcolumnnameonly"/>
         </columns>
       </table>
     </tables>

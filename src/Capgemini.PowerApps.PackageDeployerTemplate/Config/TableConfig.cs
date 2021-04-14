@@ -1,6 +1,6 @@
 ﻿namespace Capgemini.PowerApps.PackageDeployerTemplate.Config
 {
-    using System.Collections.Generic;
+    using System;
     using System.Xml.Serialization;
 
     /// <summary>
@@ -8,6 +8,14 @@
     /// </summary>
     public class TableConfig
     {
+        /// <summary>
+        /// Initializes a new instance of the <see cref="TableConfig"/> class.
+        /// </summary>
+        public TableConfig()
+        {
+            this.Columns = Array.Empty<ColumnConfig>();
+        }
+
         /// <summary>
         /// Gets or Sets the logical name of the table we want to configure.
         /// </summary>

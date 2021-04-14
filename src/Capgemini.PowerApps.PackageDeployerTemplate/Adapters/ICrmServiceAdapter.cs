@@ -42,6 +42,15 @@
         ExecuteMultipleResponse UpdateStateAndStatusForEntityInBatch(EntityCollection records, int statecode, int statuscode);
 
         /// <summary>
+        /// Execute multiple requests.
+        /// </summary>
+        /// <param name="requests">The requests.</param>
+        /// <param name="continueOnError">Whether to continue on error.</param>
+        /// <param name="returnResponses">Whether to return responses.</param>
+        /// <returns>The <see cref="ExecuteMultipleResponse"/>.</returns>
+        ExecuteMultipleResponse ExecuteMultiple(IEnumerable<OrganizationRequest> requests, bool continueOnError = true, bool returnResponses = true);
+
+        /// <summary>
         /// Updates the state and status for an entity.
         /// </summary>
         /// <param name="entityLogicalName">The entity logical name.</param>

@@ -21,6 +21,7 @@ namespace Capgemini.PowerApps.PackageDeployerTemplate.Config
             this.DocumentTemplates = Array.Empty<DocumentTemplateConfig>();
             this.DataImports = Array.Empty<DataImportConfig>();
             this.Slas = Array.Empty<SlaConfig>();
+            this.Tables = Array.Empty<TableConfig>();
         }
 
         /// <summary>

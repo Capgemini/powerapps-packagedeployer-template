@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<ImportExportXml version="9.2.20122.140" SolutionPackageVersion="9.2" languagecode="1033" generatedBy="CrmLive" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+<ImportExportXml version="9.2.21033.152" SolutionPackageVersion="9.2" languagecode="1033" generatedBy="CrmLive" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
   <SolutionManifest>
     <UniqueName>pdt_PackageDeployerTemplate_MockSolution</UniqueName>
     <LocalizedNames>
@@ -80,6 +80,7 @@
       </Addresses>
     </Publisher>
     <RootComponents>
+      <RootComponent type="1" schemaName="account" behavior="2" />
       <RootComponent type="29" id="{1bd3d7de-995f-4002-b70f-74a183b4f9ba}" behavior="0" />
       <RootComponent type="29" id="{210eafff-fdda-45a3-8126-cd9cdb21d94e}" behavior="0" />
       <RootComponent type="29" id="{42171b7a-015c-eb11-a812-00224800ed7c}" behavior="0" />

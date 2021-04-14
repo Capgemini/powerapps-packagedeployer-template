@@ -32,6 +32,24 @@
         /// <inheritdoc/>
         public Guid? CallerAADObjectId { get => this.crmSvc.CallerAADObjectId; set => this.crmSvc.CallerAADObjectId = value; }
 
+
+        /// <inheritdoc/>
+        public ExecuteMultipleResponse ExecuteMultiple(IEnumerable<OrganizationRequest> requests, bool continueOnError = true, bool returnResponses = true)
+        {
+            var executeMultipleRequest = new ExecuteMultipleRequest
+            {
+                Requests = new OrganizationRequestCollection(),
+                Settings = new ExecuteMultipleSettings
+                {
+                    ContinueOnError = continueOnError,
+                    ReturnResponses = returnResponses,
+                },
+            };
+            executeMultipleRequest.Requests.AddRange(requests);
+
+            return (ExecuteMultipleResponse)this.crmSvc.Execute(executeMultipleRequest);
+        }
+
         /// <inheritdoc/>
         public IEnumerable<Guid> RetrieveSolutionComponentObjectIds(string solutionName, int componentType)
         {

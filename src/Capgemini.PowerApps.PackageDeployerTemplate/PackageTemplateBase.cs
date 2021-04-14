@@ -360,11 +360,12 @@
                     this.TemplateConfig.DocumentTemplates.Select(d => d.Path),
                     this.PackageFolderPath);
 
-                if (this.TemplateConfig.Tables.Any())
+                if (this.TemplateConfig.Tables != null && this.TemplateConfig.Tables.Any())
                 {
                     this.AutonumberSeedSettingSvc.ProcessTables(this.TemplateConfig.Tables);
-                this.MailboxSvc.UpdateApproveAndEnableMailboxes(this.MailboxMappings);
                 }
+
+                this.MailboxSvc.UpdateApproveAndEnableMailboxes(this.MailboxMappings);
 
                 if (RunningOnAzureDevOps)
                 {
