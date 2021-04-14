@@ -29,6 +29,5 @@
         /// </summary>
         [XmlIgnore]
         public int? AutonumberSeedValue { get; set; }
-
     }
 }

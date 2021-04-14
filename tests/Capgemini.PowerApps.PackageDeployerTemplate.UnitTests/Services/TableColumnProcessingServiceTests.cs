@@ -1,5 +1,6 @@
 ﻿namespace Capgemini.PowerApps.PackageDeployerTemplate.UnitTests.Services
 {
+    using System;
     using System.Collections.Generic;
     using Capgemini.PowerApps.PackageDeployerTemplate.Adapters;
     using Capgemini.PowerApps.PackageDeployerTemplate.Config;
@@ -29,9 +30,9 @@
         public void Execute_Multiple_Not_Called_When_There_Are_No_Requests()
         {
             List<TableConfig> tableConfigs = new List<TableConfig>();
-            ColumnConfig[] tableColumns = new ColumnConfig[0];
+            ColumnConfig[] tableColumns = Array.Empty<ColumnConfig>();
 
-            tableConfigs.Add(this.GetTableConfig("test_table", tableColumns));
+            tableConfigs.Add(GetTableConfig("test_table", tableColumns));
 
             this.tableColumnProcessingService.ProcessTables(tableConfigs);
             this.loggerMock.VerifyLog(x => x.LogInformation("No requests for table columns were added."));
@@ -59,11 +60,11 @@
             List<TableConfig> tableConfigs = new List<TableConfig>();
             ColumnConfig[] tableColumns = new ColumnConfig[]
             {
-                this.GetAutonumberColumnConfig("test_autonumberone", 1000),
-                this.GetAutonumberColumnConfig("test_autonumbertwo", 2000),
+                GetAutonumberColumnConfig("test_autonumberone", 1000),
+                GetAutonumberColumnConfig("test_autonumbertwo", 2000),
             };
 
-            tableConfigs.Add(this.GetTableConfig("test_table", tableColumns));
+            tableConfigs.Add(GetTableConfig("test_table", tableColumns));
 
             this.tableColumnProcessingService.ProcessTables(tableConfigs);
             this.loggerMock.VerifyLog(x => x.LogInformation("Executing requests for table columns."));
@@ -73,15 +74,14 @@
         [Fact]
         public void Log_Autonumber_Seed_Request_When_Generated()
         {
-
             List<TableConfig> tableConfigs = new List<TableConfig>();
             ColumnConfig[] tableColumns = new ColumnConfig[]
             {
-                this.GetAutonumberColumnConfig("test_autonumberone", 1000),
-                this.GetAutonumberColumnConfig("test_autonumbertwo", 2000),
+                GetAutonumberColumnConfig("test_autonumberone", 1000),
+                GetAutonumberColumnConfig("test_autonumbertwo", 2000),
             };
 
-            tableConfigs.Add(this.GetTableConfig("test_table", tableColumns));
+            tableConfigs.Add(GetTableConfig("test_table", tableColumns));
 
             this.tableColumnProcessingService.ProcessTables(tableConfigs);
             this.loggerMock.VerifyLog(x => x.LogInformation("Adding auto-number seed request. Entity Name: Entity Name: test_table. Auto-number Attribute: test_autonumberone. Value: 1000"));
@@ -95,16 +95,16 @@
             List<TableConfig> tableConfigs = new List<TableConfig>();
             ColumnConfig[] tableColumns = new ColumnConfig[]
             {
-                this.GetAutonumberColumnConfig("test_name", null),
+                GetAutonumberColumnConfig("test_name", null),
             };
 
-            tableConfigs.Add(this.GetTableConfig("test_table", tableColumns));
+            tableConfigs.Add(GetTableConfig("test_table", tableColumns));
 
             this.tableColumnProcessingService.ProcessTables(tableConfigs);
             this.loggerMock.VerifyLog(x => x.LogInformation("No requests for Auto-number seeds were added."));
         }
 
-        private TableConfig GetTableConfig(string tableName, ColumnConfig[] columnConfigs)
+        private static TableConfig GetTableConfig(string tableName, ColumnConfig[] columnConfigs)
         {
             return new TableConfig()
             {
@@ -113,7 +113,7 @@
             };
         }
 
-        private ColumnConfig GetAutonumberColumnConfig(string name, int? value)
+        private static ColumnConfig GetAutonumberColumnConfig(string name, int? value)
         {
             return new ColumnConfig()
             {
