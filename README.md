@@ -23,6 +23,8 @@ This project's aim is to build a powerful base Package Deployer template that si
     - [Import data](#Import-data)
   - [Word templates](#Word-templates)
     - [Import word templates](#Import-word-templates)
+  - [Attribute specific functionality](#Attribute-specific-functionality)
+    - [Set auto-number seed values](#Set-auto-number-seed-values)
   - [Mailboxes](#Mailboxes)
     - [Update, approve, test and enable shared mailboxes](#Update-approve-test-and-enable-shared-mailboxes)
 - [Azure Pipelines](#Azure-pipelines)
@@ -169,7 +171,7 @@ You can import word templates by adding `<documenttemplate>` elements.
 </templateconfig>
 ```
 
-### Attribute specific functionality (Auto-number seed values)
+### Attribute specific functionality
 
 #### Set auto-number seed values
 
