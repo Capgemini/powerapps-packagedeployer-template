@@ -115,10 +115,12 @@
 
         private static ColumnConfig GetAutonumberColumnConfig(string name, int? value)
         {
+            string stringValue = value.ToString();
             return new ColumnConfig()
             {
                 Name = name,
                 AutonumberSeedValue = value,
+                AutonumberSeedAsText = stringValue,
             };
         }
     }
