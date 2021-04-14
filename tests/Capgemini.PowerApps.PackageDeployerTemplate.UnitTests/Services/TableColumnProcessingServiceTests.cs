@@ -84,8 +84,8 @@
             tableConfigs.Add(GetTableConfig("test_table", tableColumns));
 
             this.tableColumnProcessingService.ProcessTables(tableConfigs);
-            this.loggerMock.VerifyLog(x => x.LogInformation("Adding auto-number seed request. Entity Name: Entity Name: test_table. Auto-number Attribute: test_autonumberone. Value: 1000"));
-            this.loggerMock.VerifyLog(x => x.LogInformation("Adding auto-number seed request. Entity Name: Entity Name: test_table. Auto-number Attribute: test_autonumbertwo. Value: 2000"));
+            this.loggerMock.VerifyLog(x => x.LogInformation("Adding auto-number seed request. Entity Name: test_table. Auto-number Attribute: test_autonumberone. Value: 1000"));
+            this.loggerMock.VerifyLog(x => x.LogInformation("Adding auto-number seed request. Entity Name: test_table. Auto-number Attribute: test_autonumbertwo. Value: 2000"));
             this.crmServiceAdapterMock.Verify();
         }
 
