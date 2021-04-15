@@ -114,6 +114,48 @@
         }
 
         [Fact]
+        public void ExecuteMultiple_Errors_LogErrors()
+        {
+            this.crmServiceAdapterMock
+            .Setup(x => x.ExecuteMultiple(It.IsAny<List<OrganizationRequest>>(), It.IsAny<bool>(), It.IsAny<bool>()))
+            .Returns(() =>
+            {
+                var responseItemCollection = new ExecuteMultipleResponseItemCollection
+                    {
+                        new ExecuteMultipleResponseItem
+                        {
+                            Fault = new OrganizationServiceFault
+                            {
+                                Message = "Test fault response",
+                            },
+                        },
+                        new ExecuteMultipleResponseItem { },
+                    };
+
+                var response = new ExecuteMultipleResponse();
+                response.Results.Add("Responses", responseItemCollection);
+                response.Results.Add("IsFaulted", true);
+                return response;
+            });
+
+            List<TableConfig> tableConfigs = new List<TableConfig>();
+            ColumnConfig[] tableColumns = new ColumnConfig[]
+            {
+                GetAutonumberColumnConfig("test_autonumberone", 1000),
+                GetAutonumberColumnConfig("test_autonumbertwo", 2000),
+            };
+
+            tableConfigs.Add(GetTableConfig("test_table", tableColumns));
+
+            // Act
+            this.tableColumnProcessingService.ProcessTables(tableConfigs);
+
+            // Assert
+            this.loggerMock.VerifyLog(x => x.LogError("Error processing requests for table columns"));
+            this.loggerMock.VerifyLog(x => x.LogError("Test fault response"));
+        }
+
+        [Fact]
         public void Log_AutonumberSeedAlreadySet_AutoNumberSeedRequestNotAdded()
         {
             // Arrage
