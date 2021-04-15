@@ -460,5 +460,54 @@
                 public const string AzureActiveDirectoryObjectId = "azureactivedirectoryobjectid";
             }
         }
+
+        /// <summary>
+        /// Constants relating to the environmentvariabledefiniton entity.
+        /// </summary>
+        public static class EnvironmentVariableDefiniton
+        {
+            /// <summary>
+            /// The logical name.
+            /// </summary>
+            public const string LogicalName = "environmentvariabledefiniton";
+
+            /// <summary>
+            /// Field logical names.
+            /// </summary>
+            public static class Fields
+            {
+                /// <summary>
+                /// The schema name.
+                /// </summary>
+                public const string SchemaName = "schemaname";
+            }
+        }
+
+        /// <summary>
+        /// Constants relating to the environmentvariablevalue entity.
+        /// </summary>
+        public static class EnvironmentVariableValue
+        {
+            /// <summary>
+            /// The logical name.
+            /// </summary>
+            public const string LogicalName = "environmentvariablevalue";
+
+            /// <summary>
+            /// Field logical names.
+            /// </summary>
+            public static class Fields
+            {
+                /// <summary>
+                /// The variable definition id.
+                /// </summary>
+                public const string EnvironmentVariableDefinitonId = "environmentvariabledefinitonid";
+
+                /// <summary>
+                /// The variable value.
+                /// </summary>
+                public const string Value = "value";
+            }
+        }
     }
 }

@@ -1,12 +1,12 @@
 namespace Capgemini.PowerApps.PackageDeployerTemplate.Services
 {
     using System;
-    using System.Linq;
     using System.Collections.Generic;
+    using System.Linq;
+    using Capgemini.PowerApps.PackageDeployerTemplate.Adapters;
     using Microsoft.Extensions.Logging;
     using Microsoft.Xrm.Sdk;
     using Microsoft.Xrm.Sdk.Query;
-    using Capgemini.PowerApps.PackageDeployerTemplate.Adapters;
 
     /*
     *    Title: Development Hub
@@ -25,7 +25,7 @@ namespace Capgemini.PowerApps.PackageDeployerTemplate.Services
         private readonly ICrmServiceAdapter crmSvc;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="DocumentTemplateDeploymentService"/> class.
+        /// Initializes a new instance of the <see cref="EnvironmentVariableDeploymentService"/> class.
         /// </summary>
         /// <param name="logger">The <see cref="ILogger"/>.</param>
         /// <param name="crmSvc">The <see cref="ICrmServiceAdapter"/>.</param>
@@ -41,9 +41,15 @@ namespace Capgemini.PowerApps.PackageDeployerTemplate.Services
         /// <param name="environmentVariables">A dictionary of keys and values to set.</param>
         public void SetEnvironmentVariables(IDictionary<string, string> environmentVariables)
         {
+            if (environmentVariables is null || !environmentVariables.Any())
+            {
+                this.logger.LogInformation("No environment variables have been configured.");
+                return;
+            }
+
             foreach (KeyValuePair<string, string> entry in environmentVariables)
             {
-                SetEnvironmentVariable(entry.Key, entry.Value);
+                this.SetEnvironmentVariable(entry.Key, entry.Value);
             }
         }
 
@@ -59,7 +65,8 @@ namespace Capgemini.PowerApps.PackageDeployerTemplate.Services
             var definition = this.GetDefinitionByKey(key, new ColumnSet(false));
             if (definition == null)
             {
-                throw new ArgumentException($"Environment variable {key} not found on target instance.");
+                this.logger.LogError($"Environment variable {key} not found on target instance.");
+                return;
             }
 
             var definitionReference = definition.ToEntityReference();
@@ -70,10 +77,10 @@ namespace Capgemini.PowerApps.PackageDeployerTemplate.Services
 
         private void UpsertEnvironmentVariableValue(string value, EntityReference definitionReference)
         {
-            var existingValue = this.GetValueByDefinitionId(definitionReference, new ColumnSet("value"));
+            var existingValue = this.GetValueByDefinitionId(definitionReference, new ColumnSet(Constants.EnvironmentVariableValue.Fields.Value));
             if (existingValue != null)
             {
-                existingValue["value"] = value;
+                existingValue[Constants.EnvironmentVariableValue.Fields.Value] = value;
                 this.crmSvc.Update(existingValue);
             }
             else
@@ -82,42 +89,36 @@ namespace Capgemini.PowerApps.PackageDeployerTemplate.Services
             }
         }
 
-        private Entity GetValueByDefinitionId(EntityReference definitionReference, ColumnSet columnSet)
-        {
-            var definitionQuery = new QueryExpression("environmentvariablevalue")
-            {
-                ColumnSet = columnSet,
-                Criteria = new FilterExpression(),
-            };
-            definitionQuery.Criteria.AddCondition("environmentvariabledefinitionid", ConditionOperator.Equal, definitionReference.Id);
-
-            return this.crmSvc.RetrieveMultiple(definitionQuery).Entities.FirstOrDefault();
-        }
-
         private void SetValue(string value, EntityReference definition)
         {
-            var val = new Entity("environmentvariablevalue")
+            var val = new Entity(Constants.EnvironmentVariableValue.LogicalName)
             {
                 Attributes = new AttributeCollection
                             {
-                                { "value", value },
-                                { "environmentvariabledefinitionid", definition },
+                                { Constants.EnvironmentVariableValue.Fields.Value, value },
+                                { Constants.EnvironmentVariableValue.Fields.EnvironmentVariableDefinitonId, definition },
                             },
             };
 
             this.crmSvc.Create(val);
         }
 
+        private Entity GetValueByDefinitionId(EntityReference definitionReference, ColumnSet columnSet)
+        {
+            return this.crmSvc.RetrieveMultipleByAttribute(
+                Constants.EnvironmentVariableValue.LogicalName,
+                Constants.EnvironmentVariableValue.Fields.EnvironmentVariableDefinitonId,
+                new object[] { definitionReference.Id },
+                columnSet).Entities.FirstOrDefault();
+        }
+
         private Entity GetDefinitionByKey(string key, ColumnSet columnSet)
         {
-            var definitionQuery = new QueryExpression("environmentvariabledefinition")
-            {
-                ColumnSet = columnSet,
-                Criteria = new FilterExpression(),
-            };
-            definitionQuery.Criteria.AddCondition("schemaname", ConditionOperator.Equal, key);
-
-            return this.crmSvc.RetrieveMultiple(definitionQuery).Entities.FirstOrDefault();
+            return this.crmSvc.RetrieveMultipleByAttribute(
+                Constants.EnvironmentVariableDefiniton.LogicalName,
+                Constants.EnvironmentVariableDefiniton.Fields.SchemaName,
+                new string[] { key },
+                columnSet).Entities.FirstOrDefault();
         }
     }
 }
