@@ -69,7 +69,7 @@ namespace Capgemini.PowerApps.PackageDeployerTemplate.IntegrationTests
             GetRequiredEnvironmentVariable("CAPGEMINI_PACKAGE_DEPLOYER_TESTS_PASSWORD", "No environment variable configured to set deployment password.");
 
         protected string GetTestEnvironmentVariable() =>
-            GetRequiredEnvironmentVariable("PACKAGEDEPLOYER_SETTINGS_ENVVAR_PDT_TESTVARIABLE", "No environment variable configured to set test environment variable connection.");
+            GetRequiredEnvironmentVariable("PACKAGEDEPLOYER_SETTINGS_ENVVAR_PDT_TESTVARIABLE", "No environment variable configured to set power apps test environment variable.");
 
         private static string GetRequiredEnvironmentVariable(string name, string exceptionMessage)
         {
