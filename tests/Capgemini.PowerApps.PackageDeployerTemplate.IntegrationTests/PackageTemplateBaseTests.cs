@@ -139,7 +139,7 @@
         }
 
         [Theory]
-        [InlineData("account", "pdt_testautonumber", 1)]
+        [InlineData("account", "pdt_testautonumber", 10000)]
         public void PackageTemplateBase_TableColumnProcessing_AutonumberSeedIsSet(string entityName, string attributeName, int expectedValue)
         {
             var req = new GetAutoNumberSeedRequest
