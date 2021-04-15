@@ -1,14 +1,13 @@
 ﻿namespace Capgemini.PowerApps.PackageDeployerTemplate.Services
 {
+    using Capgemini.PowerApps.PackageDeployerTemplate.Adapters;
+    using Microsoft.Extensions.Logging;
+    using Microsoft.Xrm.Sdk;
+    using Microsoft.Xrm.Sdk.Query;
     using System;
     using System.Collections.Generic;
     using System.Linq;
     using System.Threading;
-    using Capgemini.PowerApps.PackageDeployerTemplate.Adapters;
-    using Capgemini.PowerApps.PackageDeployerTemplate.Config;
-    using Microsoft.Extensions.Logging;
-    using Microsoft.Xrm.Sdk;
-    using Microsoft.Xrm.Sdk.Query;
 
     /// <summary>
     /// Deployment functionality related to SLAs.

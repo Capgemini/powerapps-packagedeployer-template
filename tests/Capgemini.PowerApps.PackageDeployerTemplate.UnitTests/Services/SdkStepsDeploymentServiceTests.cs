@@ -1,8 +1,5 @@
 ﻿namespace Capgemini.PowerApps.PackageDeployerTemplate.UnitTests.Services
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Linq;
     using Capgemini.PowerApps.PackageDeployerTemplate.Adapters;
     using Capgemini.PowerApps.PackageDeployerTemplate.Services;
     using FluentAssertions;
@@ -10,6 +7,9 @@
     using Microsoft.Xrm.Sdk;
     using Microsoft.Xrm.Sdk.Query;
     using Moq;
+    using System;
+    using System.Collections.Generic;
+    using System.Linq;
     using Xunit;
 
     public class SdkStepsDeploymentServiceTests

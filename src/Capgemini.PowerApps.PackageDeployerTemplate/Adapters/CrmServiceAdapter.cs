@@ -1,14 +1,14 @@
 ﻿namespace Capgemini.PowerApps.PackageDeployerTemplate.Adapters
 {
-    using System;
-    using System.Collections.Generic;
-    using System.IO;
-    using System.Linq;
     using Microsoft.Extensions.Logging;
     using Microsoft.Xrm.Sdk;
     using Microsoft.Xrm.Sdk.Messages;
     using Microsoft.Xrm.Sdk.Query;
     using Microsoft.Xrm.Tooling.Connector;
+    using System;
+    using System.Collections.Generic;
+    using System.IO;
+    using System.Linq;
 
     /// <summary>
     /// An extended <see cref="IOrganizationService"/> built on <see cref="CrmServiceClient"/>.

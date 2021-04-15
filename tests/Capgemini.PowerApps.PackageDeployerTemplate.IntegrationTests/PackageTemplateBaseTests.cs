@@ -1,11 +1,11 @@
 ﻿namespace Capgemini.PowerApps.PackageDeployerTemplate.IntegrationTests
 {
-    using System;
-    using System.Linq;
     using FluentAssertions;
     using Microsoft.Crm.Sdk.Messages;
     using Microsoft.Xrm.Sdk;
     using Microsoft.Xrm.Sdk.Query;
+    using System;
+    using System.Linq;
     using Xunit;
 
     public class PackageTemplateBaseTests : IClassFixture<PackageDeployerFixture>

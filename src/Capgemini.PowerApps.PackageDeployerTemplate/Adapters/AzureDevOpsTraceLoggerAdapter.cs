@@ -1,9 +1,9 @@
 ﻿namespace Capgemini.PowerApps.PackageDeployerTemplate.Adapters
 {
-    using System;
-    using System.Diagnostics.CodeAnalysis;
     using Microsoft.Extensions.Logging;
     using Microsoft.Xrm.Tooling.PackageDeployment.CrmPackageExtentionBase;
+    using System;
+    using System.Diagnostics.CodeAnalysis;
 
     /// <summary>
     /// An adapter class from <see cref="TraceLogger"/> to <see cref="ILogger"/> for use on Azure DevOps.

@@ -1,8 +1,8 @@
 ﻿namespace Capgemini.PowerApps.PackageDeployerTemplate.UnitTests
 {
-    using System.IO;
     using FluentAssertions;
     using NPOI.XWPF.UserModel;
+    using System.IO;
     using Xunit;
 
     public class ZipFileUtilitiesTests

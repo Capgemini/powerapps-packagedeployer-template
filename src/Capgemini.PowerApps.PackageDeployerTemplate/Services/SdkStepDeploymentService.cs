@@ -1,12 +1,12 @@
 ﻿namespace Capgemini.PowerApps.PackageDeployerTemplate.Services
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Linq;
     using Capgemini.PowerApps.PackageDeployerTemplate.Adapters;
     using Microsoft.Extensions.Logging;
     using Microsoft.Xrm.Sdk;
     using Microsoft.Xrm.Sdk.Query;
+    using System;
+    using System.Collections.Generic;
+    using System.Linq;
 
     /// <summary>
     /// Deployment functionality related to SDK steps.

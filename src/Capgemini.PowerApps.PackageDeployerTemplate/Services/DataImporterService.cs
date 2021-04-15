@@ -1,10 +1,5 @@
 ﻿namespace Capgemini.PowerApps.PackageDeployerTemplate.Services
 {
-    using System;
-    using System.Collections.Generic;
-    using System.IO;
-    using System.Linq;
-    using System.Threading;
     using Capgemini.DataMigration.Resiliency.Polly;
     using Capgemini.PowerApps.PackageDeployerTemplate.Adapters;
     using Capgemini.PowerApps.PackageDeployerTemplate.Config;
@@ -13,6 +8,11 @@
     using Capgemini.Xrm.DataMigration.Repositories;
     using Microsoft.Extensions.Logging;
     using Microsoft.Xrm.Sdk;
+    using System;
+    using System.Collections.Generic;
+    using System.IO;
+    using System.Linq;
+    using System.Threading;
 
     /// <summary>
     /// Functionality related to importing data.
