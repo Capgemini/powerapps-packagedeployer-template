@@ -1,11 +1,11 @@
 ﻿namespace Capgemini.PowerApps.PackageDeployerTemplate.Services
 {
-    using Capgemini.PowerApps.PackageDeployerTemplate.Adapters;
-    using Capgemini.PowerApps.PackageDeployerTemplate.Extensions;
-    using Microsoft.Extensions.Logging;
     using System;
     using System.Collections.Generic;
     using System.Linq;
+    using Capgemini.PowerApps.PackageDeployerTemplate.Adapters;
+    using Capgemini.PowerApps.PackageDeployerTemplate.Extensions;
+    using Microsoft.Extensions.Logging;
 
     /// <summary>
     /// Deployment functionality related to SLAs.

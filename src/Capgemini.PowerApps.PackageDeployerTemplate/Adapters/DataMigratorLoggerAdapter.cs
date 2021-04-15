@@ -1,7 +1,7 @@
 ﻿namespace Capgemini.PowerApps.PackageDeployerTemplate.Adapters
 {
-    using Microsoft.Extensions.Logging;
     using System;
+    using Microsoft.Extensions.Logging;
 
     /// <summary>
     /// An adapter from <see cref="DataMigration.Core.ILogger"/> to <see cref="ILogger"/>.

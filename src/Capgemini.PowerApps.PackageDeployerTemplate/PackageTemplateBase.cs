@@ -1,17 +1,17 @@
 ﻿namespace Capgemini.PowerApps.PackageDeployerTemplate
 {
-    using Capgemini.PowerApps.PackageDeployerTemplate.Adapters;
-    using Capgemini.PowerApps.PackageDeployerTemplate.Config;
-    using Capgemini.PowerApps.PackageDeployerTemplate.Services;
-    using Microsoft.Extensions.Logging;
-    using Microsoft.Xrm.Tooling.Connector;
-    using Microsoft.Xrm.Tooling.PackageDeployment.CrmPackageExtentionBase;
     using System;
     using System.Collections.Generic;
     using System.Diagnostics.CodeAnalysis;
     using System.Globalization;
     using System.IO;
     using System.Linq;
+    using Capgemini.PowerApps.PackageDeployerTemplate.Adapters;
+    using Capgemini.PowerApps.PackageDeployerTemplate.Config;
+    using Capgemini.PowerApps.PackageDeployerTemplate.Services;
+    using Microsoft.Extensions.Logging;
+    using Microsoft.Xrm.Tooling.Connector;
+    using Microsoft.Xrm.Tooling.PackageDeployment.CrmPackageExtentionBase;
 
     /// <summary>
     /// A base Package Deployer template class that provides additional configurable deployment functionality.

@@ -1,11 +1,11 @@
 namespace Capgemini.PowerApps.PackageDeployerTemplate.IntegrationTests
 {
-    using Microsoft.Xrm.Sdk.Query;
-    using Microsoft.Xrm.Tooling.Connector;
     using System;
     using System.Diagnostics;
     using System.Linq;
     using System.Net;
+    using Microsoft.Xrm.Sdk.Query;
+    using Microsoft.Xrm.Tooling.Connector;
 
     public class PackageDeployerFixture : IDisposable
     {

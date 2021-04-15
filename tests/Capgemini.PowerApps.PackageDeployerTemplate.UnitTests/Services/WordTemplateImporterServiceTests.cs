@@ -1,11 +1,11 @@
 ﻿namespace Capgemini.PowerApps.PackageDeployerTemplate.UnitTests.Services
 {
+    using System;
+    using System.Linq;
     using Capgemini.PowerApps.PackageDeployerTemplate.Adapters;
     using Capgemini.PowerApps.PackageDeployerTemplate.Services;
     using Microsoft.Extensions.Logging;
     using Moq;
-    using System;
-    using System.Linq;
     using Xunit;
 
     public class WordTemplateImporterServiceTests

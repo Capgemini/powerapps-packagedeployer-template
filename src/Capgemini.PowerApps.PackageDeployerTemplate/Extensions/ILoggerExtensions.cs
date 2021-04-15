@@ -1,8 +1,8 @@
 ﻿namespace Capgemini.PowerApps.PackageDeployerTemplate.Extensions
 {
+    using System.Linq;
     using Microsoft.Extensions.Logging;
     using Microsoft.Xrm.Sdk.Messages;
-    using System.Linq;
 
     /// <summary>
     /// Extensions to <see cref="ILogger"/>.

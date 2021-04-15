@@ -1,10 +1,10 @@
 ﻿namespace Capgemini.PowerApps.PackageDeployerTemplate.Adapters
 {
+    using System;
+    using System.Collections.Generic;
     using Microsoft.Xrm.Sdk;
     using Microsoft.Xrm.Sdk.Messages;
     using Microsoft.Xrm.Sdk.Query;
-    using System;
-    using System.Collections.Generic;
 
     /// <summary>
     /// An en extended <see cref="IOrganizationService"/>.

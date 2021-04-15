@@ -1,10 +1,10 @@
 ﻿namespace Capgemini.PowerApps.PackageDeployerTemplate
 {
-    using DocumentFormat.OpenXml.Packaging;
-    using Microsoft.Xrm.Tooling.PackageDeployment.CrmPackageExtentionBase;
     using System.IO;
     using System.Text;
     using System.Text.RegularExpressions;
+    using DocumentFormat.OpenXml.Packaging;
+    using Microsoft.Xrm.Tooling.PackageDeployment.CrmPackageExtentionBase;
 
     /// <summary>
     /// Utilities relating to word templates.
