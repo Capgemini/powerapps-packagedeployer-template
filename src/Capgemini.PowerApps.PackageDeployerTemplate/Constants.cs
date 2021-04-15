@@ -16,6 +16,11 @@
             public const string ConnectionReferencePrefix = "ConnRef";
 
             /// <summary>
+            /// The prefix for all Power Apps environment variables.
+            /// </summary>
+            public const string PowerAppsEnvironmentVariablePrefix = "EnvVar";
+
+            /// <summary>
             /// The prefix for all environment variables.
             /// </summary>
             public const string EnvironmentVariablePrefix = "PACKAGEDEPLOYER_SETTINGS_";
@@ -29,11 +34,6 @@
             /// The prefix for all mailbox settings.
             /// </summary>
             public const string MailboxPrefix = "Mailbox";
-
-            /// <summary>
-            /// The prefix for all Power Apps environment variables.
-            /// </summary>
-            public const string PowerAppsEnvironmentVariablePrefix = "EnvironmentVariable";
         }
 
         /// <summary>
@@ -469,7 +469,7 @@
             /// <summary>
             /// The logical name.
             /// </summary>
-            public const string LogicalName = "environmentvariabledefiniton";
+            public const string LogicalName = "environmentvariabledefinition";
 
             /// <summary>
             /// Field logical names.
@@ -501,7 +501,7 @@
                 /// <summary>
                 /// The variable definition id.
                 /// </summary>
-                public const string EnvironmentVariableDefinitonId = "environmentvariabledefinitonid";
+                public const string EnvironmentVariableDefinitonId = "environmentvariabledefinitionid";
 
                 /// <summary>
                 /// The variable value.

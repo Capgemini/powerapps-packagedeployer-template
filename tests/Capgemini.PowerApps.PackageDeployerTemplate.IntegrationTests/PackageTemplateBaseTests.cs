@@ -16,7 +16,7 @@
         {
             this.fixture = fixture;
         }
-
+        
         [Fact]
         public void PackageTemplateBase_WordTemplateConfigured_WordTemplateIsImported()
         {
@@ -123,6 +123,24 @@
             var connectionReference = this.fixture.ServiceClient.RetrieveMultiple(connectionReferenceQuery).Entities.First();
 
             connectionReference.GetAttributeValue<string>(Constants.ConnectionReference.Fields.ConnectionId).Should().Be(Environment.GetEnvironmentVariable("PACKAGEDEPLOYER_SETTINGS_CONNREF_PDT_SHAREDAPPROVALS_D7DCB"));
+        }
+
+        [Fact]
+        public void PackageTemplateBase_EnvironmentVariablePassed_EnvironmentVariableIsSet()
+        {
+            var variableDefinitionQuery = new QueryByAttribute(Constants.EnvironmentVariableDefiniton.LogicalName);
+            variableDefinitionQuery.AddAttributeValue(Constants.EnvironmentVariableDefiniton.Fields.SchemaName, "pdt_testvariable");
+            variableDefinitionQuery.ColumnSet = new ColumnSet(false);
+
+            var variableDefinition = this.fixture.ServiceClient.RetrieveMultiple(variableDefinitionQuery).Entities.First();
+
+            var variableValueQuery = new QueryByAttribute(Constants.EnvironmentVariableValue.LogicalName);
+            variableValueQuery.AddAttributeValue(Constants.EnvironmentVariableValue.Fields.EnvironmentVariableDefinitonId, variableDefinition.Id);
+            variableValueQuery.ColumnSet = new ColumnSet(Constants.EnvironmentVariableValue.Fields.Value);
+
+            var variableValue = this.fixture.ServiceClient.RetrieveMultiple(variableValueQuery).Entities.First();
+
+            variableValue.GetAttributeValue<string>(Constants.EnvironmentVariableValue.Fields.Value).Should().Be(Environment.GetEnvironmentVariable("PACKAGEDEPLOYER_SETTINGS_ENVVAR_PDT_TESTVARIABLE"));
         }
 
         [Theory]

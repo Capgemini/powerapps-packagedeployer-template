@@ -1,4 +1,4 @@
-﻿namespace Capgemini.PowerApps.PackageDeployerTemplate.IntegrationTests
+namespace Capgemini.PowerApps.PackageDeployerTemplate.IntegrationTests
 {
     using Microsoft.Xrm.Sdk.Query;
     using Microsoft.Xrm.Tooling.Connector;
@@ -11,8 +11,9 @@
     {
         public PackageDeployerFixture()
         {
-            // Check approvals connection is set.
+            // Check values are set.
             _ = this.GetApprovalsConnection();
+            _ = this.GetTestEnvironmentVariable();
 
             var process = new Process();
             var startInfo = new ProcessStartInfo
@@ -66,6 +67,9 @@
 
         protected string GetPassword() =>
             GetRequiredEnvironmentVariable("CAPGEMINI_PACKAGE_DEPLOYER_TESTS_PASSWORD", "No environment variable configured to set deployment password.");
+
+        protected string GetTestEnvironmentVariable() =>
+            GetRequiredEnvironmentVariable("PACKAGEDEPLOYER_SETTINGS_ENVVAR_PDT_TESTVARIABLE", "No environment variable configured to set test environment variable connection.");
 
         private static string GetRequiredEnvironmentVariable(string name, string exceptionMessage)
         {
