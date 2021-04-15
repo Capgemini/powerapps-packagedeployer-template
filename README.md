@@ -23,6 +23,8 @@ This project's aim is to build a powerful base Package Deployer template that si
     - [Import data](#Import-data)
   - [Word templates](#Word-templates)
     - [Import word templates](#Import-word-templates)
+  - [Attribute specific functionality](#Attribute-specific-functionality)
+    - [Set auto-number seed values](#Set-auto-number-seed-values)
   - [Mailboxes](#Mailboxes)
     - [Update, approve, test and enable shared mailboxes](#Update-approve-test-and-enable-shared-mailboxes)
 - [Azure Pipelines](#Azure-pipelines)
@@ -168,6 +170,34 @@ You can import word templates by adding `<documenttemplate>` elements.
     </documenttemplates>
 </templateconfig>
 ```
+
+### Attribute specific functionality
+
+#### Set auto-number seed values
+
+When deploying auto-numbers, seed values can be defined in the template for each entity. These are set post-deployment. Setting the `<autonumberseedvalue>` element determines that the column is an auto-number.
+
+```xml
+<templateconfig>
+    <tables>
+      <table name="account">
+        <columns>
+          <column name="new_accountautonumber" autonumberseedvalue="1"/>
+        </columns>
+      </table>
+      <table name="contact">
+        <columns>
+          <column name="new_contactautonumber" autonumberseedvalue="2000"/>
+        </columns>
+      </table>
+    </tables>
+</templateconfig>
+```
+**Important Note**: When you set a seed value, it will reset the next number in the sequence to the seed value. Unless the autonumber column has an alternate key, it will not be enforced as unique. This means you could accidentally reset the count and end up with duplicate auto-number values.
+
+You should set the seed once in the config file and avoid changing it. If you need to change the seed, ensure that it is a higher value than the current value on all target environments.
+
+More information can be read on this functionality here: https://docs.microsoft.com/en-us/dynamics365/customerengagement/on-premises/developer/create-auto-number-attributes
 
 ### Mailboxes
 

@@ -3,6 +3,7 @@
     using System;
     using System.Linq;
     using FluentAssertions;
+    using Microsoft.Crm.Sdk.Messages;
     using Microsoft.Xrm.Sdk;
     using Microsoft.Xrm.Sdk.Query;
     using Xunit;
@@ -135,6 +136,21 @@
             var workflow = this.fixture.ServiceClient.RetrieveMultiple(workflowQuery).Entities.FirstOrDefault();
 
             workflow["statecode"].As<OptionSetValue>().Value.Should().Be(stateCode);
+        }
+
+        [Theory]
+        [InlineData("account", "pdt_testautonumber", 10000)]
+        public void PackageTemplateBase_TableColumnProcessing_AutonumberSeedIsSet(string entityName, string attributeName, int expectedValue)
+        {
+            var req = new GetAutoNumberSeedRequest
+            {
+                EntityName = entityName,
+                AttributeName = attributeName,
+            };
+
+            GetAutoNumberSeedResponse response = (GetAutoNumberSeedResponse)this.fixture.ServiceClient.Execute(req);
+
+            response.AutoNumberSeedValue.Should().Be(expectedValue);
         }
     }
 }

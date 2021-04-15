@@ -21,6 +21,7 @@ namespace Capgemini.PowerApps.PackageDeployerTemplate.Config
             this.DocumentTemplates = Array.Empty<DocumentTemplateConfig>();
             this.DataImports = Array.Empty<DataImportConfig>();
             this.Slas = Array.Empty<SlaConfig>();
+            this.Tables = Array.Empty<TableConfig>();
         }
 
         /// <summary>
@@ -133,6 +134,16 @@ namespace Capgemini.PowerApps.PackageDeployerTemplate.Config
         /// </value>
         [XmlAttribute("activatedeactivateslas")]
         public bool ActivateDeactivateSLAs { get; set; }
+
+        /// <summary>
+        /// Gets or sets a list of Tables with Columns that need configuration logic, i.e. Autonumber Seeds.
+        /// </summary>
+        /// <value>
+        /// A list of Tables and their columns to be configured in a given target environment.
+        /// </value>
+        [XmlArray("tables")]
+        [XmlArrayItem("table")]
+        public TableConfig[] Tables { get; set; }
 
         /// <summary>
         /// Load the template config from the specified path.

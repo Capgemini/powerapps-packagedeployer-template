@@ -30,5 +30,18 @@
         datafolderpath="Data/Reference/DefaultedPostDeploy/Extract"
         importconfigpath="Data/Reference/DefaultedPostDeploy/ImportConfig.json" />
     </dataimports>
+    <tables>
+      <table name="account">
+        <columns>
+          <column name="pdt_testautonumber" autonumberseedvalue="1"/>
+        </columns>
+      </table>
+      <table name="contact">
+        <columns>
+          <column name="pdt_testautonumber" autonumberseedvalue="2000"/>  
+          <column name="pdt_contactcolumnnameonly"/>
+        </columns>
+      </table>
+    </tables>
   </templateconfig>
 </configdatastorage>

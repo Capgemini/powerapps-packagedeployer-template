@@ -97,7 +97,7 @@
         [Fact]
         public void Load_SlaIsPresent_SlaIsDeserialized()
         {
-            this.config.Slas.Should().Contain(sla => sla.Name == "Standard Case SLA" && sla.IsDefault == true);
+            this.config.Slas.Should().Contain(sla => sla.Name == "Standard Case SLA" && sla.IsDefault);
         }
 
         [Fact]
@@ -157,6 +157,30 @@
         public void Load_ActivateDeactivateSlasPopulated_ActivateDeactivateSlasDeserialized()
         {
             this.config.ActivateDeactivateSLAs.Should().BeTrue();
+        }
+
+        [Fact]
+        public void Load_Tables_Exist()
+        {
+            this.config.Tables.Should().Contain(t => t.Name == "account");
+            this.config.Tables.Should().Contain(t => t.Name == "contact");
+        }
+
+        [Fact]
+        public void Load_TableColumnAutoNumberSeedPresent_IsDeserialised()
+        {
+            var accountTable = this.config.Tables.FirstOrDefault(t => t.Name == "account");
+            accountTable.Columns.Should().Contain(c => c.Name == "pdt_testautonumber" && c.AutonumberSeedValue == 1);
+
+            var contactTable = this.config.Tables.FirstOrDefault(t => t.Name == "contact");
+            contactTable.Columns.Should().Contain(c => c.Name == "pdt_testautonumber" && c.AutonumberSeedValue == 2000);
+        }
+
+        [Fact]
+        public void Load_TableColumnAutonumber_ShouldBeNullable()
+        {
+            var contactTable = this.config.Tables.FirstOrDefault(t => t.Name == "contact");
+            contactTable.Columns.Should().Contain(c => c.Name == "pdt_contactcolumnnameonly" && c.AutonumberSeedValue == null);
         }
 
         private static TemplateConfig Load(string path)

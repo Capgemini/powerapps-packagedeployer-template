@@ -29,6 +29,7 @@
         private DocumentTemplateDeploymentService documentTemplateSvc;
         private SdkStepDeploymentService sdkStepsSvc;
         private ConnectionReferenceDeploymentService connectionReferenceSvc;
+        private TableColumnProcessingService autonumberSeedSettingSvc;
         private MailboxDeploymentService mailboxSvc;
 
         /// <summary>
@@ -206,6 +207,22 @@
         }
 
         /// <summary>
+        /// Gets a service that provides functionality relating to setting autonumber seeds.
+        /// </summary>
+        protected TableColumnProcessingService AutonumberSeedSettingSvc
+        {
+            get
+            {
+                if (this.autonumberSeedSettingSvc == null)
+                {
+                    this.autonumberSeedSettingSvc = new TableColumnProcessingService(this.TraceLoggerAdapter, this.CrmServiceAdapter ?? this.CrmServiceAdapter);
+                }
+
+                return this.autonumberSeedSettingSvc;
+            }
+        }
+
+        /// <summary>
         /// Gets provides deployment functionality relating to mailboxes.
         /// </summary>
         protected MailboxDeploymentService MailboxSvc
@@ -342,6 +359,11 @@
                 this.DocumentTemplateSvc.Import(
                     this.TemplateConfig.DocumentTemplates.Select(d => d.Path),
                     this.PackageFolderPath);
+
+                if (this.TemplateConfig.Tables != null && this.TemplateConfig.Tables.Any())
+                {
+                    this.AutonumberSeedSettingSvc.ProcessTables(this.TemplateConfig.Tables);
+                }
 
                 this.MailboxSvc.UpdateApproveAndEnableMailboxes(this.MailboxMappings);
 
