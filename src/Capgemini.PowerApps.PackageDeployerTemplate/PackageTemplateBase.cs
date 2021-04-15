@@ -32,6 +32,8 @@
         private ConnectionReferenceDeploymentService connectionReferenceSvc;
         private TableColumnProcessingService autonumberSeedSettingSvc;
         private MailboxDeploymentService mailboxSvc;
+        
+        private EnvironmentVariableDeploymentService environmentVariableService;
 
         #endregion
 
@@ -77,6 +79,12 @@
         /// </summary>
         /// <returns>The mailbox mappings.</returns>
         protected IDictionary<string, string> MailboxMappings => this.GetSettings(Constants.Settings.MailboxPrefix);
+
+        /// <summary>
+        /// Gets the PowerApps environment variables mappings.
+        /// </summary>
+        /// <returns>The mailbox mappings.</returns>
+        protected IDictionary<string, string> PowerAppsEnvironmentVariables => this.GetSettings(Constants.Settings.PowerAppsEnvironmentVariablePrefix);
 
         /// <summary>
         /// Gets a list of solutions that have been processed (i.e. <see cref="PreSolutionImport(string, bool, bool, out bool, out bool)"/> has been ran for that solution.)
@@ -260,6 +268,22 @@
         }
 
         /// <summary>
+        /// Gets provides deployment functionality relating to environment variables.
+        /// </summary>
+        protected EnvironmentVariableDeploymentService EnvironmentVariablesSvc
+        {
+            get
+            {
+                if (this.environmentVariableService == null)
+                {
+                    this.environmentVariableService = new EnvironmentVariableDeploymentService(this.TraceLoggerAdapter, this.CrmServiceAdapter);
+                }
+
+                return this.environmentVariableService;
+            }
+        }
+
+        /// <summary>
         /// Gets a <see cref="TraceLogger"/> adapter that provides additional functionality (e.g. for Azure Pipelines).
         /// </summary>
         protected TraceLoggerAdapter TraceLoggerAdapter
@@ -338,6 +362,8 @@
                 this.DataImporterService.Import(
                     this.TemplateConfig.PostDeployDataImports,
                     this.PackageFolderPath);
+
+                this.EnvironmentVariablesSvc.SetEnvironmentVariables(this.PowerAppsEnvironmentVariables);
 
                 this.SdkStepSvc.SetStatesBySolution(
                     this.ProcessedSolutions,

@@ -29,6 +29,11 @@
             /// The prefix for all mailbox settings.
             /// </summary>
             public const string MailboxPrefix = "Mailbox";
+
+            /// <summary>
+            /// The prefix for all Power Apps environment variables.
+            /// </summary>
+            public const string PowerAppsEnvironmentVariablePrefix = "EnvironmentVariable";
         }
 
         /// <summary>
