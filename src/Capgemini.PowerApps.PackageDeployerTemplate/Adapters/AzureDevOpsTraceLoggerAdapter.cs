@@ -34,11 +34,11 @@
             switch (logLevel)
             {
                 case LogLevel.Warning:
-                    Console.Write($"##[task.logissue type=warning]{message}");
+                    Console.WriteLine($"##vso[task.logissue type=warning]{message}");
                     break;
                 case LogLevel.Error:
                 case LogLevel.Critical:
-                    Console.WriteLine($"##[task.logissue type=error]{message}");
+                    Console.WriteLine($"##vso[task.logissue type=error]{message}");
                     break;
             }
         }
