@@ -18,6 +18,7 @@
     /// </summary>
     public abstract class PackageTemplateBase : ImportExtension
     {
+        #region private-props
         private ICrmServiceAdapter crmServiceAdapter;
         private string licensedUsername;
         private TemplateConfig templateConfig;
@@ -31,6 +32,8 @@
         private ConnectionReferenceDeploymentService connectionReferenceSvc;
         private TableColumnProcessingService autonumberSeedSettingSvc;
         private MailboxDeploymentService mailboxSvc;
+
+        #endregion
 
         /// <summary>
         /// Gets a value indicating whether whether the deployment is running on Azure DevOps.
@@ -76,6 +79,40 @@
         protected IDictionary<string, string> MailboxMappings => this.GetSettings(Constants.Settings.MailboxPrefix);
 
         /// <summary>
+        /// Gets a list of solutions that have been processed (i.e. <see cref="PreSolutionImport(string, bool, bool, out bool, out bool)"/> has been ran for that solution.)
+        /// </summary>
+        protected IList<string> ProcessedSolutions
+        {
+            get
+            {
+                if (this.processedSolutions == null)
+                {
+                    this.processedSolutions = new List<string>();
+                }
+
+                return this.processedSolutions;
+            }
+        }
+
+        /// <summary>
+        /// Gets provides access to the templateconfig section of the ImportConfig.xml.
+        /// </summary>
+        protected TemplateConfig TemplateConfig
+        {
+            get
+            {
+                if (this.templateConfig == null)
+                {
+                    this.templateConfig = TemplateConfig.Load(this.ImportConfigFilePath);
+                }
+
+                return this.templateConfig;
+            }
+        }
+
+        #region service-initialisers
+
+        /// <summary>
         /// Gets an extended <see cref="Microsoft.Xrm.Sdk.IOrganizationService"/>.
         /// </summary>
         /// <value>
@@ -91,22 +128,6 @@
                 }
 
                 return this.crmServiceAdapter;
-            }
-        }
-
-        /// <summary>
-        /// Gets a list of solutions that have been processed (i.e. <see cref="PreSolutionImport(string, bool, bool, out bool, out bool)"/> has been ran for that solution.)
-        /// </summary>
-        protected IList<string> ProcessedSolutions
-        {
-            get
-            {
-                if (this.processedSolutions == null)
-                {
-                    this.processedSolutions = new List<string>();
-                }
-
-                return this.processedSolutions;
             }
         }
 
@@ -239,22 +260,6 @@
         }
 
         /// <summary>
-        /// Gets provides access to the templateconfig section of the ImportConfig.xml.
-        /// </summary>
-        protected TemplateConfig TemplateConfig
-        {
-            get
-            {
-                if (this.templateConfig == null)
-                {
-                    this.templateConfig = TemplateConfig.Load(this.ImportConfigFilePath);
-                }
-
-                return this.templateConfig;
-            }
-        }
-
-        /// <summary>
         /// Gets a <see cref="TraceLogger"/> adapter that provides additional functionality (e.g. for Azure Pipelines).
         /// </summary>
         protected TraceLoggerAdapter TraceLoggerAdapter
@@ -269,6 +274,10 @@
                 return this.traceLoggerAdapter;
             }
         }
+
+        #endregion
+
+        #region lifecycle-events
 
         /// <inheritdoc/>
         public override void InitializeCustomExtension()
@@ -375,6 +384,10 @@
 
             return true;
         }
+
+        #endregion
+
+        #region settings-retrival
 
         /// <summary>
         /// Gets a setting either from runtime arguments or an environment variable (in that order of preference). Environment variables should be prefixed with 'PACKAGEDEPLOYER_SETTINGS_'.
@@ -492,5 +505,7 @@
                 Console.WriteLine("##vso[task.complete result=SucceededWithIssues;]DONE");
             }
         }
+
+        #endregion
     }
 }
