@@ -167,7 +167,7 @@
         }
 
         [Fact]
-        public void Load_Tables_Autonumber_Columns_Populated()
+        public void Load_TableColumnAutoNumberSeedPresent_IsDeserialised()
         {
             var accountTable = this.config.Tables.FirstOrDefault(t => t.Name == "account");
             accountTable.Columns.Should().Contain(c => c.Name == "pdt_testautonumber" && c.AutonumberSeedValue == 1);
@@ -177,7 +177,7 @@
         }
 
         [Fact]
-        public void Load_Tables_Autonumber_Columns_Should_Be_Nullable()
+        public void Load_TableColumnAutonumber_ShouldBeNullable()
         {
             var contactTable = this.config.Tables.FirstOrDefault(t => t.Name == "contact");
             contactTable.Columns.Should().Contain(c => c.Name == "pdt_contactcolumnnameonly" && c.AutonumberSeedValue == null);

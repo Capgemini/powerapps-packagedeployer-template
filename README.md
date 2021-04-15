@@ -189,6 +189,8 @@ When deploying auto-numbers, seed values can be defined in the template for each
         <columns>
           <column name="new_contactautonumber" autonumberseedvalue="2000"/>
         </columns>
+      </table>
+    </tables>
 </templateconfig>
 ```
 
