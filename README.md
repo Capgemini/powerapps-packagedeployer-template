@@ -195,7 +195,7 @@ When deploying auto-numbers, seed values can be defined in the template for each
 ```
 **Important Note**: When you set a seed value, it will reset the next number in the sequence to the seed value. Unless the autonumber column has an alternate key, it will not be enforced as unique. This means you could accidentally reset the count and end up with duplicate auto-number values.
 
-Ideally you want to set the seed number once and avoid changing it. If you need to change the autonumber seed, make sure you test it in a sandbox environment first. 
+You should set the seed once in the config file and avoid changing it. If you need to change the seed, ensure that it is a higher value than the current value on all target environments.
 
 More information can be read on this functionality here: https://docs.microsoft.com/en-us/dynamics365/customerengagement/on-premises/developer/create-auto-number-attributes
 
