@@ -193,6 +193,11 @@ When deploying auto-numbers, seed values can be defined in the template for each
     </tables>
 </templateconfig>
 ```
+**Important Note**: When you set a seed value, it will reset the next number in the sequence to the seed value. Unless the autonumber atribute has an alternate key, it will not be enforced as unique. This means you could accidentially reset the count and end up with duplicate numbers.
+
+Ideally you want to set the seed number once and avoid changing it. If you need to change the autonumber seed, make sure you test it in a sandbox environment first. 
+
+More information can be read on this functionality here: https://docs.microsoft.com/en-us/dynamics365/customerengagement/on-premises/developer/create-auto-number-attributes
 
 ### Mailboxes
 
