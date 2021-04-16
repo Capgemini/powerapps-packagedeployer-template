@@ -16,7 +16,7 @@
         {
             this.fixture = fixture;
         }
-        
+
         [Fact]
         public void PackageTemplateBase_WordTemplateConfigured_WordTemplateIsImported()
         {

@@ -37,6 +37,8 @@
 
         #endregion
 
+        #region protected-props
+
         /// <summary>
         /// Gets a value indicating whether whether the deployment is running on Azure DevOps.
         /// </summary>
@@ -117,6 +119,7 @@
                 return this.templateConfig;
             }
         }
+        #endregion
 
         #region service-initialisers
 
@@ -501,6 +504,10 @@
             return mappings;
         }
 
+        #endregion
+
+        #region lifecycle-event-helpers
+
         private void ExecuteLifecycleEvent(string eventName, Action eventAction)
         {
             this.LogLifecycleEventStart(eventName);
@@ -517,6 +524,10 @@
         {
             this.TraceLoggerAdapter.LogInformation($"{nameof(PackageTemplateBase)}.{lifecycleEvent} completed.");
         }
+
+        #endregion
+
+        #region logging-helpers
 
         // Excluded as it would require our CI or PR validation pipelines to be partially succeeding or failing
         [ExcludeFromCodeCoverage]
