@@ -3,6 +3,9 @@
 # SA1633: File should have header
 dotnet_diagnostic.SA1633.severity = none
 
+# SA1124: Do not use regions
+dotnet_diagnostic.SA1124.severity = none
+
 [tests/**/*.cs]
 
 # SA1600: Elements should be documented

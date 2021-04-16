@@ -120,16 +120,16 @@ Environment variables must be prefixed with `PACKAGEDEPLOYER_SETTINGS_CONNREF_` 
 
 ```powershell
 $env:PACKAGEDEPLOYER_SETTINGS_CONNREF_DEVHUB_SHAREDVISUALSTUDIOTEAMSERVICES_CA653 = "shared-visualstudiot-44dd3131-3292-482a-9ec3-32cd7f3e799b"
+
+Import-CrmPackage [...]
 ```
 
 **Runtime setting**
 
 ```powershell
-$runtimeSettings = @{ 
-    "ConnRef:devhub_sharedvisualstudioteamservices_ca653" = "shared-visualstudiot-44dd3131-3292-482a-9ec3-32cd7f3e799b" 
-}
+$runtimeSettings =  "ConnRef:devhub_sharedvisualstudioteamservices_ca653=shared-visualstudiot-44dd3131-3292-482a-9ec3-32cd7f3e799b"
 
-Import-CrmPackage –CrmConnection $conn –PackageDirectory $packageDir –PackageName Package.dll –RuntimePackageSettings $runtimeSettings
+Import-CrmPackage [...] –RuntimePackageSettings $runtimeSettings
 ```
 
 The runtime setting takes precedence if both an environment variable and runtime setting are found for the same connection reference.
@@ -150,16 +150,16 @@ Environment variables must be prefixed with `PACKAGEDEPLOYER_SETTINGS_ENVVAR_` a
 
 ```powershell
 $env:PACKAGEDEPLOYER_SETTINGS_ENVVAR_PDT_TESTVARIABLE = "test_value"
+
+Import-CrmPackage [...]
 ```
 
 **Runtime setting**
 
 ```powershell
-$runtimeSettings = @{ 
-    "EnvVar:pdt_testvariable" = "test_value" 
-}
+$runtimeSettings = "EnvVar:pdt_testvariable=test_value"
 
-Import-CrmPackage –CrmConnection $conn –PackageDirectory $packageDir –PackageName Package.dll –RuntimePackageSettings $runtimeSettings
+Import-CrmPackage [...] –RuntimePackageSettings $runtimeSettings
 ```
 
 The runtime setting takes precedence if both an environment variable and runtime setting are found for the same Power App environment variable.
@@ -241,16 +241,16 @@ Environment variables must be prefixed with `PACKAGEDEPLOYER_SETTINGS_MAILBOX_` 
 
 ```powershell
 $env:PACKAGEDEPLOYER_SETTINGS_MAILBOX_SUPPORT-DEV@FAKE.COM = "support-prod@fake.com"
+
+Import-CrmPackage [...]
 ```
 
 **Runtime setting**
 
 ```powershell
-$runtimeSettings = @{ 
-    "Mailbox:support-dev@fake.com" = "support-prod@fake.com" 
-}
+$runtimeSettings = "Mailbox:support-dev@fake.com=support-prod@fake.com" 
 
-Import-CrmPackage –CrmConnection $conn –PackageDirectory $packageDir –PackageName Package.dll –RuntimePackageSettings $runtimeSettings
+Import-CrmPackage [...] –RuntimePackageSettings $runtimeSettings
 ```
 
 The runtime setting takes precedence if both an environment variable and runtime setting are found for the same shared mailbox.
