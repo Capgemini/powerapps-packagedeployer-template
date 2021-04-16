@@ -77,11 +77,11 @@ namespace Capgemini.PowerApps.PackageDeployerTemplate.Services
 
         private void UpsertEnvironmentVariableValue(string value, EntityReference definitionReference)
         {
-            var existingValue = this.GetValueByDefinitionId(definitionReference, new ColumnSet(Constants.EnvironmentVariableValue.Fields.Value));
-            if (existingValue != null)
+            var existingValueRecord = this.GetValueByDefinitionId(definitionReference, new ColumnSet(Constants.EnvironmentVariableValue.Fields.Value));
+            if (existingValueRecord != null)
             {
-                existingValue[Constants.EnvironmentVariableValue.Fields.Value] = value;
-                this.crmSvc.Update(existingValue);
+                existingValueRecord[Constants.EnvironmentVariableValue.Fields.Value] = value;
+                this.crmSvc.Update(existingValueRecord);
             }
             else
             {
@@ -91,7 +91,7 @@ namespace Capgemini.PowerApps.PackageDeployerTemplate.Services
 
         private void SetValue(string value, EntityReference definition)
         {
-            var val = new Entity(Constants.EnvironmentVariableValue.LogicalName)
+            var valueRecord = new Entity(Constants.EnvironmentVariableValue.LogicalName)
             {
                 Attributes = new AttributeCollection
                             {
@@ -100,7 +100,7 @@ namespace Capgemini.PowerApps.PackageDeployerTemplate.Services
                             },
             };
 
-            this.crmSvc.Create(val);
+            this.crmSvc.Create(valueRecord);
         }
 
         private Entity GetValueByDefinitionId(EntityReference definitionReference, ColumnSet columnSet)

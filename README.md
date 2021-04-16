@@ -164,7 +164,7 @@ Import-CrmPackage [...] –RuntimePackageSettings $runtimeSettings
 
 The runtime setting takes precedence if both an environment variable and runtime setting are found for the same Power App environment variable.
 
-If a value has already been set in the target environment then it will be overridden, otherwise a new Environment Variable Value will be created ad related to the Environment Variable Definition determined by the given schema name.
+If a value has already been set in the target environment then it will be overridden, otherwise a new environment variable value will be created and related to the environment variable definition determined by the given schema name.
 
 ### Data
 
