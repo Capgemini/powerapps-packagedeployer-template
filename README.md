@@ -19,6 +19,8 @@ This project's aim is to build a powerful base Package Deployer template that si
     - [Set SDK step states](#Set-sdk-step-states)
   - [Connection references](#Connection-references)
     - [Set connection references](#Set-connection-references)
+  - [Environment variables](#Environment-variables)
+    - [Set environment variables](#Set-environment-variables)
   - [Data](#Data)
     - [Import data](#Import-data)
   - [Word templates](#Word-templates)
@@ -118,16 +120,16 @@ Environment variables must be prefixed with `PACKAGEDEPLOYER_SETTINGS_CONNREF_` 
 
 ```powershell
 $env:PACKAGEDEPLOYER_SETTINGS_CONNREF_DEVHUB_SHAREDVISUALSTUDIOTEAMSERVICES_CA653 = "shared-visualstudiot-44dd3131-3292-482a-9ec3-32cd7f3e799b"
+
+Import-CrmPackage [...]
 ```
 
 **Runtime setting**
 
 ```powershell
-$runtimeSettings = @{ 
-    "ConnRef:devhub_sharedvisualstudioteamservices_ca653" = "shared-visualstudiot-44dd3131-3292-482a-9ec3-32cd7f3e799b" 
-}
+$runtimeSettings =  "ConnRef:devhub_sharedvisualstudioteamservices_ca653=shared-visualstudiot-44dd3131-3292-482a-9ec3-32cd7f3e799b"
 
-Import-CrmPackage –CrmConnection $conn –PackageDirectory $packageDir –PackageName Package.dll –RuntimePackageSettings $runtimeSettings
+Import-CrmPackage [...] –RuntimePackageSettings $runtimeSettings
 ```
 
 The runtime setting takes precedence if both an environment variable and runtime setting are found for the same connection reference.
@@ -135,6 +137,34 @@ The runtime setting takes precedence if both an environment variable and runtime
 To get your flow connection names, go to your environment and navigate to _Data -> Connections_ within the [Maker Portal](https://make.powerapps.com). Opening a connection will reveal the connection name in the URL, which will have a format of 'environments/environmentid/connections/apiname/_connectionname_/details'. 
 
 As above, you will need to pass a licensed user's email via runtime settings or environment variables if the Package Deployer is not running in the context of a licensed user. In addition, **the connections passed in need to be owned by the user doing the deployment or impersonated by the deployment**.
+
+### Environment variables
+
+#### Set environment variables
+
+You can set Power App environment variables either through system environment variables (for example, those [exposed on Azure Pipelines](https://docs.microsoft.com/en-us/azure/devops/pipelines/process/variables?view=azure-devops&tabs=yaml%2Cbatch#access-variables-through-the-environment) from your variables or variable groups) or through Package Deployer [runtime settings](https://docs.microsoft.com/en-us/power-platform/admin/deploy-packages-using-package-deployer-windows-powershell#use-the-cmdlet-to-deploy-packages).
+
+Environment variables must be prefixed with `PACKAGEDEPLOYER_SETTINGS_ENVVAR_` and followed by the schema name. Similarly, runtime settings must be prefixed with `EnvVar:` and followed by the environment variable schema name. For example, if an enviroment variable schema name was `pdt_testvariable`, this could be set via either of the following:
+
+**Environment variable**
+
+```powershell
+$env:PACKAGEDEPLOYER_SETTINGS_ENVVAR_PDT_TESTVARIABLE = "test_value"
+
+Import-CrmPackage [...]
+```
+
+**Runtime setting**
+
+```powershell
+$runtimeSettings = "EnvVar:pdt_testvariable=test_value"
+
+Import-CrmPackage [...] –RuntimePackageSettings $runtimeSettings
+```
+
+The runtime setting takes precedence if both an environment variable and runtime setting are found for the same Power App environment variable.
+
+If a value has already been set in the target environment then it will be overridden, otherwise a new Environment Variable Value will be created ad related to the Environment Variable Definition determined by the given schema name.
 
 ### Data
 
@@ -211,16 +241,16 @@ Environment variables must be prefixed with `PACKAGEDEPLOYER_SETTINGS_MAILBOX_` 
 
 ```powershell
 $env:PACKAGEDEPLOYER_SETTINGS_MAILBOX_SUPPORT-DEV@FAKE.COM = "support-prod@fake.com"
+
+Import-CrmPackage [...]
 ```
 
 **Runtime setting**
 
 ```powershell
-$runtimeSettings = @{ 
-    "Mailbox:support-dev@fake.com" = "support-prod@fake.com" 
-}
+$runtimeSettings = "Mailbox:support-dev@fake.com=support-prod@fake.com" 
 
-Import-CrmPackage –CrmConnection $conn –PackageDirectory $packageDir –PackageName Package.dll –RuntimePackageSettings $runtimeSettings
+Import-CrmPackage [...] –RuntimePackageSettings $runtimeSettings
 ```
 
 The runtime setting takes precedence if both an environment variable and runtime setting are found for the same shared mailbox.

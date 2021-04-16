@@ -18,6 +18,8 @@
     /// </summary>
     public abstract class PackageTemplateBase : ImportExtension
     {
+        #region private-props
+
         private ICrmServiceAdapter crmServiceAdapter;
         private string licensedUsername;
         private TemplateConfig templateConfig;
@@ -31,6 +33,11 @@
         private ConnectionReferenceDeploymentService connectionReferenceSvc;
         private TableColumnProcessingService autonumberSeedSettingSvc;
         private MailboxDeploymentService mailboxSvc;
+
+        private EnvironmentVariableDeploymentService environmentVariableService;
+
+        #endregion
+        #region protected-props
 
         /// <summary>
         /// Gets a value indicating whether whether the deployment is running on Azure DevOps.
@@ -76,6 +83,47 @@
         protected IDictionary<string, string> MailboxMappings => this.GetSettings(Constants.Settings.MailboxPrefix);
 
         /// <summary>
+        /// Gets the PowerApps environment variables mappings.
+        /// </summary>
+        /// <returns>The Power App environment variables.</returns>
+        protected IDictionary<string, string> PowerAppsEnvironmentVariables => this.GetSettings(Constants.Settings.PowerAppsEnvironmentVariablePrefix);
+
+        /// <summary>
+        /// Gets a list of solutions that have been processed (i.e. <see cref="PreSolutionImport(string, bool, bool, out bool, out bool)"/> has been ran for that solution.)
+        /// </summary>
+        protected IList<string> ProcessedSolutions
+        {
+            get
+            {
+                if (this.processedSolutions == null)
+                {
+                    this.processedSolutions = new List<string>();
+                }
+
+                return this.processedSolutions;
+            }
+        }
+
+        /// <summary>
+        /// Gets provides access to the templateconfig section of the ImportConfig.xml.
+        /// </summary>
+        protected TemplateConfig TemplateConfig
+        {
+            get
+            {
+                if (this.templateConfig == null)
+                {
+                    this.templateConfig = TemplateConfig.Load(this.ImportConfigFilePath);
+                }
+
+                return this.templateConfig;
+            }
+        }
+
+        #endregion
+        #region service-initialisers
+
+        /// <summary>
         /// Gets an extended <see cref="Microsoft.Xrm.Sdk.IOrganizationService"/>.
         /// </summary>
         /// <value>
@@ -91,22 +139,6 @@
                 }
 
                 return this.crmServiceAdapter;
-            }
-        }
-
-        /// <summary>
-        /// Gets a list of solutions that have been processed (i.e. <see cref="PreSolutionImport(string, bool, bool, out bool, out bool)"/> has been ran for that solution.)
-        /// </summary>
-        protected IList<string> ProcessedSolutions
-        {
-            get
-            {
-                if (this.processedSolutions == null)
-                {
-                    this.processedSolutions = new List<string>();
-                }
-
-                return this.processedSolutions;
             }
         }
 
@@ -239,18 +271,18 @@
         }
 
         /// <summary>
-        /// Gets provides access to the templateconfig section of the ImportConfig.xml.
+        /// Gets provides deployment functionality relating to environment variables.
         /// </summary>
-        protected TemplateConfig TemplateConfig
+        protected EnvironmentVariableDeploymentService EnvironmentVariablesSvc
         {
             get
             {
-                if (this.templateConfig == null)
+                if (this.environmentVariableService == null)
                 {
-                    this.templateConfig = TemplateConfig.Load(this.ImportConfigFilePath);
+                    this.environmentVariableService = new EnvironmentVariableDeploymentService(this.TraceLoggerAdapter, this.CrmServiceAdapter);
                 }
 
-                return this.templateConfig;
+                return this.environmentVariableService;
             }
         }
 
@@ -269,6 +301,9 @@
                 return this.traceLoggerAdapter;
             }
         }
+
+        #endregion
+        #region lifecycle-events
 
         /// <inheritdoc/>
         public override void InitializeCustomExtension()
@@ -330,6 +365,8 @@
                     this.TemplateConfig.PostDeployDataImports,
                     this.PackageFolderPath);
 
+                this.EnvironmentVariablesSvc.SetEnvironmentVariables(this.PowerAppsEnvironmentVariables);
+
                 this.SdkStepSvc.SetStatesBySolution(
                     this.ProcessedSolutions,
                     this.TemplateConfig.SdkStepsToDeactivate.Select(s => s.Name));
@@ -375,6 +412,9 @@
 
             return true;
         }
+
+        #endregion
+        #region settings-retrival
 
         /// <summary>
         /// Gets a setting either from runtime arguments or an environment variable (in that order of preference). Environment variables should be prefixed with 'PACKAGEDEPLOYER_SETTINGS_'.
@@ -462,6 +502,9 @@
             return mappings;
         }
 
+        #endregion
+        #region lifecycle-event-helpers
+
         private void ExecuteLifecycleEvent(string eventName, Action eventAction)
         {
             this.LogLifecycleEventStart(eventName);
@@ -479,6 +522,9 @@
             this.TraceLoggerAdapter.LogInformation($"{nameof(PackageTemplateBase)}.{lifecycleEvent} completed.");
         }
 
+        #endregion
+        #region logging-helpers
+
         // Excluded as it would require our CI or PR validation pipelines to be partially succeeding or failing
         [ExcludeFromCodeCoverage]
         private void LogTaskCompleteResult()
@@ -492,5 +538,7 @@
                 Console.WriteLine("##vso[task.complete result=SucceededWithIssues;]DONE");
             }
         }
+
+        #endregion
     }
 }

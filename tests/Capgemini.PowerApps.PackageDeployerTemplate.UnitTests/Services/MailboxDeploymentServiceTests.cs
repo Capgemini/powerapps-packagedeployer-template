@@ -4,7 +4,6 @@
     using System.Collections.Generic;
     using System.Linq;
     using Capgemini.PowerApps.PackageDeployerTemplate.Adapters;
-    using Capgemini.PowerApps.PackageDeployerTemplate.Config;
     using Capgemini.PowerApps.PackageDeployerTemplate.Services;
     using Microsoft.Extensions.Logging;
     using Microsoft.Xrm.Sdk;

@@ -16,6 +16,11 @@
             public const string ConnectionReferencePrefix = "ConnRef";
 
             /// <summary>
+            /// The prefix for all Power Apps environment variables.
+            /// </summary>
+            public const string PowerAppsEnvironmentVariablePrefix = "EnvVar";
+
+            /// <summary>
             /// The prefix for all environment variables.
             /// </summary>
             public const string EnvironmentVariablePrefix = "PACKAGEDEPLOYER_SETTINGS_";
@@ -453,6 +458,55 @@
                 /// The Azure AD object ID.
                 /// </summary>
                 public const string AzureActiveDirectoryObjectId = "azureactivedirectoryobjectid";
+            }
+        }
+
+        /// <summary>
+        /// Constants relating to the environmentvariabledefinition entity.
+        /// </summary>
+        public static class EnvironmentVariableDefinition
+        {
+            /// <summary>
+            /// The logical name.
+            /// </summary>
+            public const string LogicalName = "environmentvariabledefinition";
+
+            /// <summary>
+            /// Field logical names.
+            /// </summary>
+            public static class Fields
+            {
+                /// <summary>
+                /// The schema name.
+                /// </summary>
+                public const string SchemaName = "schemaname";
+            }
+        }
+
+        /// <summary>
+        /// Constants relating to the environmentvariablevalue entity.
+        /// </summary>
+        public static class EnvironmentVariableValue
+        {
+            /// <summary>
+            /// The logical name.
+            /// </summary>
+            public const string LogicalName = "environmentvariablevalue";
+
+            /// <summary>
+            /// Field logical names.
+            /// </summary>
+            public static class Fields
+            {
+                /// <summary>
+                /// The variable definition id.
+                /// </summary>
+                public const string EnvironmentVariableDefinitonId = "environmentvariabledefinitionid";
+
+                /// <summary>
+                /// The variable value.
+                /// </summary>
+                public const string Value = "value";
             }
         }
     }

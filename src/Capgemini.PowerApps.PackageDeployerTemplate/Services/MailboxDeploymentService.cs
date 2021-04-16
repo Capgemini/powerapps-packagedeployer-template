@@ -5,7 +5,6 @@
     using System.Linq;
     using System.Threading;
     using Capgemini.PowerApps.PackageDeployerTemplate.Adapters;
-    using Capgemini.PowerApps.PackageDeployerTemplate.Config;
     using Microsoft.Extensions.Logging;
     using Microsoft.Xrm.Sdk;
     using Microsoft.Xrm.Sdk.Query;

@@ -125,6 +125,24 @@
             connectionReference.GetAttributeValue<string>(Constants.ConnectionReference.Fields.ConnectionId).Should().Be(Environment.GetEnvironmentVariable("PACKAGEDEPLOYER_SETTINGS_CONNREF_PDT_SHAREDAPPROVALS_D7DCB"));
         }
 
+        [Fact]
+        public void PackageTemplateBase_EnvironmentVariablePassed_EnvironmentVariableIsSet()
+        {
+            var variableDefinitionQuery = new QueryByAttribute(Constants.EnvironmentVariableDefinition.LogicalName);
+            variableDefinitionQuery.AddAttributeValue(Constants.EnvironmentVariableDefinition.Fields.SchemaName, "pdt_testvariable");
+            variableDefinitionQuery.ColumnSet = new ColumnSet(false);
+
+            var variableDefinition = this.fixture.ServiceClient.RetrieveMultiple(variableDefinitionQuery).Entities.First();
+
+            var variableValueQuery = new QueryByAttribute(Constants.EnvironmentVariableValue.LogicalName);
+            variableValueQuery.AddAttributeValue(Constants.EnvironmentVariableValue.Fields.EnvironmentVariableDefinitonId, variableDefinition.Id);
+            variableValueQuery.ColumnSet = new ColumnSet(Constants.EnvironmentVariableValue.Fields.Value);
+
+            var variableValue = this.fixture.ServiceClient.RetrieveMultiple(variableValueQuery).Entities.First();
+
+            variableValue.GetAttributeValue<string>(Constants.EnvironmentVariableValue.Fields.Value).Should().Be(Environment.GetEnvironmentVariable("PACKAGEDEPLOYER_SETTINGS_ENVVAR_PDT_TESTVARIABLE"));
+        }
+
         [Theory]
         [InlineData("When a contact is created -> Terminate", Constants.Workflow.StateCodeInactive)]
         [InlineData("When a contact is created -> Create an approval", Constants.Workflow.StateCodeActive)]
