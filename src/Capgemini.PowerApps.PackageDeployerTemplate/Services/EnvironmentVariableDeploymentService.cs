@@ -36,7 +36,7 @@ namespace Capgemini.PowerApps.PackageDeployerTemplate.Services
         }
 
         /// <summary>
-        /// Sets environment variables on the target Common Data Service environment.
+        /// Sets environment variables on the target Power Apps environment.
         /// </summary>
         /// <param name="environmentVariables">A dictionary of keys and values to set.</param>
         public void SetEnvironmentVariables(IDictionary<string, string> environmentVariables)
@@ -54,7 +54,7 @@ namespace Capgemini.PowerApps.PackageDeployerTemplate.Services
         }
 
         /// <summary>
-        /// Sets an environment variable on the target Common Data Service environment.
+        /// Sets an environment variable on the target Power Apps environment.
         /// </summary>
         /// <param name="key">Environment variable key.</param>
         /// <param name="value">Environment variable value.</param>

@@ -85,7 +85,7 @@
         /// <summary>
         /// Gets the PowerApps environment variables mappings.
         /// </summary>
-        /// <returns>The mailbox mappings.</returns>
+        /// <returns>The Power App environment variables.</returns>
         protected IDictionary<string, string> PowerAppsEnvironmentVariables => this.GetSettings(Constants.Settings.PowerAppsEnvironmentVariablePrefix);
 
         /// <summary>
