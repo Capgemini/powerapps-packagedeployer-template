@@ -19,6 +19,7 @@
     public abstract class PackageTemplateBase : ImportExtension
     {
         #region private-props
+
         private ICrmServiceAdapter crmServiceAdapter;
         private string licensedUsername;
         private TemplateConfig templateConfig;
@@ -36,7 +37,6 @@
         private EnvironmentVariableDeploymentService environmentVariableService;
 
         #endregion
-
         #region protected-props
 
         /// <summary>
@@ -119,8 +119,8 @@
                 return this.templateConfig;
             }
         }
-        #endregion
 
+        #endregion
         #region service-initialisers
 
         /// <summary>
@@ -303,7 +303,6 @@
         }
 
         #endregion
-
         #region lifecycle-events
 
         /// <inheritdoc/>
@@ -415,7 +414,6 @@
         }
 
         #endregion
-
         #region settings-retrival
 
         /// <summary>
@@ -505,7 +503,6 @@
         }
 
         #endregion
-
         #region lifecycle-event-helpers
 
         private void ExecuteLifecycleEvent(string eventName, Action eventAction)
@@ -526,7 +523,6 @@
         }
 
         #endregion
-
         #region logging-helpers
 
         // Excluded as it would require our CI or PR validation pipelines to be partially succeeding or failing
