@@ -414,7 +414,7 @@
         }
 
         #endregion
-        #region settings-retrival
+        #region settings-retrieval
 
         /// <summary>
         /// Gets a setting either from runtime arguments or an environment variable (in that order of preference). Environment variables should be prefixed with 'PACKAGEDEPLOYER_SETTINGS_'.
