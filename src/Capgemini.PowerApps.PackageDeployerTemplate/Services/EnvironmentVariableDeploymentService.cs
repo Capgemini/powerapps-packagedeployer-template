@@ -115,8 +115,8 @@ namespace Capgemini.PowerApps.PackageDeployerTemplate.Services
         private Entity GetDefinitionByKey(string key, ColumnSet columnSet)
         {
             return this.crmSvc.RetrieveMultipleByAttribute(
-                Constants.EnvironmentVariableDefiniton.LogicalName,
-                Constants.EnvironmentVariableDefiniton.Fields.SchemaName,
+                Constants.EnvironmentVariableDefinition.LogicalName,
+                Constants.EnvironmentVariableDefinition.Fields.SchemaName,
                 new string[] { key },
                 columnSet).Entities.FirstOrDefault();
         }

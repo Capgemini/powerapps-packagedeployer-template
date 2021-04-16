@@ -61,14 +61,14 @@ namespace Capgemini.PowerApps.PackageDeployerTemplate.UnitTests.Services
 
             var entityCollection = new EntityCollection
             {
-                EntityName = Constants.EnvironmentVariableDefiniton.LogicalName,
+                EntityName = Constants.EnvironmentVariableDefinition.LogicalName,
                 Entities = { },
             };
 
             this.crmServiceAdapterMock
                 .Setup(x => x.RetrieveMultipleByAttribute(
-                  Constants.EnvironmentVariableDefiniton.LogicalName,
-                  Constants.EnvironmentVariableDefiniton.Fields.SchemaName,
+                  Constants.EnvironmentVariableDefinition.LogicalName,
+                  Constants.EnvironmentVariableDefinition.Fields.SchemaName,
                   It.Is<IEnumerable<string>>(values => values.Contains(environmentVariableConfigs.ElementAt(0).Key)),
                   It.IsAny<ColumnSet>()))
                 .Returns(entityCollection)
@@ -90,10 +90,10 @@ namespace Capgemini.PowerApps.PackageDeployerTemplate.UnitTests.Services
 
             var definitionEntityCollection = new EntityCollection
             {
-                EntityName = Constants.EnvironmentVariableDefiniton.LogicalName,
+                EntityName = Constants.EnvironmentVariableDefinition.LogicalName,
                 Entities =
                 {
-                    new Entity(Constants.EnvironmentVariableDefiniton.LogicalName, definitionId),
+                    new Entity(Constants.EnvironmentVariableDefinition.LogicalName, definitionId),
                 },
             };
 
@@ -105,8 +105,8 @@ namespace Capgemini.PowerApps.PackageDeployerTemplate.UnitTests.Services
 
             this.crmServiceAdapterMock
                 .Setup(x => x.RetrieveMultipleByAttribute(
-                  Constants.EnvironmentVariableDefiniton.LogicalName,
-                  Constants.EnvironmentVariableDefiniton.Fields.SchemaName,
+                  Constants.EnvironmentVariableDefinition.LogicalName,
+                  Constants.EnvironmentVariableDefinition.Fields.SchemaName,
                   It.Is<IEnumerable<string>>(values => values.Contains(environmentVariableConfigs.ElementAt(0).Key)),
                   It.IsAny<ColumnSet>()))
                 .Returns(definitionEntityCollection)
@@ -148,10 +148,10 @@ namespace Capgemini.PowerApps.PackageDeployerTemplate.UnitTests.Services
 
             var definitionEntityCollection = new EntityCollection
             {
-                EntityName = Constants.EnvironmentVariableDefiniton.LogicalName,
+                EntityName = Constants.EnvironmentVariableDefinition.LogicalName,
                 Entities =
                 {
-                    new Entity(Constants.EnvironmentVariableDefiniton.LogicalName, definitionId),
+                    new Entity(Constants.EnvironmentVariableDefinition.LogicalName, definitionId),
                 },
             };
 
@@ -166,8 +166,8 @@ namespace Capgemini.PowerApps.PackageDeployerTemplate.UnitTests.Services
 
             this.crmServiceAdapterMock
                 .Setup(x => x.RetrieveMultipleByAttribute(
-                  Constants.EnvironmentVariableDefiniton.LogicalName,
-                  Constants.EnvironmentVariableDefiniton.Fields.SchemaName,
+                  Constants.EnvironmentVariableDefinition.LogicalName,
+                  Constants.EnvironmentVariableDefinition.Fields.SchemaName,
                   It.Is<IEnumerable<string>>(values => values.Contains(environmentVariableConfigs.ElementAt(0).Key)),
                   It.IsAny<ColumnSet>()))
                 .Returns(definitionEntityCollection)

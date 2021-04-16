@@ -462,9 +462,9 @@
         }
 
         /// <summary>
-        /// Constants relating to the environmentvariabledefiniton entity.
+        /// Constants relating to the environmentvariabledefinition entity.
         /// </summary>
-        public static class EnvironmentVariableDefiniton
+        public static class EnvironmentVariableDefinition
         {
             /// <summary>
             /// The logical name.

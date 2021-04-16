@@ -128,8 +128,8 @@
         [Fact]
         public void PackageTemplateBase_EnvironmentVariablePassed_EnvironmentVariableIsSet()
         {
-            var variableDefinitionQuery = new QueryByAttribute(Constants.EnvironmentVariableDefiniton.LogicalName);
-            variableDefinitionQuery.AddAttributeValue(Constants.EnvironmentVariableDefiniton.Fields.SchemaName, "pdt_testvariable");
+            var variableDefinitionQuery = new QueryByAttribute(Constants.EnvironmentVariableDefinition.LogicalName);
+            variableDefinitionQuery.AddAttributeValue(Constants.EnvironmentVariableDefinition.Fields.SchemaName, "pdt_testvariable");
             variableDefinitionQuery.ColumnSet = new ColumnSet(false);
 
             var variableDefinition = this.fixture.ServiceClient.RetrieveMultiple(variableDefinitionQuery).Entities.First();
