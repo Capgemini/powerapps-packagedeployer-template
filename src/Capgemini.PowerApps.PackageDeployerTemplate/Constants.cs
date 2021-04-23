@@ -339,7 +339,7 @@
             public static class Fields
             {
                 /// <summary>
-                /// The connection reference ID.
+                /// The connection ID.
                 /// </summary>
                 public const string ConnectionId = "connectionid";
 
@@ -352,6 +352,43 @@
                 /// The logical name of the connection reference.
                 /// </summary>
                 public const string ConnectionReferenceLogicalName = "connectionreferencelogicalname";
+
+                /// <summary>
+                /// The connection reference ID.
+                /// </summary>
+                public const string ConnectorId = "connectorid";
+
+                /// <summary>
+                /// The connection reference ID.
+                /// </summary>
+                public const string CustomConnectorId = "customconnectorid";
+            }
+        }
+
+        /// <summary>
+        /// Constants related to the connector entity.
+        /// </summary>
+        public static class Connector
+        {
+            /// <summary>
+            /// The logical name.
+            /// </summary>
+            public const string LogicalName = "connector";
+
+            /// <summary>
+            /// Field logical names.
+            /// </summary>
+            public static class Fields
+            {
+                /// <summary>
+                /// The connector ID.
+                /// </summary>
+                public const string ConnectorId = "connectorid";
+
+                /// <summary>
+                /// The connector internal ID.
+                /// </summary>
+                public const string ConnectorInternalId = "connectorinternalid";
             }
         }
 

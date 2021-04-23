@@ -43,8 +43,16 @@ namespace Capgemini.PowerApps.PackageDeployerTemplate.Services
                 return;
             }
 
-            var updateRequests = this
-                .GetConnectionReferences(connectionMap.Keys.ToArray())
+            var connectionReferences = this.GetConnectionReferences(connectionMap.Keys.ToArray());
+
+            this.SetCustomConnectorInternalId(connectionReferences);
+
+            this.ConnectReferences(connectionReferences, connectionMap, connectionOwner);
+        }
+
+        private void ConnectReferences(IEnumerable<Entity> connectionReferences, IDictionary<string, string> connectionMap, string connectionOwner = null)
+        {
+            var updateRequests = connectionReferences
                 .Select(e => new UpdateRequest
                 {
                     Target = new Entity(Constants.ConnectionReference.LogicalName)
@@ -85,6 +93,28 @@ namespace Capgemini.PowerApps.PackageDeployerTemplate.Services
             if (response.IsFaulted)
             {
                 this.logger.LogExecuteMultipleErrors(response);
+            }
+        }
+
+        private void SetCustomConnectorInternalId(IEnumerable<Entity> connectionReferences)
+        {
+            var customConnectionReferences = connectionReferences
+                .Where(connRef => !(connRef.GetAttributeValue<EntityReference>(Constants.ConnectionReference.Fields.CustomConnectorId) is null));
+
+            foreach (var connectionReference in customConnectionReferences)
+            {
+                var customConnectorId = connectionReference.GetAttributeValue<EntityReference>(Constants.ConnectionReference.Fields.CustomConnectorId).Id;
+                var customConnector = this.crmSvc.Retrieve(Constants.Connector.LogicalName, customConnectorId, new ColumnSet(Constants.Connector.Fields.ConnectorInternalId));
+                var customConnectorInternalId = customConnector.GetAttributeValue<string>(Constants.Connector.Fields.ConnectorInternalId);
+
+                var oldValue = connectionReference.Attributes[Constants.ConnectionReference.Fields.ConnectorId];
+                var newValue = $"/providers/Microsoft.PowerApps/apis/{customConnectorInternalId}";
+
+                this.logger.LogInformation($"Updating connection reference connector id from '{oldValue}' to '{newValue}'.");
+
+                connectionReference.Attributes[Constants.ConnectionReference.Fields.ConnectorId] = newValue;
+
+                this.crmSvc.Update(connectionReference);
             }
         }
 

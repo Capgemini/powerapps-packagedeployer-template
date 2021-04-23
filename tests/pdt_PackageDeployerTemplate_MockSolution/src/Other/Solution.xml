@@ -1,12 +1,12 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<ImportExportXml version="9.2.21033.152" SolutionPackageVersion="9.2" languagecode="1033" generatedBy="CrmLive" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+<ImportExportXml version="9.2.21035.163" SolutionPackageVersion="9.2" languagecode="1033" generatedBy="CrmLive" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
   <SolutionManifest>
     <UniqueName>pdt_PackageDeployerTemplate_MockSolution</UniqueName>
     <LocalizedNames>
       <LocalizedName description="Package Deployer Template - Mock Solution" languagecode="1033" />
     </LocalizedNames>
     <Descriptions />
-    <Version>1.0.0.0</Version>
+    <Version>1.0.0.1</Version>
     <Managed>2</Managed>
     <Publisher>
       <UniqueName>packagedeployertemplate</UniqueName>
@@ -87,6 +87,7 @@
       <RootComponent type="29" id="{cec1de32-025c-eb11-a812-00224800ed7c}" behavior="0" />
       <RootComponent type="92" id="{c22fdadb-3f5c-eb11-a812-00224800ed7c}" behavior="0" />
       <RootComponent type="95" id="{42f2f6aa-3f5c-eb11-a812-00224800ed7c}" behavior="0" />
+      <RootComponent type="372" id="{6a86a5b7-80fe-4e0a-89ef-9d8352c3cebe}" schemaName="pdt_5Fjson-20placeholder" behavior="0" />
     </RootComponents>
     <MissingDependencies />
   </SolutionManifest>

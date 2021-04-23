@@ -13,7 +13,18 @@
   <SdkMessageProcessingSteps />
   <ServiceEndpoints />
   <EntityDataProviders />
+  <Connectors />
   <connectionreferences>
+    <connectionreference connectionreferencelogicalname="pdt_sharedpdt5fjson20placeholder5fe62e8ad62fbbb64a_d283a">
+      <connectionreferencedisplayname>JSON Placeholder</connectionreferencedisplayname>
+      <connectorid>/providers/Microsoft.PowerApps/apis/shared_pdt-5fjson-20placeholder-5f26c6d4127ca16da8</connectorid>
+      <customconnectorid>
+        <connectorid>6a86a5b7-80fe-4e0a-89ef-9d8352c3cebe</connectorid>
+      </customconnectorid>
+      <iscustomizable>1</iscustomizable>
+      <statecode>0</statecode>
+      <statuscode>1</statuscode>
+    </connectionreference>
     <connectionreference connectionreferencelogicalname="pdt_CommonDataServiceCurrentEnvironment">
       <connectionreferencedisplayname>Common Data Service (Current Environment)</connectionreferencedisplayname>
       <connectorid>/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps</connectorid>

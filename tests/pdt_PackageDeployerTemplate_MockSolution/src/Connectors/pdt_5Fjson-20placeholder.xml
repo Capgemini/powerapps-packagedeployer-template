@@ -1,0 +1,13 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Connector xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <connectorid>6a86a5b7-80fe-4e0a-89ef-9d8352c3cebe</connectorid>
+  <description></description>
+  <displayname>JSON Placeholder</displayname>
+  <iconbrandcolor>#007ee5</iconbrandcolor>
+  <name>pdt_5Fjson-20placeholder</name>
+  <connectortype>1</connectortype>
+  <openapidefinition>/Connector/pdt_5Fjson-20placeholder_openapidefinition.json</openapidefinition>
+  <connectionparameters>/Connector/pdt_5Fjson-20placeholder_connectionparameters.json</connectionparameters>
+  <policytemplateinstances>/Connector/pdt_5Fjson-20placeholder_policytemplateinstances.json</policytemplateinstances>
+  <iconblob>/Connector/pdt_5Fjson-20placeholder_iconblob.Png</iconblob>
+</Connector>
