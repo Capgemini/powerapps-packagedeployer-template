@@ -51,7 +51,7 @@ namespace Capgemini.PowerApps.PackageDeployerTemplate.Services
         }
 
         private void ConnectReferences(IEnumerable<Entity> connectionReferences, IDictionary<string, string> connectionMap, string connectionOwner = null)
-        {
+        {   
             var updateRequests = connectionReferences
                 .Select(e => new UpdateRequest
                 {
@@ -66,7 +66,7 @@ namespace Capgemini.PowerApps.PackageDeployerTemplate.Services
                             },
                             {
                                 Constants.ConnectionReference.Fields.ConnectionId,
-                                connectionMap[e.GetAttributeValue<string>(Constants.ConnectionReference.Fields.ConnectionReferenceLogicalName)]
+                                connectionMap[e.GetAttributeValue<string>(Constants.ConnectionReference.Fields.ConnectionReferenceLogicalName).ToLower()]
                             },
                         },
                     },
@@ -107,13 +107,16 @@ namespace Capgemini.PowerApps.PackageDeployerTemplate.Services
                 var customConnector = this.crmSvc.Retrieve(Constants.Connector.LogicalName, customConnectorId, new ColumnSet(Constants.Connector.Fields.ConnectorInternalId));
                 var customConnectorInternalId = customConnector.GetAttributeValue<string>(Constants.Connector.Fields.ConnectorInternalId);
 
-                var oldValue = connectionReference.Attributes[Constants.ConnectionReference.Fields.ConnectorId];
+                var oldValue = connectionReference.GetAttributeValue<string>(Constants.ConnectionReference.Fields.ConnectorId);
                 var newValue = $"/providers/Microsoft.PowerApps/apis/{customConnectorInternalId}";
 
-                this.logger.LogInformation($"Updating connection reference connector id from '{oldValue}' to '{newValue}'.");
+                if (oldValue == newValue) {
+                    continue;
+                }
+
+                this.logger.LogTrace($"Updating connection reference connector id from '{oldValue}' to '{newValue}'.");
 
                 connectionReference.Attributes[Constants.ConnectionReference.Fields.ConnectorId] = newValue;
-
                 this.crmSvc.Update(connectionReference);
             }
         }
@@ -125,11 +128,15 @@ namespace Capgemini.PowerApps.PackageDeployerTemplate.Services
                 throw new ArgumentNullException(nameof(logicalNames));
             }
 
-            return this.crmSvc.RetrieveMultipleByAttribute(
+            var records = this.crmSvc.RetrieveMultipleByAttribute(
                     Constants.ConnectionReference.LogicalName,
                     Constants.ConnectionReference.Fields.ConnectionReferenceLogicalName,
                     logicalNames,
                     new ColumnSet(true)).Entities.ToList();
+
+            this.logger.LogInformation($"Found {records.Count} of {logicalNames.Count()} connection references.");
+
+            return records;
         }
     }
 }
