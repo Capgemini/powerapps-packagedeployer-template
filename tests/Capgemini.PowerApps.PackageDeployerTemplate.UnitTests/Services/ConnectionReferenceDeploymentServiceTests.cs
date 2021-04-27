@@ -117,6 +117,99 @@ namespace Capgemini.PowerApps.PackageDeployerTemplate.UnitTests.Services
             this.loggerMock.VerifyLog(l => l.LogError(It.IsAny<string>()));
         }
 
+        [Fact]
+        public void ConnectConnectionReferences_CustomConnectionReferenceIdsDoNotMatch_UpdateConnectorId()
+        {
+            var connector = new Entity(Constants.Connector.LogicalName, Guid.NewGuid());
+            connector.Attributes[Constants.Connector.Fields.ConnectorInternalId] = "some-api-id-123";
+
+            var connectionReference = new Entity(Constants.ConnectionReference.LogicalName, Guid.NewGuid());
+            connectionReference.Attributes[Constants.ConnectionReference.Fields.CustomConnectorId] = connector.ToEntityReference();
+            connectionReference.Attributes[Constants.ConnectionReference.Fields.ConnectionReferenceLogicalName] = "pdt_sharedpdt5fjson20placeholder5fe62e8ad62fbbb64a_d283a";
+            connectionReference.Attributes[Constants.ConnectionReference.Fields.ConnectorId] =
+                "/providers/Microsoft.PowerApps/apis/some-api-id-abc"; // Difference from the connector defined above.
+
+            var connectionMap = new Dictionary<string, string>
+            {
+                { connectionReference.GetAttributeValue<string>(Constants.ConnectionReference.Fields.ConnectionReferenceLogicalName), "52d97d7652b845878eb6f3b61818e03d" },
+            };
+
+            this.crmSvc.Setup(
+                c => c.RetrieveMultipleByAttribute(
+                    Constants.ConnectionReference.LogicalName,
+                    Constants.ConnectionReference.Fields.ConnectionReferenceLogicalName,
+                    connectionMap.Keys,
+                    It.IsAny<ColumnSet>()))
+                .Returns(new EntityCollection(new List<Entity>(new Entity[] { connectionReference })));
+
+            this.crmSvc.Setup(
+                c => c.Retrieve(
+                    Constants.Connector.LogicalName,
+                    connector.Id,
+                    It.IsAny<ColumnSet>()))
+                .Returns(connector)
+                .Verifiable();
+
+            this.crmSvc.Setup(
+                c => c.Update(It.Is<Entity>(e =>
+                    e.LogicalName == Constants.ConnectionReference.LogicalName &&
+                    e.Id == connectionReference.Id &&
+                    e.Attributes.ContainsKey(Constants.ConnectionReference.Fields.ConnectorId) &&
+                    e.GetAttributeValue<string>(Constants.ConnectionReference.Fields.ConnectorId).EndsWith(connector.GetAttributeValue<string>(Constants.Connector.Fields.ConnectorInternalId)))))
+                .Verifiable();
+
+            this.MockUpdateConnectionReferencesResponse(new ExecuteMultipleResponse { Results = { { "IsFaulted", false } } });
+
+            this.connectionReferenceSvc.ConnectConnectionReferences(connectionMap);
+
+            this.crmSvc.Verify();
+        }
+
+        [Fact]
+        public void ConnectConnectionReferences_CustomConnectionReferenceIdsMatch_DoNotUpdateConnectorId()
+        {
+            var connector = new Entity(Constants.Connector.LogicalName, Guid.NewGuid());
+            connector.Attributes[Constants.Connector.Fields.ConnectorInternalId] = "some-api-id-123";
+
+            var connectionReference = new Entity(Constants.ConnectionReference.LogicalName, Guid.NewGuid());
+            connectionReference.Attributes[Constants.ConnectionReference.Fields.CustomConnectorId] = connector.ToEntityReference();
+            connectionReference.Attributes[Constants.ConnectionReference.Fields.ConnectionReferenceLogicalName] = "pdt_sharedpdt5fjson20placeholder5fe62e8ad62fbbb64a_d283a";
+            connectionReference.Attributes[Constants.ConnectionReference.Fields.ConnectorId] =
+                $"/providers/Microsoft.PowerApps/apis/{connector.Attributes[Constants.Connector.Fields.ConnectorInternalId]}"; // Same as the connector defined above.
+
+            var connectionMap = new Dictionary<string, string>
+            {
+                { connectionReference.GetAttributeValue<string>(Constants.ConnectionReference.Fields.ConnectionReferenceLogicalName), "52d97d7652b845878eb6f3b61818e03d" },
+            };
+
+            this.crmSvc.Setup(
+                c => c.RetrieveMultipleByAttribute(
+                    Constants.ConnectionReference.LogicalName,
+                    Constants.ConnectionReference.Fields.ConnectionReferenceLogicalName,
+                    connectionMap.Keys,
+                    It.IsAny<ColumnSet>()))
+                .Returns(new EntityCollection(new List<Entity>(new Entity[] { connectionReference })));
+
+            this.crmSvc.Setup(
+                c => c.Retrieve(
+                    Constants.Connector.LogicalName,
+                    connector.Id,
+                    It.IsAny<ColumnSet>()))
+                .Returns(connector);
+
+            this.MockUpdateConnectionReferencesResponse(new ExecuteMultipleResponse { Results = { { "IsFaulted", false } } });
+
+            this.connectionReferenceSvc.ConnectConnectionReferences(connectionMap);
+
+            this.crmSvc.Verify(
+                c => c.Update(It.Is<Entity>(e =>
+                    e.LogicalName == Constants.ConnectionReference.LogicalName &&
+                    e.Id == connectionReference.Id &&
+                    e.Attributes.ContainsKey(Constants.ConnectionReference.Fields.ConnectorId) &&
+                    e.GetAttributeValue<string>(Constants.ConnectionReference.Fields.ConnectorId).EndsWith(connector.GetAttributeValue<string>(Constants.Connector.Fields.ConnectorInternalId)))),
+                Times.Never);
+        }
+
         private void MockUpdateConnectionReferencesResponse(ExecuteMultipleResponse response)
         {
             this.crmSvc.Setup(svc => svc.Execute(It.IsAny<ExecuteMultipleRequest>())).Returns(response);

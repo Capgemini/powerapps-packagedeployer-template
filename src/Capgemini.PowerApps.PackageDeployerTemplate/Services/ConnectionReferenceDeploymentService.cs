@@ -110,7 +110,7 @@ namespace Capgemini.PowerApps.PackageDeployerTemplate.Services
                 var oldValue = connectionReference.GetAttributeValue<string>(Constants.ConnectionReference.Fields.ConnectorId);
                 var newValue = $"/providers/Microsoft.PowerApps/apis/{customConnectorInternalId}";
 
-                if (oldValue == newValue) 
+                if (oldValue == newValue)
                 {
                     continue;
                 }
