@@ -51,7 +51,7 @@ namespace Capgemini.PowerApps.PackageDeployerTemplate.Services
         }
 
         private void ConnectReferences(IEnumerable<Entity> connectionReferences, IDictionary<string, string> connectionMap, string connectionOwner = null)
-        {   
+        {
             var updateRequests = connectionReferences
                 .Select(e => new UpdateRequest
                 {
@@ -110,7 +110,8 @@ namespace Capgemini.PowerApps.PackageDeployerTemplate.Services
                 var oldValue = connectionReference.GetAttributeValue<string>(Constants.ConnectionReference.Fields.ConnectorId);
                 var newValue = $"/providers/Microsoft.PowerApps/apis/{customConnectorInternalId}";
 
-                if (oldValue == newValue) {
+                if (oldValue == newValue) 
+                {
                     continue;
                 }
 
@@ -134,7 +135,7 @@ namespace Capgemini.PowerApps.PackageDeployerTemplate.Services
                     logicalNames,
                     new ColumnSet(true)).Entities.ToList();
 
-            this.logger.LogInformation($"Found {records.Count} of {logicalNames.Count()} connection references.");
+            this.logger.LogInformation($"Found {records.Count} of {logicalNames.Length} connection references.");
 
             return records;
         }
