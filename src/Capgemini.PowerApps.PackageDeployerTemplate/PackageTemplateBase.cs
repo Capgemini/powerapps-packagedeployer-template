@@ -332,14 +332,14 @@
         }
 
         /// <inheritdoc/>
-        public override void PreSolutionImport(string solutionName, bool solutionOverwriteUnmanagedCustomizations, bool solutionPublishWorkflowsAndActivatePlugins, out bool overwriteUnmanagedCustomizations, out bool publishWorkflowsAndActivatePlugins)
+        public override UserRequestedImportAction OverrideSolutionImportDecision(string solutionUniqueName, Version organizationVersion, Version packageSolutionVersion, Version inboundSolutionVersion, Version deployedSolutionVersion, ImportAction systemSelectedImportAction)
         {
-            base.PreSolutionImport(solutionName, solutionOverwriteUnmanagedCustomizations, solutionPublishWorkflowsAndActivatePlugins, out overwriteUnmanagedCustomizations, out publishWorkflowsAndActivatePlugins);
-
-            this.ExecuteLifecycleEvent(nameof(this.PreSolutionImport), () =>
+            this.ExecuteLifecycleEvent($"{nameof(this.OverrideSolutionImportDecision)}({solutionUniqueName})", () =>
             {
-                this.ProcessedSolutions.Add(solutionName);
+                this.ProcessedSolutions.Add(solutionUniqueName);
             });
+
+            return base.OverrideSolutionImportDecision(solutionUniqueName, organizationVersion, packageSolutionVersion, inboundSolutionVersion, deployedSolutionVersion, systemSelectedImportAction);
         }
 
         /// <inheritdoc/>
