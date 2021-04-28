@@ -89,7 +89,7 @@
         protected IDictionary<string, string> PowerAppsEnvironmentVariables => this.GetSettings(Constants.Settings.PowerAppsEnvironmentVariablePrefix);
 
         /// <summary>
-        /// Gets a list of solutions that have been processed (i.e. <see cref="PreSolutionImport(string, bool, bool, out bool, out bool)"/> has been ran for that solution.)
+        /// Gets a list of solutions that have been processed (i.e. <see cref="OverrideSolutionImportDecision"/> has been ran for that solution.)
         /// </summary>
         protected IList<string> ProcessedSolutions
         {
