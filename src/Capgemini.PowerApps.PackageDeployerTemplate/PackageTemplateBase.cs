@@ -89,7 +89,7 @@
         protected IDictionary<string, string> PowerAppsEnvironmentVariables => this.GetSettings(Constants.Settings.PowerAppsEnvironmentVariablePrefix);
 
         /// <summary>
-        /// Gets a list of solutions that have been processed (i.e. <see cref="PreSolutionImport(string, bool, bool, out bool, out bool)"/> has been ran for that solution.)
+        /// Gets a list of solutions that have been processed (i.e. <see cref="OverrideSolutionImportDecision"/> has been ran for that solution.)
         /// </summary>
         protected IList<string> ProcessedSolutions
         {
@@ -332,14 +332,14 @@
         }
 
         /// <inheritdoc/>
-        public override void PreSolutionImport(string solutionName, bool solutionOverwriteUnmanagedCustomizations, bool solutionPublishWorkflowsAndActivatePlugins, out bool overwriteUnmanagedCustomizations, out bool publishWorkflowsAndActivatePlugins)
+        public override UserRequestedImportAction OverrideSolutionImportDecision(string solutionUniqueName, Version organizationVersion, Version packageSolutionVersion, Version inboundSolutionVersion, Version deployedSolutionVersion, ImportAction systemSelectedImportAction)
         {
-            base.PreSolutionImport(solutionName, solutionOverwriteUnmanagedCustomizations, solutionPublishWorkflowsAndActivatePlugins, out overwriteUnmanagedCustomizations, out publishWorkflowsAndActivatePlugins);
-
-            this.ExecuteLifecycleEvent(nameof(this.PreSolutionImport), () =>
+            this.ExecuteLifecycleEvent($"{nameof(this.OverrideSolutionImportDecision)}({solutionUniqueName})", () =>
             {
-                this.ProcessedSolutions.Add(solutionName);
+                this.ProcessedSolutions.Add(solutionUniqueName);
             });
+
+            return base.OverrideSolutionImportDecision(solutionUniqueName, organizationVersion, packageSolutionVersion, inboundSolutionVersion, deployedSolutionVersion, systemSelectedImportAction);
         }
 
         /// <inheritdoc/>
