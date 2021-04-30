@@ -3,6 +3,7 @@
     using System;
     using System.Linq;
     using FluentAssertions;
+    using Microsoft.Crm.Sdk.Messages;
     using Microsoft.Xrm.Sdk;
     using Microsoft.Xrm.Sdk.Query;
     using Xunit;
@@ -124,6 +125,24 @@
             connectionReference.GetAttributeValue<string>(Constants.ConnectionReference.Fields.ConnectionId).Should().Be(Environment.GetEnvironmentVariable("PACKAGEDEPLOYER_SETTINGS_CONNREF_PDT_SHAREDAPPROVALS_D7DCB"));
         }
 
+        [Fact]
+        public void PackageTemplateBase_EnvironmentVariablePassed_EnvironmentVariableIsSet()
+        {
+            var variableDefinitionQuery = new QueryByAttribute(Constants.EnvironmentVariableDefinition.LogicalName);
+            variableDefinitionQuery.AddAttributeValue(Constants.EnvironmentVariableDefinition.Fields.SchemaName, "pdt_testvariable");
+            variableDefinitionQuery.ColumnSet = new ColumnSet(false);
+
+            var variableDefinition = this.fixture.ServiceClient.RetrieveMultiple(variableDefinitionQuery).Entities.First();
+
+            var variableValueQuery = new QueryByAttribute(Constants.EnvironmentVariableValue.LogicalName);
+            variableValueQuery.AddAttributeValue(Constants.EnvironmentVariableValue.Fields.EnvironmentVariableDefinitonId, variableDefinition.Id);
+            variableValueQuery.ColumnSet = new ColumnSet(Constants.EnvironmentVariableValue.Fields.Value);
+
+            var variableValue = this.fixture.ServiceClient.RetrieveMultiple(variableValueQuery).Entities.First();
+
+            variableValue.GetAttributeValue<string>(Constants.EnvironmentVariableValue.Fields.Value).Should().Be(Environment.GetEnvironmentVariable("PACKAGEDEPLOYER_SETTINGS_ENVVAR_PDT_TESTVARIABLE"));
+        }
+
         [Theory]
         [InlineData("When a contact is created -> Terminate", Constants.Workflow.StateCodeInactive)]
         [InlineData("When a contact is created -> Create an approval", Constants.Workflow.StateCodeActive)]
@@ -135,6 +154,21 @@
             var workflow = this.fixture.ServiceClient.RetrieveMultiple(workflowQuery).Entities.FirstOrDefault();
 
             workflow["statecode"].As<OptionSetValue>().Value.Should().Be(stateCode);
+        }
+
+        [Theory]
+        [InlineData("account", "pdt_testautonumber", 10000)]
+        public void PackageTemplateBase_TableColumnProcessing_AutonumberSeedIsSet(string entityName, string attributeName, int expectedValue)
+        {
+            var req = new GetAutoNumberSeedRequest
+            {
+                EntityName = entityName,
+                AttributeName = attributeName,
+            };
+
+            GetAutoNumberSeedResponse response = (GetAutoNumberSeedResponse)this.fixture.ServiceClient.Execute(req);
+
+            response.AutoNumberSeedValue.Should().Be(expectedValue);
         }
     }
 }

@@ -29,11 +29,19 @@ namespace Capgemini.PowerApps.PackageDeployerTemplate.UnitTests.Services
         }
 
         [Fact]
-        public void ConnectConnectionReferences_NullConnectionMap_Throws()
+        public void ConnectConnectionReferences_NullConnectionMap_DoesNotThrow()
         {
             Action callingConnectConnectionReferencesWithNullConnectionMap = () => this.connectionReferenceSvc.ConnectConnectionReferences(null);
 
-            callingConnectConnectionReferencesWithNullConnectionMap.Should().Throw<ArgumentNullException>();
+            callingConnectConnectionReferencesWithNullConnectionMap.Should().NotThrow<ArgumentNullException>();
+        }
+
+        [Fact]
+        public void ConnectConnectionReferences_EmptyConnectionMap_DoesNotThrow()
+        {
+            Action callingConnectConnectionReferencesWithNullConnectionMap = () => this.connectionReferenceSvc.ConnectConnectionReferences(new Dictionary<string, string>());
+
+            callingConnectConnectionReferencesWithNullConnectionMap.Should().NotThrow<ArgumentNullException>();
         }
 
         [Fact]
@@ -43,6 +51,80 @@ namespace Capgemini.PowerApps.PackageDeployerTemplate.UnitTests.Services
             {
                 { "pdt_sharedapprovals_d7dcb", "12038109da0wud01" },
             };
+
+            var connectionReferences = this.MockConnectionReferencesForConnectionMap(connectionMap);
+            this.MockUpdateConnectionReferencesResponse(new ExecuteMultipleResponse { Results = { { "IsFaulted", false } } });
+
+            this.connectionReferenceSvc.ConnectConnectionReferences(connectionMap);
+
+            this.crmSvc.Verify(
+                svc => svc.Execute(
+                    It.Is<ExecuteMultipleRequest>(
+                        execMultiReq => execMultiReq.Requests.Cast<UpdateRequest>().Any(
+                            req =>
+                                req.Target.GetAttributeValue<string>(Constants.ConnectionReference.Fields.ConnectionId) == connectionMap.Values.First() &&
+                                req.Target.Id == connectionReferences.Entities.First().Id))));
+        }
+
+        [Fact]
+        public void ConnectConnectionReferences_WithConnectionOwner_UpdatesAsConnectionOwner()
+        {
+            var connectionOwner = "licenseduser@domaincom";
+            var connectionMap = new Dictionary<string, string>
+            {
+                { "pdt_sharedapprovals_d7dcb", "12038109da0wud01" },
+            };
+            this.MockConnectionReferencesForConnectionMap(connectionMap);
+            this.MockUpdateConnectionReferencesResponse(new ExecuteMultipleResponse { Results = { { "IsFaulted", false } } });
+
+            this.connectionReferenceSvc.ConnectConnectionReferences(connectionMap, connectionOwner);
+
+            this.crmSvc.Verify(svc => svc.Execute<ExecuteMultipleResponse>(It.IsAny<OrganizationRequest>(), connectionOwner, true));
+        }
+
+        [Fact]
+        public void ConnectConnectionReferences_WithErrorUpdating_Continues()
+        {
+            var connectionMap = new Dictionary<string, string>
+            {
+                { "pdt_sharedapprovals_d7dcb", "12038109da0wud01" },
+            };
+            this.MockConnectionReferencesForConnectionMap(connectionMap);
+            var response = new ExecuteMultipleResponse
+            {
+                Results =
+                {
+                    {
+                        "IsFaulted",
+                        true
+                    },
+                    {
+                        "Responses",
+                        new ExecuteMultipleResponseItemCollection()
+                        {
+                            new ExecuteMultipleResponseItem
+                            {
+                                Fault = new OrganizationServiceFault(),
+                            },
+                        }
+                    },
+                },
+            };
+            this.MockUpdateConnectionReferencesResponse(response);
+
+            this.connectionReferenceSvc.ConnectConnectionReferences(connectionMap);
+
+            this.loggerMock.VerifyLog(l => l.LogError(It.IsAny<string>()));
+        }
+
+        private void MockUpdateConnectionReferencesResponse(ExecuteMultipleResponse response)
+        {
+            this.crmSvc.Setup(svc => svc.Execute(It.IsAny<ExecuteMultipleRequest>())).Returns(response);
+            this.crmSvc.Setup(svc => svc.Execute<ExecuteMultipleResponse>(It.IsAny<ExecuteMultipleRequest>(), It.IsAny<string>(), true)).Returns(response);
+        }
+
+        private EntityCollection MockConnectionReferencesForConnectionMap(Dictionary<string, string> connectionMap)
+        {
             var connectionReferences = new EntityCollection(
                 connectionMap.Keys.Select(k =>
                 {
@@ -50,6 +132,7 @@ namespace Capgemini.PowerApps.PackageDeployerTemplate.UnitTests.Services
                     entity.Attributes.Add(Constants.ConnectionReference.Fields.ConnectionReferenceLogicalName, k);
                     return entity;
                 }).ToList());
+
             this.crmSvc.Setup(
                 c => c.RetrieveMultipleByAttribute(
                     Constants.ConnectionReference.LogicalName,
@@ -57,20 +140,8 @@ namespace Capgemini.PowerApps.PackageDeployerTemplate.UnitTests.Services
                     connectionMap.Keys,
                     It.IsAny<ColumnSet>()))
                 .Returns(connectionReferences);
-            this.crmSvc.Setup(c => c.ExecuteMultiple(
-                    It.Is<List<UpdateRequest>>(
-                        reqs => reqs.All(r =>
-                            r.Target.LogicalName == Constants.ConnectionReference.LogicalName &&
-                            connectionReferences.Entities.Any(e => e.Id == r.Target.Id) &&
-                            connectionMap.Values.Contains(r.Target.Attributes[Constants.ConnectionReference.Fields.ConnectionId]))),
-                    It.IsAny<bool>(),
-                    It.IsAny<bool>()))
-                .Returns(new ExecuteMultipleResponse { Results = { { "IsFaulted", false } } })
-                .Verifiable();
 
-            this.connectionReferenceSvc.ConnectConnectionReferences(connectionMap);
-
-            this.crmSvc.VerifyAll();
+            return connectionReferences;
         }
     }
 }

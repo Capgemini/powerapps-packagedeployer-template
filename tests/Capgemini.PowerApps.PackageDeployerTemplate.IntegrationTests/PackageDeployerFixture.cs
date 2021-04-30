@@ -1,4 +1,4 @@
-﻿namespace Capgemini.PowerApps.PackageDeployerTemplate.IntegrationTests
+namespace Capgemini.PowerApps.PackageDeployerTemplate.IntegrationTests
 {
     using System;
     using System.Diagnostics;
@@ -11,6 +11,10 @@
     {
         public PackageDeployerFixture()
         {
+            // Check values are set.
+            _ = GetApprovalsConnection();
+            _ = GetTestEnvironmentVariable();
+
             var process = new Process();
             var startInfo = new ProcessStartInfo
             {
@@ -28,9 +32,9 @@
 
             ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
             this.ServiceClient = new CrmServiceClient(
-                $"Url={Environment.GetEnvironmentVariable("CAPGEMINI_PACKAGE_DEPLOYER_TESTS_URL")}; " +
-                $"Username={Environment.GetEnvironmentVariable("CAPGEMINI_PACKAGE_DEPLOYER_TESTS_USERNAME")}; " +
-                $"Password={Environment.GetEnvironmentVariable("CAPGEMINI_PACKAGE_DEPLOYER_TESTS_PASSWORD")}; " +
+                $"Url={GetUrl()}; " +
+                $"Username={GetUsername()}; " +
+                $"Password={GetPassword()}; " +
                 "AuthType=OAuth; " +
                 "AppId=51f81489-12ee-4a9e-aaae-a2591f45987d; " +
                 "RedirectUri=app://58145B91-0C36-4500-8554-080854F2AC97");
@@ -47,6 +51,35 @@
             this.UninstallSolution();
 
             this.ServiceClient.Dispose();
+        }
+
+        protected static string GetApprovalsConnection() =>
+            GetRequiredEnvironmentVariable("PACKAGEDEPLOYER_SETTINGS_CONNREF_PDT_SHAREDAPPROVALS_D7DCB", "No environment variable configured to set approvals connection.");
+
+        protected static string GetLicensedUsername() =>
+            GetRequiredEnvironmentVariable("PACKAGEDEPLOYER_SETTINGS_LICENSEDUSERNAME", "No environment variable configured to connect and activate flows.");
+
+        protected static string GetUrl() =>
+            GetRequiredEnvironmentVariable("CAPGEMINI_PACKAGE_DEPLOYER_TESTS_URL", "No environment variable configured to set deployment URL.");
+
+        protected static string GetUsername() =>
+            GetRequiredEnvironmentVariable("CAPGEMINI_PACKAGE_DEPLOYER_TESTS_USERNAME", "No environment variable configured to set deployment username.");
+
+        protected static string GetPassword() =>
+            GetRequiredEnvironmentVariable("CAPGEMINI_PACKAGE_DEPLOYER_TESTS_PASSWORD", "No environment variable configured to set deployment password.");
+
+        protected static string GetTestEnvironmentVariable() =>
+            GetRequiredEnvironmentVariable("PACKAGEDEPLOYER_SETTINGS_ENVVAR_PDT_TESTVARIABLE", "No environment variable configured to set power apps test environment variable.");
+
+        private static string GetRequiredEnvironmentVariable(string name, string exceptionMessage)
+        {
+            var url = Environment.GetEnvironmentVariable(name);
+            if (string.IsNullOrEmpty(url))
+            {
+                throw new Exception(exceptionMessage);
+            }
+
+            return url;
         }
 
         private void UninstallSolution()
