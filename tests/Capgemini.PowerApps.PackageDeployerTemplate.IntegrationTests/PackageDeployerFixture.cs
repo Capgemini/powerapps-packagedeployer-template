@@ -120,6 +120,7 @@ namespace Capgemini.PowerApps.PackageDeployerTemplate.IntegrationTests
 
             solutionRecord.ToList().ForEach(solution =>
             {
+                CrmServiceClient.MaxConnectionTimeout = new TimeSpan(0, minutes: 5, 0);
                 this.ServiceClient.Delete(Constants.Solution.LogicalName, solution.Id);
             });
         }
