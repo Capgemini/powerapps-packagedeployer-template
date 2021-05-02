@@ -2,27 +2,40 @@ namespace Capgemini.PowerApps.PackageDeployerTemplate.IntegrationTests
 {
     using System;
     using System.Diagnostics;
+    using System.IO;
     using System.Linq;
     using System.Net;
     using Microsoft.Xrm.Sdk.Query;
     using Microsoft.Xrm.Tooling.Connector;
+    using Xunit.Abstractions;
+    using Xunit.Sdk;
 
     public class PackageDeployerFixture : IDisposable
     {
-        public PackageDeployerFixture()
+
+        public PackageDeployerFixture(IMessageSink diagnosticMessageSink)
         {
             // Check values are set.
             _ = GetApprovalsConnection();
             _ = GetTestEnvironmentVariable();
 
-            var process = new Process();
             var startInfo = new ProcessStartInfo
             {
                 FileName = "cmd.exe",
-                Arguments = "/C powershell ./Resources/DeployPackage.ps1",
+                Arguments = "/C powershell -ExecutionPolicy ByPass ./Resources/DeployPackage.ps1",
+                RedirectStandardOutput = true,
+                RedirectStandardError = true,
+                UseShellExecute = false,
+                CreateNoWindow = true,
             };
-            process.StartInfo = startInfo;
-            process.Start();
+
+            diagnosticMessageSink.OnMessage(new DiagnosticMessage("Running `DeployPackage.ps1`..."));
+
+            var process = Process.Start(startInfo);
+
+            diagnosticMessageSink.OnMessage(new DiagnosticMessage("Script output: \n" + process.StandardOutput.ReadToEnd()));
+            diagnosticMessageSink.OnMessage(new DiagnosticMessage("Script error output: \n" + process.StandardError.ReadToEnd()));
+
             process.WaitForExit();
 
             if (process.ExitCode != 0)
