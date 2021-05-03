@@ -12,7 +12,6 @@ namespace Capgemini.PowerApps.PackageDeployerTemplate.IntegrationTests
 
     public class PackageDeployerFixture : IDisposable
     {
-
         public PackageDeployerFixture(IMessageSink diagnosticMessageSink)
         {
             // Check values are set.
