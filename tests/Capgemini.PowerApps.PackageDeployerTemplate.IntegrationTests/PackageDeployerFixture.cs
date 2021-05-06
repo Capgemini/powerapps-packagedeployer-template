@@ -13,6 +13,7 @@ namespace Capgemini.PowerApps.PackageDeployerTemplate.IntegrationTests
     public class PackageDeployerFixture : IDisposable
     {
         private readonly IMessageSink diagnosticMessageSink;
+        
         public PackageDeployerFixture(IMessageSink diagnosticMessageSink)
         {
             this.diagnosticMessageSink = diagnosticMessageSink;
