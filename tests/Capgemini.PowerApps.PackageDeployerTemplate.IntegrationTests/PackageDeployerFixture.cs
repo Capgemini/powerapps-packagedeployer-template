@@ -12,8 +12,11 @@ namespace Capgemini.PowerApps.PackageDeployerTemplate.IntegrationTests
 
     public class PackageDeployerFixture : IDisposable
     {
+        private readonly IMessageSink diagnosticMessageSink;
         public PackageDeployerFixture(IMessageSink diagnosticMessageSink)
         {
+            this.diagnosticMessageSink = diagnosticMessageSink;
+
             // Check values are set.
             _ = GetApprovalsConnection();
             _ = GetTestEnvironmentVariable();
@@ -28,12 +31,12 @@ namespace Capgemini.PowerApps.PackageDeployerTemplate.IntegrationTests
                 CreateNoWindow = true,
             };
 
-            diagnosticMessageSink.OnMessage(new DiagnosticMessage("Running `DeployPackage.ps1`..."));
+            this.LogDiagnosticMessage("Running `DeployPackage.ps1`...");
 
             var process = Process.Start(startInfo);
 
-            diagnosticMessageSink.OnMessage(new DiagnosticMessage("Script output: \n" + process.StandardOutput.ReadToEnd()));
-            diagnosticMessageSink.OnMessage(new DiagnosticMessage("Script error output: \n" + process.StandardError.ReadToEnd()));
+            this.LogDiagnosticMessage("Script output: \n" + process.StandardOutput.ReadToEnd());
+            this.LogDiagnosticMessage("Script error output: \n" + process.StandardError.ReadToEnd());
 
             process.WaitForExit();
 
@@ -63,6 +66,8 @@ namespace Capgemini.PowerApps.PackageDeployerTemplate.IntegrationTests
             this.UninstallSolution();
 
             this.ServiceClient.Dispose();
+
+            this.LogDiagnosticMessage($"{nameof(PackageDeployerFixture)} clean up complete.");
         }
 
         protected static string GetApprovalsConnection() =>
@@ -96,6 +101,8 @@ namespace Capgemini.PowerApps.PackageDeployerTemplate.IntegrationTests
 
         private void UninstallSolution()
         {
+            this.LogDiagnosticMessage("Uninstalling solution...");
+
             var solutionQuery = new QueryExpression(Constants.Solution.LogicalName)
             {
                 Criteria = new FilterExpression
@@ -119,13 +126,14 @@ namespace Capgemini.PowerApps.PackageDeployerTemplate.IntegrationTests
 
             solutionRecord.ToList().ForEach(solution =>
             {
-                CrmServiceClient.MaxConnectionTimeout = new TimeSpan(0, minutes: 5, 0);
                 this.ServiceClient.Delete(Constants.Solution.LogicalName, solution.Id);
             });
         }
 
         private void DeleteData()
         {
+            this.LogDiagnosticMessage("Deleting migrated data...");
+
             var preDeploymentRecordQuery = new QueryByAttribute("subject");
             preDeploymentRecordQuery.AddAttributeValue("title", "Integration Test Subject");
             var preDeploymentRecord = this.ServiceClient.RetrieveMultiple(preDeploymentRecordQuery).Entities.FirstOrDefault();
@@ -149,6 +157,8 @@ namespace Capgemini.PowerApps.PackageDeployerTemplate.IntegrationTests
 
         private void DeleteWordTemplates()
         {
+            this.LogDiagnosticMessage("Deleting included word templates...");
+
             var wordTemplateQuery = new QueryByAttribute(Constants.DocumentTemplate.LogicalName);
             wordTemplateQuery.AddAttributeValue(Constants.DocumentTemplate.Fields.Name, "Contact Profile");
             var wordTemplate = this.ServiceClient.RetrieveMultiple(wordTemplateQuery).Entities.FirstOrDefault();
@@ -157,6 +167,11 @@ namespace Capgemini.PowerApps.PackageDeployerTemplate.IntegrationTests
             {
                 this.ServiceClient.Delete(Constants.DocumentTemplate.LogicalName, wordTemplate.Id);
             }
+        }
+
+        private void LogDiagnosticMessage(string message)
+        {
+            this.diagnosticMessageSink.OnMessage(new DiagnosticMessage(message));
         }
     }
 }
