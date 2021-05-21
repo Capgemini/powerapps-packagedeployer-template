@@ -485,7 +485,7 @@
 
             var runtimeSettingMappings = this.RuntimeSettings
                 .Where(s => s.Key.StartsWith($"{prefix}:"))
-                .ToDictionary(s => s.Key.Remove(0, prefix.Length + 1), s => s.Value.ToString());
+                .ToDictionary(kvp => kvp.Key.Remove(0, prefix.Length + 1).ToLower(), kvp => kvp.Value.ToString());
 
             this.TraceLoggerAdapter.LogDebug($"{mappings.Count} matching settings found in runtime settings");
 

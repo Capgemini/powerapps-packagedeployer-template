@@ -58,7 +58,7 @@ namespace Capgemini.PowerApps.PackageDeployerTemplate.Services
                             },
                             {
                                 Constants.ConnectionReference.Fields.ConnectionId,
-                                connectionMap[e.GetAttributeValue<string>(Constants.ConnectionReference.Fields.ConnectionReferenceLogicalName)]
+                                connectionMap[e.GetAttributeValue<string>(Constants.ConnectionReference.Fields.ConnectionReferenceLogicalName).ToLower()]
                             },
                         },
                     },
