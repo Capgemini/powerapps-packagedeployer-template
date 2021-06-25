@@ -4,6 +4,7 @@
     using System.Text;
     using System.Text.RegularExpressions;
     using DocumentFormat.OpenXml.Packaging;
+    using DocumentFormat.OpenXml.Wordprocessing;
     using Microsoft.Xrm.Tooling.PackageDeployment.CrmPackageExtentionBase;
 
     /// <summary>
@@ -43,10 +44,16 @@
             var replace = $@"urn:microsoft-crm/document-template/{logicalName}/{typeCode}/";
 
             using var doc = WordprocessingDocument.Open(filePath, true, new OpenSettings { AutoSave = true });
-            doc.MainDocumentPart.Document.InnerXml = Regex.Replace(
-                doc.MainDocumentPart.Document.InnerXml,
-                pattern,
-                replace);
+
+            foreach (var binding in doc.MainDocumentPart.Document.Descendants<DataBinding>())
+            {
+                binding.PrefixMappings = Regex.Replace(binding.PrefixMappings, pattern, replace);
+            }
+
+            foreach (var wordBinding in doc.MainDocumentPart.Document.Descendants<DocumentFormat.OpenXml.Office2013.Word.DataBinding>())
+            {
+                wordBinding.PrefixMappings = Regex.Replace(wordBinding.PrefixMappings, pattern, replace);
+            }
 
             foreach (var customXmlPart in doc.MainDocumentPart.CustomXmlParts)
             {

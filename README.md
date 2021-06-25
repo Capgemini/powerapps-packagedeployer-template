@@ -196,7 +196,7 @@ You can import word templates by adding `<documenttemplate>` elements.
 ```xml
 <templateconfig>
     <documenttemplates>
-        <documenttemplate path="Word Template.docx">
+        <documenttemplate path="Word Template.docx"/>
     </documenttemplates>
 </templateconfig>
 ```
