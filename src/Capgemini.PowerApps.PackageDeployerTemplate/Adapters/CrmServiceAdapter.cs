@@ -140,25 +140,8 @@
         }
 
         /// <inheritdoc/>
-        public void ImportWordTemplate(string filePath)
+        public void ImportWordTemplate(FileInfo fileInfo, string entityLogicalName, OptionSetValue templateType, string filePath)
         {
-            var fileInfo = new FileInfo(filePath);
-            var templateType = new OptionSetValue(fileInfo.Extension.Equals("xlsx", StringComparison.OrdinalIgnoreCase) ? Constants.DocumentTemplate.DocumentTypeExcel : Constants.DocumentTemplate.DocumentTypeWord);
-
-            if (templateType.Value != 2)
-            {
-                throw new NotSupportedException("Only Word templates (.docx) files are supported.");
-            }
-
-            var logicalName = WordTemplateUtilities.GetEntityLogicalName(filePath);
-            var targetEntityTypeCode = this.crmSvc.GetEntityTypeCode(logicalName);
-            var entityTypeCode = WordTemplateUtilities.GetEntityTypeCode(filePath);
-
-            if (targetEntityTypeCode != entityTypeCode)
-            {
-                WordTemplateUtilities.SetEntity(filePath, logicalName, targetEntityTypeCode);
-            }
-
             var retrieveMultipleResponse = this.crmSvc.RetrieveMultiple(
                 new QueryByAttribute(Constants.DocumentTemplate.LogicalName) { Attributes = { Constants.DocumentTemplate.Fields.Name }, Values = { Path.GetFileNameWithoutExtension(fileInfo.Name) } });
 
@@ -169,7 +152,7 @@
                 documentTemplate[Constants.DocumentTemplate.Fields.Name] = Path.GetFileNameWithoutExtension(fileInfo.Name);
             }
 
-            documentTemplate[Constants.DocumentTemplate.Fields.AssociatedEntityTypeCode] = logicalName;
+            documentTemplate[Constants.DocumentTemplate.Fields.AssociatedEntityTypeCode] = entityLogicalName;
             documentTemplate[Constants.DocumentTemplate.Fields.DocumentType] = templateType;
             documentTemplate[Constants.DocumentTemplate.Fields.Content] = Convert.ToBase64String(File.ReadAllBytes(filePath));
 
@@ -228,6 +211,12 @@
             }
 
             return systemUser.GetAttributeValue<Guid>(Constants.SystemUser.Fields.AzureActiveDirectoryObjectId);
+        }
+
+        /// <inheritdoc/>
+        public string GetEntityTypeCode(string entityLogicalName)
+        {
+            return this.crmSvc.GetEntityTypeCode(entityLogicalName);
         }
 
         /// <inheritdoc/>

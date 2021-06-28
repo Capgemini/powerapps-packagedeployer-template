@@ -1,10 +1,13 @@
 ﻿namespace Capgemini.PowerApps.PackageDeployerTemplate.UnitTests.Services
 {
     using System;
-    using System.Linq;
+    using System.IO;
     using Capgemini.PowerApps.PackageDeployerTemplate.Adapters;
     using Capgemini.PowerApps.PackageDeployerTemplate.Services;
+    using DocumentFormat.OpenXml.Packaging;
+    using DocumentFormat.OpenXml.Wordprocessing;
     using Microsoft.Extensions.Logging;
+    using Microsoft.Xrm.Sdk;
     using Moq;
     using Xunit;
 
@@ -58,32 +61,57 @@
         }
 
         [Fact]
-        public void ImportWordTemplate_ValidListOfTemplates_CallImportWordTemplate()
+        public void ImportWordTemplate_Should_UpdateBindingsAsExpected()
         {
-            var workTemplatesToImport = new string[] { "word_template_one", "word_template_two" };
+            var random = new Random();
+            var targetEntityTypeCode = random.Next(0, 99999);
+
+            var workTemplatesToImport = new string[] { TestUtilities.GetResourcePath("Word Document with Bindings.docx"), TestUtilities.GetResourcePath("Word Document with Bindings - 2.docx") };
             var packageFolderPath = "F:/fake_directory_to_templates/";
 
-            this.wordTemplateImporterService.Import(workTemplatesToImport, packageFolderPath);
-
-            this.crmServiceAdapterMock.Verify(
-                x => x.ImportWordTemplate(It.IsIn(
-                    workTemplatesToImport.Select(path => packageFolderPath + path))),
-                Times.Exactly(workTemplatesToImport.Length));
-        }
-
-        [Fact]
-        public void ImportWordTemplate_ValidListOfTemplates_LogsComplete()
-        {
-            var workTemplatesToImport = new string[] { "word_template_one", "word_template_two" };
-            var packageFolderPath = "F:/fake_directory_to_templates/";
+            this.crmServiceAdapterMock.Setup(x => x.GetEntityTypeCode(It.IsAny<string>())).Returns(targetEntityTypeCode.ToString());
 
             this.wordTemplateImporterService.Import(workTemplatesToImport, packageFolderPath);
 
             foreach (var workTemplate in workTemplatesToImport)
             {
                 this.loggerMock.VerifyLog(
-                    x => x.LogInformation($"{nameof(DocumentTemplateDeploymentService)}: Word Template imported - {workTemplate}"), Times.Once);
+                    x => x.LogInformation($"{nameof(DocumentTemplateDeploymentService)}: Word template '{workTemplate}' successfully imported."), Times.Once);
+
+                this.VerifyDataBindingUpdates(workTemplate, targetEntityTypeCode.ToString());
             }
+
+            this.crmServiceAdapterMock.Verify(
+                x => x.ImportWordTemplate(
+                    It.IsAny<FileInfo>(),
+                    It.IsAny<string>(),
+                    It.Is<OptionSetValue>(i => i.Value.Equals(Constants.DocumentTemplate.DocumentTypeWord)),
+                    It.IsAny<string>()),
+                Times.Exactly(workTemplatesToImport.Length));
+        }
+
+        private void VerifyDataBindingUpdates(string documentPath, string entityTypeCode)
+        {
+            using (var doc = WordprocessingDocument.Open(documentPath, true, new OpenSettings { AutoSave = true }))
+            {
+                foreach (var binding in doc.MainDocumentPart.Document.Descendants<DataBinding>())
+                {
+                    Assert.Matches($"urn:microsoft-crm/document-template/.*/{entityTypeCode}/", binding.PrefixMappings.Value);
+                }
+
+                foreach (var repeatableBinding in doc.MainDocumentPart.Document.Descendants<DocumentFormat.OpenXml.Office2013.Word.DataBinding>())
+                {
+                    Assert.Matches($"urn:microsoft-crm/document-template/.*/{entityTypeCode}/", repeatableBinding.PrefixMappings.Value);
+                }
+            }
+
+            this.crmServiceAdapterMock.Verify(
+                x => x.ImportWordTemplate(
+                    It.IsAny<FileInfo>(),
+                    It.IsAny<string>(),
+                    It.Is<OptionSetValue>(i => i.Value.Equals(Constants.DocumentTemplate.DocumentTypeWord)),
+                    It.Is<string>(j => j.Equals(documentPath))),
+                Times.Once);
         }
     }
 }
