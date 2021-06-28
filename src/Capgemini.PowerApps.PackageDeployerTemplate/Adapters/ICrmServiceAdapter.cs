@@ -20,7 +20,7 @@
         /// <summary>
         /// Imports a word template.
         /// </summary>
-        /// <param name="fileInfo">Informatio about file.</param>
+        /// <param name="fileInfo">Information about file.</param>
         /// <param name="entityLogicalName">entity location name/schema name.</param>
         /// <param name="templateType">template extension type.</param>
         /// <param name="filePath">The path to the word template.</param>
