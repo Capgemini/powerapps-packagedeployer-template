@@ -102,6 +102,16 @@
             }
         }
 
+        private static string GetEntityLogicalName(string filePath)
+        {
+            return FindInWordDocument(filePath, @"urn:microsoft-crm/document-template/(.*)/\d*/");
+        }
+
+        private static string GetEntityTypeCode(string filePath)
+        {
+            return FindInWordDocument(filePath, @"urn:microsoft-crm/document-template/.*/(\d*)/");
+        }
+
         private void UpdateTemplateBindingAndImport(string filePath)
         {
             var fileInfo = new FileInfo(filePath);
@@ -112,9 +122,9 @@
                 throw new NotSupportedException("Only Word templates (.docx) files are supported.");
             }
 
-            var logicalName = this.GetEntityLogicalName(filePath);
+            var logicalName = GetEntityLogicalName(filePath);
             var targetEntityTypeCode = this.crmSvc.GetEntityTypeCode(logicalName);
-            var entityTypeCode = this.GetEntityTypeCode(filePath);
+            var entityTypeCode = GetEntityTypeCode(filePath);
 
             if (targetEntityTypeCode != entityTypeCode)
             {
@@ -122,16 +132,6 @@
             }
 
             this.crmSvc.ImportWordTemplate(fileInfo, logicalName, templateType, filePath);
-        }
-
-        private string GetEntityLogicalName(string filePath)
-        {
-            return FindInWordDocument(filePath, @"urn:microsoft-crm/document-template/(.*)/\d*/");
-        }
-
-        private string GetEntityTypeCode(string filePath)
-        {
-            return FindInWordDocument(filePath, @"urn:microsoft-crm/document-template/.*/(\d*)/");
         }
     }
 }
