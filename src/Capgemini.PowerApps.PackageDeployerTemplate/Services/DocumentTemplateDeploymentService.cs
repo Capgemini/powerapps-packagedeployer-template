@@ -47,8 +47,15 @@
 
             foreach (var docTemplate in documentTemplates)
             {
-                this.UpdateTemplateBindingAndImport(Path.Combine(packageFolderPath, docTemplate));
-                this.logger.LogInformation($"{nameof(DocumentTemplateDeploymentService)}: Word template imported - {docTemplate}");
+                try 
+                {
+                    this.UpdateTemplateBindingAndImport(Path.Combine(packageFolderPath, docTemplate));
+                    this.logger.LogInformation($"{nameof(DocumentTemplateDeploymentService)}: Word template '{docTemplate}' successfully imported.");
+                } 
+                catch (Exception ex)
+                {
+                    this.logger.LogError(ex, $"{nameof(DocumentTemplateDeploymentService)}: Word template '{docTemplate}' failed to import.");
+                }
             }
         }
 
