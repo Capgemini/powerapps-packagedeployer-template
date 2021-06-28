@@ -4,8 +4,14 @@
     using System.Collections.Generic;
     using System.IO;
     using System.Linq;
+    using System.Text;
+    using System.Text.RegularExpressions;
     using Capgemini.PowerApps.PackageDeployerTemplate.Adapters;
+    using DocumentFormat.OpenXml.Packaging;
+    using DocumentFormat.OpenXml.Wordprocessing;
     using Microsoft.Extensions.Logging;
+    using Microsoft.Xrm.Sdk;
+    using Microsoft.Xrm.Tooling.PackageDeployment.CrmPackageExtentionBase;
 
     /// <summary>
     /// Deployment functionality related to document templates.
@@ -41,8 +47,87 @@
 
             foreach (var docTemplate in documentTemplates)
             {
-                this.crmSvc.ImportWordTemplate(Path.Combine(packageFolderPath, docTemplate));
+                this.UpdateTemplateBindingAndImport(Path.Combine(packageFolderPath, docTemplate));
                 this.logger.LogInformation($"{nameof(DocumentTemplateDeploymentService)}: Word template imported - {docTemplate}");
+            }
+        }
+
+        /// <summary>
+        /// Imports the provided document templates. Only Word templates are currently supported.
+        /// </summary>
+        /// <param name="filePath">The path of the file.</param>
+        private void UpdateTemplateBindingAndImport(string filePath)
+        {
+            var fileInfo = new FileInfo(filePath);
+            var templateType = new OptionSetValue(fileInfo.Extension.Equals("xlsx", StringComparison.OrdinalIgnoreCase) ? Constants.DocumentTemplate.DocumentTypeExcel : Constants.DocumentTemplate.DocumentTypeWord);
+
+            if (templateType.Value != 2)
+            {
+                throw new NotSupportedException("Only Word templates (.docx) files are supported.");
+            }
+
+            var logicalName = this.GetEntityLogicalName(filePath);
+            var targetEntityTypeCode = this.crmSvc.GetEntityTypeCode(logicalName);
+            var entityTypeCode = this.GetEntityTypeCode(filePath);
+
+            if (targetEntityTypeCode != entityTypeCode)
+            {
+                this.SetEntity(filePath, logicalName, targetEntityTypeCode);
+            }
+
+            this.crmSvc.ImportWordTemplate(fileInfo, logicalName, templateType, filePath);
+        }
+
+        private string GetEntityLogicalName(string filePath)
+        {
+            return this.FindInWordDocument(filePath, @"urn:microsoft-crm/document-template/(.*)/\d*/");
+        }
+
+        private string GetEntityTypeCode(string filePath)
+        {
+            return this.FindInWordDocument(filePath, @"urn:microsoft-crm/document-template/.*/(\d*)/");
+        }
+
+        private string FindInWordDocument(string filePath, string regexPattern)
+        {
+            using var doc = WordprocessingDocument.Open(filePath, true, new OpenSettings { AutoSave = true });
+            foreach (var customXmlPart in doc.MainDocumentPart.CustomXmlParts)
+            {
+                using var sr = new StreamReader(customXmlPart.GetStream());
+                var match = Regex.Match(sr.ReadToEnd(), regexPattern);
+
+                if (match.Groups.Count > 1)
+                {
+                    return match.Groups[1].Value;
+                }
+            }
+
+            throw new PackageDeployerException("Unable to find entity logical name and type code in template.");
+        }
+
+        private void SetEntity(string filePath, string logicalName, string typeCode)
+        {
+            var pattern = @"urn:microsoft-crm/document-template/.*/\d*/";
+            var replace = $@"urn:microsoft-crm/document-template/{logicalName}/{typeCode}/";
+
+            using var doc = WordprocessingDocument.Open(filePath, true, new OpenSettings { AutoSave = true });
+
+            foreach (var binding in doc.MainDocumentPart.Document.Descendants<DataBinding>())
+            {
+                binding.PrefixMappings = Regex.Replace(binding.PrefixMappings, pattern, replace);
+            }
+
+            foreach (var wordBinding in doc.MainDocumentPart.Document.Descendants<DocumentFormat.OpenXml.Office2013.Word.DataBinding>())
+            {
+                wordBinding.PrefixMappings = Regex.Replace(wordBinding.PrefixMappings, pattern, replace);
+            }
+
+            foreach (var customXmlPart in doc.MainDocumentPart.CustomXmlParts)
+            {
+                using var sr = new StreamReader(customXmlPart.GetStream());
+                var updatedXmlPart = Regex.Replace(sr.ReadToEnd(), pattern, replace);
+                using var ms = new MemoryStream(Encoding.UTF8.GetBytes(updatedXmlPart));
+                customXmlPart.FeedData(ms);
             }
         }
     }
