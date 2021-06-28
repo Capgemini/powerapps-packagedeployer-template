@@ -79,7 +79,7 @@
 
             if (targetEntityTypeCode != entityTypeCode)
             {
-                this.SetEntity(filePath, logicalName, targetEntityTypeCode);
+                SetEntity(filePath, logicalName, targetEntityTypeCode);
             }
 
             this.crmSvc.ImportWordTemplate(fileInfo, logicalName, templateType, filePath);
@@ -87,15 +87,15 @@
 
         private string GetEntityLogicalName(string filePath)
         {
-            return this.FindInWordDocument(filePath, @"urn:microsoft-crm/document-template/(.*)/\d*/");
+            return FindInWordDocument(filePath, @"urn:microsoft-crm/document-template/(.*)/\d*/");
         }
 
         private string GetEntityTypeCode(string filePath)
         {
-            return this.FindInWordDocument(filePath, @"urn:microsoft-crm/document-template/.*/(\d*)/");
+            return FindInWordDocument(filePath, @"urn:microsoft-crm/document-template/.*/(\d*)/");
         }
 
-        private string FindInWordDocument(string filePath, string regexPattern)
+        private static string FindInWordDocument(string filePath, string regexPattern)
         {
             using var doc = WordprocessingDocument.Open(filePath, true, new OpenSettings { AutoSave = true });
             foreach (var customXmlPart in doc.MainDocumentPart.CustomXmlParts)
@@ -112,7 +112,7 @@
             throw new PackageDeployerException("Unable to find entity logical name and type code in template.");
         }
 
-        private void SetEntity(string filePath, string logicalName, string typeCode)
+        private static void SetEntity(string filePath, string logicalName, string typeCode)
         {
             var pattern = @"urn:microsoft-crm/document-template/.*/\d*/";
             var replace = $@"urn:microsoft-crm/document-template/{logicalName}/{typeCode}/";
