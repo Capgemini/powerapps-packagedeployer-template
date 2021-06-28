@@ -76,7 +76,7 @@
             foreach (var workTemplate in workTemplatesToImport)
             {
                 this.loggerMock.VerifyLog(
-                    x => x.LogInformation($"{nameof(DocumentTemplateDeploymentService)}: Word Template imported - {workTemplate}"), Times.Once);
+                    x => x.LogInformation($"{nameof(DocumentTemplateDeploymentService)}: Word template '{workTemplate}' successfully imported."), Times.Once);
 
                 this.VerifyDataBindingUpdates(workTemplate, targetEntityTypeCode.ToString());
             }
