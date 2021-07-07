@@ -2,6 +2,7 @@
 {
     using System;
     using System.Collections.Generic;
+    using System.IO;
     using Microsoft.Xrm.Sdk;
     using Microsoft.Xrm.Sdk.Messages;
     using Microsoft.Xrm.Sdk.Query;
@@ -19,8 +20,11 @@
         /// <summary>
         /// Imports a word template.
         /// </summary>
+        /// <param name="fileInfo">Information about file.</param>
+        /// <param name="entityLogicalName">The entity schema name the document is based off.</param>
+        /// <param name="templateType">The template extension type.</param>
         /// <param name="filePath">The path to the word template.</param>
-        void ImportWordTemplate(string filePath);
+        void ImportWordTemplate(FileInfo fileInfo, string entityLogicalName, OptionSetValue templateType, string filePath);
 
         /// <summary>
         /// Query for records based on a single field matching any of the given values.
@@ -97,5 +101,12 @@
         /// <param name="columnSet">The columns to select.</param>
         /// <returns>A collection of the component entity records.</returns>
         EntityCollection RetrieveDeployedSolutionComponents(IEnumerable<string> solutions, int solutionComponentType, string componentLogicalName, ColumnSet columnSet = null);
+
+        /// <summary>
+        /// Retrieve solution component object IDs of a given type and solution.
+        /// </summary>
+        /// <param name="entityLogicalName">The unique name of the solution.</param>
+        /// <returns> EntityTypeCode for a given entity type.</returns>
+        string GetEntityTypeCode(string entityLogicalName);
     }
 }
