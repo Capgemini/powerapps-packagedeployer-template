@@ -324,6 +324,38 @@
         }
 
         /// <summary>
+        /// Constants related to the connector entity.
+        /// </summary>
+        public static class Connector
+        {
+            /// <summary>
+            /// The logical name.
+            /// </summary>
+            public const string LogicalName = "connector";
+
+            /// <summary>
+            /// Field logical names.
+            /// </summary>
+            public static class Fields
+            {
+                /// <summary>
+                /// The connector ID.
+                /// </summary>
+                public const string ConnectorId = "connectorid";
+
+                /// <summary>
+                /// The logical name of the name.
+                /// </summary>
+                public const string Name = "name";
+
+                /// <summary>
+                /// The logical name of the openapidefinition.
+                /// </summary>
+                public const string OpenApiDefinition = "openapidefinition";
+            }
+        }
+
+        /// <summary>
         /// Constants related to the connection reference entity.
         /// </summary>
         public static class ConnectionReference
