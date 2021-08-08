@@ -31,6 +31,7 @@
         private DocumentTemplateDeploymentService documentTemplateSvc;
         private SdkStepDeploymentService sdkStepsSvc;
         private ConnectionReferenceDeploymentService connectionReferenceSvc;
+        private ConnectorDeploymentService connectorSvc;
         private TableColumnProcessingService autonumberSeedSettingSvc;
         private MailboxDeploymentService mailboxSvc;
 
@@ -87,6 +88,12 @@
         /// </summary>
         /// <returns>The Power App environment variables.</returns>
         protected IDictionary<string, string> PowerAppsEnvironmentVariables => this.GetSettings(Constants.Settings.PowerAppsEnvironmentVariablePrefix);
+
+        /// <summary>
+        /// Gets the custom connector base url mappings.
+        /// </summary>
+        /// <returns>The Power App environment variables.</returns>
+        protected IDictionary<string, string> CustomConnectorBaseUrls => this.GetSettings(Constants.Settings.CustomConnectorBaseUrlPrefix);
 
         /// <summary>
         /// Gets a list of solutions that have been processed (i.e. <see cref="OverrideSolutionImportDecision"/> has been ran for that solution.)
@@ -239,6 +246,22 @@
         }
 
         /// <summary>
+        /// Gets provides deployment functionality relating to custom connectors.
+        /// </summary>
+        protected ConnectorDeploymentService ConnectorSvc
+        {
+            get
+            {
+                if (this.connectorSvc == null)
+                {
+                    this.connectorSvc = new ConnectorDeploymentService(this.TraceLoggerAdapter, this.CrmServiceAdapter);
+                }
+
+                return this.connectorSvc;
+            }
+        }
+
+        /// <summary>
         /// Gets a service that provides functionality relating to setting autonumber seeds.
         /// </summary>
         protected TableColumnProcessingService AutonumberSeedSettingSvc
@@ -377,6 +400,8 @@
                         this.TemplateConfig.SdkStepsToActivate.Where(s => s.External).Select(s => s.Name),
                         this.TemplateConfig.SdkStepsToDeactivate.Where(s => s.External).Select(s => s.Name));
                 }
+
+                this.ConnectorSvc.SetBaseUrls(this.CustomConnectorBaseUrls);
 
                 this.ConnectionReferenceSvc.ConnectConnectionReferences(this.ConnectionReferenceMappings, this.LicensedUsername);
 

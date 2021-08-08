@@ -21,6 +21,11 @@
             public const string PowerAppsEnvironmentVariablePrefix = "EnvVar";
 
             /// <summary>
+            /// The prefix for all connector base urls.
+            /// </summary>
+            public const string CustomConnectorBaseUrlPrefix = "ConnBaseUrl";
+
+            /// <summary>
             /// The prefix for all environment variables.
             /// </summary>
             public const string EnvironmentVariablePrefix = "PACKAGEDEPLOYER_SETTINGS_";
