@@ -21,6 +21,11 @@
             public const string PowerAppsEnvironmentVariablePrefix = "EnvVar";
 
             /// <summary>
+            /// The prefix for all connector base urls.
+            /// </summary>
+            public const string CustomConnectorBaseUrlPrefix = "ConnBaseUrl";
+
+            /// <summary>
             /// The prefix for all environment variables.
             /// </summary>
             public const string EnvironmentVariablePrefix = "PACKAGEDEPLOYER_SETTINGS_";
@@ -320,6 +325,38 @@
                 /// The solution ID.
                 /// </summary>
                 public const string SolutionId = "solutionid";
+            }
+        }
+
+        /// <summary>
+        /// Constants related to the connector entity.
+        /// </summary>
+        public static class Connector
+        {
+            /// <summary>
+            /// The logical name.
+            /// </summary>
+            public const string LogicalName = "connector";
+
+            /// <summary>
+            /// Field logical names.
+            /// </summary>
+            public static class Fields
+            {
+                /// <summary>
+                /// The connector ID.
+                /// </summary>
+                public const string ConnectorId = "connectorid";
+
+                /// <summary>
+                /// The logical name of the name.
+                /// </summary>
+                public const string Name = "name";
+
+                /// <summary>
+                /// The logical name of the openapidefinition.
+                /// </summary>
+                public const string OpenApiDefinition = "openapidefinition";
             }
         }
 

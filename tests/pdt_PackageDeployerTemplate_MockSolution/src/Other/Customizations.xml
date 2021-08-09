@@ -13,6 +13,7 @@
   <SdkMessageProcessingSteps />
   <ServiceEndpoints />
   <EntityDataProviders />
+  <Connectors />
   <connectionreferences>
     <connectionreference connectionreferencelogicalname="pdt_CommonDataServiceCurrentEnvironment">
       <connectionreferencedisplayname>Common Data Service (Current Environment)</connectionreferencedisplayname>

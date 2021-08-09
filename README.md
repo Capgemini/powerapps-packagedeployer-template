@@ -17,6 +17,8 @@ This project's aim is to build a powerful base Package Deployer template that si
     - [Set process states](#Set-process-states)
   - [SDK Steps](#SDK-stpes)
     - [Set SDK step states](#Set-sdk-step-states)
+  - [Connectors](#Connectors)
+    - [Set base URLs][#Set-base-URLs]
   - [Connection references](#Connection-references)
     - [Set connection references](#Set-connection-references)
   - [Environment variables](#Environment-variables)
@@ -107,6 +109,34 @@ All SDK steps within the deployed solution(s) are activated by default after the
 ```
 
 > You can also activate or deactivate SDK steps that are not in your package by setting the `external` attribute to `true` on an `<sdkstep>` element. Be careful when doing this - deploying your package may introduce side-effects to an environment that make it incompatible with other solutions.
+
+### Connectors
+
+#### Set base URLs
+
+You can set the base URL (scheme, host, base path) for custom connector either through environment variables (for example, those [exposed on Azure Pipelines](https://docs.microsoft.com/en-us/azure/devops/pipelines/process/variables?view=azure-devops&tabs=yaml%2Cbatch#access-variables-through-the-environment) from your variables or variable groups) or through Package Deployer [runtime settings](https://docs.microsoft.com/en-us/power-platform/admin/deploy-packages-using-package-deployer-windows-powershell#use-the-cmdlet-to-deploy-packages).
+
+Environment variables must be prefixed with `PACKAGEDEPLOYER_SETTINGS_CONNBASEURL_` and followed by the connector name (not display name). Similarly, runtime settings must be prefixed with `ConnBaseUrl:` and followed by the connector name (not display name). For example, if a custom connector name was `new_testconnector`, this could be set via either of the following:
+
+**Environment variable**
+
+```powershell
+$env:PACKAGEDEPLOYER_SETTINGS_CONNBASEURL_new_testconnector = "https://new-url.com/api"
+
+Import-CrmPackage [...]
+```
+
+**Runtime setting**
+
+```powershell
+$runtimeSettings =  "ConnBaseUrl:new_testconnector=https://new-url.com/api"
+
+Import-CrmPackage [...] –RuntimePackageSettings $runtimeSettings
+```
+
+The runtime setting takes precedence if both an environment variable and runtime setting are found for the same connection reference.
+
+To get your custom connector name, either query the web API for `https://[your-environment].dynamics.com/api/data/v9.2/connectors` and use the `name` property or if your solution is unpacked, use the `name` property in the `.xml` under the `Connectors/` directory. 
 
 ### Connection references
 

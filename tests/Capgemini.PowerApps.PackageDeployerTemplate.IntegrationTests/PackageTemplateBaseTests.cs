@@ -170,5 +170,22 @@
 
             response.AutoNumberSeedValue.Should().Be(expectedValue);
         }
+
+        [Fact]
+        public void PackageTemplateBase_ConnectorBaseUrlPassed_BaseUrlIsSet()
+        {
+            var connectorDefinitionQuery = new QueryByAttribute(Constants.Connector.LogicalName);
+            connectorDefinitionQuery.AddAttributeValue(Constants.Connector.Fields.Name, "pdt_5Fexample-20api");
+            connectorDefinitionQuery.ColumnSet = new ColumnSet(Constants.Connector.Fields.OpenApiDefinition);
+
+            var connectorDefinition = this.fixture.ServiceClient.RetrieveMultiple(connectorDefinitionQuery).Entities.First();
+            var openApiDefinition = connectorDefinition.GetAttributeValue<string>(Constants.Connector.Fields.OpenApiDefinition);
+
+            var newBaseUrl = new Uri(Environment.GetEnvironmentVariable("PACKAGEDEPLOYER_SETTINGS_CONNBASEURL_pdt_5Fexample-20api"));
+
+            openApiDefinition.Should().Contain($"\"host\":\"{newBaseUrl.Host}\"", $"Host was not set to '{newBaseUrl.Host}'.");
+            openApiDefinition.Should().Contain($"\"basePath\":\"{newBaseUrl.AbsolutePath}\"", $"Base URL was not set to '{newBaseUrl.AbsolutePath}'.");
+            openApiDefinition.Should().Contain($"\"schemes\":[\"{newBaseUrl.Scheme}\"]", $"Schemes was not set to include '{newBaseUrl.Scheme}'.");
+        }
     }
 }

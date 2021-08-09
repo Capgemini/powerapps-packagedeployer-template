@@ -1,0 +1,13 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Connector xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <connectorid>3b48116a-bb2a-4201-b528-e757af62cd0b</connectorid>
+  <description>This is an example API used to test Package Deployer Base Template.</description>
+  <displayname>Example API</displayname>
+  <iconbrandcolor>#007ee5</iconbrandcolor>
+  <name>pdt_5Fexample-20api</name>
+  <connectortype>1</connectortype>
+  <openapidefinition>/Connector/pdt_5Fexample-20api_openapidefinition.json</openapidefinition>
+  <connectionparameters>/Connector/pdt_5Fexample-20api_connectionparameters.json</connectionparameters>
+  <policytemplateinstances>/Connector/pdt_5Fexample-20api_policytemplateinstances.json</policytemplateinstances>
+  <iconblob>/Connector/pdt_5Fexample-20api_iconblob.Png</iconblob>
+</Connector>

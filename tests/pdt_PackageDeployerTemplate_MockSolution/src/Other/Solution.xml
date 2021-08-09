@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<ImportExportXml version="9.2.21033.152" SolutionPackageVersion="9.2" languagecode="1033" generatedBy="CrmLive" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+<ImportExportXml version="9.2.21073.130" SolutionPackageVersion="9.2" languagecode="1033" generatedBy="CrmLive" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
   <SolutionManifest>
     <UniqueName>pdt_PackageDeployerTemplate_MockSolution</UniqueName>
     <LocalizedNames>
@@ -87,6 +87,7 @@
       <RootComponent type="29" id="{cec1de32-025c-eb11-a812-00224800ed7c}" behavior="0" />
       <RootComponent type="92" id="{c22fdadb-3f5c-eb11-a812-00224800ed7c}" behavior="0" />
       <RootComponent type="95" id="{42f2f6aa-3f5c-eb11-a812-00224800ed7c}" behavior="0" />
+      <RootComponent type="372" id="{3b48116a-bb2a-4201-b528-e757af62cd0b}" schemaName="pdt_5Fexample-20api" behavior="0" />
     </RootComponents>
     <MissingDependencies />
   </SolutionManifest>
