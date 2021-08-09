@@ -89,7 +89,7 @@ namespace Capgemini.PowerApps.PackageDeployerTemplate.IntegrationTests
 
         protected static string GetTestEnvironmentVariable() =>
             GetRequiredEnvironmentVariable("PACKAGEDEPLOYER_SETTINGS_ENVVAR_PDT_TESTVARIABLE", "No environment variable configured to set power apps test environment variable.");
-        
+
         protected static string GetExampleConnectorBaseUrl() =>
             GetRequiredEnvironmentVariable("PACKAGEDEPLOYER_SETTINGS_CONNBASEURL_pdt_5Fexample-20api", "No environment variable configured to set custom connector base url.");
 
