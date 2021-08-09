@@ -18,7 +18,7 @@ This project's aim is to build a powerful base Package Deployer template that si
   - [SDK Steps](#SDK-stpes)
     - [Set SDK step states](#Set-sdk-step-states)
   - [Connectors](#Connectors)
-    - [Set base URLs][#Set-base-URLs]
+    - [Set base URLs](#Set-base-URLs)
   - [Connection references](#Connection-references)
     - [Set connection references](#Set-connection-references)
   - [Environment variables](#Environment-variables)
