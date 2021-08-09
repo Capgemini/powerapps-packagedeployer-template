@@ -116,7 +116,7 @@ All SDK steps within the deployed solution(s) are activated by default after the
 
 You can set the base URL (scheme, host, base path) for custom connector either through environment variables (for example, those [exposed on Azure Pipelines](https://docs.microsoft.com/en-us/azure/devops/pipelines/process/variables?view=azure-devops&tabs=yaml%2Cbatch#access-variables-through-the-environment) from your variables or variable groups) or through Package Deployer [runtime settings](https://docs.microsoft.com/en-us/power-platform/admin/deploy-packages-using-package-deployer-windows-powershell#use-the-cmdlet-to-deploy-packages).
 
-Environment variables must be prefixed with `PACKAGEDEPLOYER_SETTINGS_CONNBASEURL_` and followed by the connector name (not display name). Similarly, runtime settings must be prefixed with `ConnBaseUrl:` and followed by the connector name (new display name). For example, if a custom connector name was `new_testconnector`, this could be set via either of the following:
+Environment variables must be prefixed with `PACKAGEDEPLOYER_SETTINGS_CONNBASEURL_` and followed by the connector name (not display name). Similarly, runtime settings must be prefixed with `ConnBaseUrl:` and followed by the connector name (not display name). For example, if a custom connector name was `new_testconnector`, this could be set via either of the following:
 
 **Environment variable**
 
