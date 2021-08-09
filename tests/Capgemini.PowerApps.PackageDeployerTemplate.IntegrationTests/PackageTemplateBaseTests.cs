@@ -176,7 +176,7 @@
         {
             var connectorDefinitionQuery = new QueryByAttribute(Constants.Connector.LogicalName);
             connectorDefinitionQuery.AddAttributeValue(Constants.Connector.Fields.Name, "pdt_5Fexample-20api");
-            connectorDefinitionQuery.ColumnSet = new ColumnSet(false);
+            connectorDefinitionQuery.ColumnSet = new ColumnSet(Constants.Connector.Fields.OpenApiDefinition);
 
             var connectorDefinition = this.fixture.ServiceClient.RetrieveMultiple(connectorDefinitionQuery).Entities.First();
             var openApiDefinition = connectorDefinition.GetAttributeValue<string>(Constants.Connector.Fields.OpenApiDefinition);
