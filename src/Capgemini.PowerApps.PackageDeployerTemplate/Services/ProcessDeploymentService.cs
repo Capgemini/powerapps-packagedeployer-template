@@ -134,7 +134,7 @@
                 }
                 catch (Exception ex)
                 {
-                    this.logger.LogError(ex, $"Status for process {deployedProcess.Attributes[Constants.Workflow.Fields.Name]} could not be set. Please check the processes for errors e.g. missing reference data or connections.");
+                    this.logger.LogError(ex, $"Status for process {deployedProcess.Attributes[Constants.Workflow.Fields.Name]} could not be set. {ex.Message}");
                 }
             }
         }
