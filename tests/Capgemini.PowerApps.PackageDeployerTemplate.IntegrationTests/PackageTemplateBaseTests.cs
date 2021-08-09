@@ -181,7 +181,7 @@
             var connectorDefinition = this.fixture.ServiceClient.RetrieveMultiple(connectorDefinitionQuery).Entities.First();
             var openApiDefinition = connectorDefinition.GetAttributeValue<string>(Constants.Connector.Fields.OpenApiDefinition);
 
-            var newBaseUrl = new Uri(Environment.GetEnvironmentVariable("PACKAGEDEPLOYER_SETTINGS_CONNBASEURL_pdt_5Fexample"));
+            var newBaseUrl = new Uri(Environment.GetEnvironmentVariable("PACKAGEDEPLOYER_SETTINGS_CONNBASEURL_pdt_5Fexample-20api"));
 
             openApiDefinition.Should().Contain($"\"host\":\"{newBaseUrl.Host}\"", $"Host was not set to '{newBaseUrl.Host}'.");
             openApiDefinition.Should().Contain($"\"basePath\":\"{newBaseUrl.AbsolutePath}\"", $"Base URL was not set to '{newBaseUrl.AbsolutePath}'.");
