@@ -250,7 +250,7 @@
                 }
                 else
                 {
-                    this.logger.LogWarning(ex, $"Failed to execute {request.RequestName} as {username}.");
+                    this.logger.LogWarning(ex, $"Failed to execute {request.RequestName} as {username}. {ex.Message}");
                 }
 
                 if (!fallbackToExistingUser)
