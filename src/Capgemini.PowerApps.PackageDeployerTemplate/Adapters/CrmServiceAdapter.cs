@@ -50,6 +50,36 @@
         }
 
         /// <inheritdoc/>
+        public ExecuteMultipleResponse ExecuteMultiple(IEnumerable<OrganizationRequest> requests, string username, bool continueOnError = true, bool returnResponses = true)
+        {
+            if (requests is null)
+            {
+                throw new ArgumentNullException(nameof(requests));
+            }
+
+            if (username is null)
+            {
+                throw new ArgumentNullException(nameof(username));
+            }
+
+            this.logger.LogDebug($"Executing {requests.Count()} requests as {username}.");
+
+            var previousCallerObjectId = this.CallerAADObjectId;
+            ExecuteMultipleResponse response = null;
+            try
+            {
+                this.CallerAADObjectId = this.RetrieveAzureAdObjectIdByDomainName(username);
+                response = this.ExecuteMultiple(requests, continueOnError, returnResponses);
+            }
+            finally
+            {
+                this.CallerAADObjectId = previousCallerObjectId;
+            }
+
+            return response;
+        }
+
+        /// <inheritdoc/>
         public IEnumerable<Guid> RetrieveSolutionComponentObjectIds(string solutionName, int componentType)
         {
             var queryExpression = new QueryExpression(Constants.SolutionComponent.LogicalName)

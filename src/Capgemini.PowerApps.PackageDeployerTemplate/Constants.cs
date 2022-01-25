@@ -105,6 +105,11 @@
                 /// The name of the process.
                 /// </summary>
                 public const string Name = "name";
+
+                /// <summary>
+                /// The name of the process.
+                /// </summary>
+                public const string StateCode = "statecode";
             }
         }
 

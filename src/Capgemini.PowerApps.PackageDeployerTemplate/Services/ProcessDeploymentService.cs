@@ -48,7 +48,7 @@
                 solutions,
                 Constants.SolutionComponent.ComponentTypeWorkflow,
                 Constants.Workflow.LogicalName,
-                new ColumnSet(Constants.Workflow.Fields.Name)).Entities;
+                new ColumnSet(Constants.Workflow.Fields.Name, Constants.Workflow.Fields.StateCode)).Entities;
 
             this.SetStates(deployedProcesses, componentsToDeactivate, user);
         }
@@ -103,6 +103,7 @@
                 this.logger.LogInformation($"Activating processes as {user}.");
             }
 
+            var requests = new List<OrganizationRequest>();
             foreach (var deployedProcess in processes)
             {
                 var stateCode = new OptionSetValue(Constants.Workflow.StateCodeActive);
@@ -114,27 +115,39 @@
                     statusCode.Value = Constants.Workflow.StatusCodeInactive;
                 }
 
+                if (stateCode.Value == deployedProcess.GetAttributeValue<OptionSetValue>(Constants.Workflow.Fields.StateCode).Value)
+                {
+                    this.logger.LogInformation($"Process {deployedProcess[Constants.Workflow.Fields.Name]} already has desired state. Skipping.");
+                    continue;
+                }
+
                 this.logger.LogInformation($"Setting process status for {deployedProcess[Constants.Workflow.Fields.Name]} with statecode {stateCode.Value} and statuscode {statusCode.Value}");
 
                 // SetStateRequest is supposedly deprecated but UpdateRequest doesn't work for deactivating active flows
-                var setStateRequest = new SetStateRequest { EntityMoniker = deployedProcess.ToEntityReference(), State = stateCode, Status = statusCode };
-
-                try
-                {
-                    if (!string.IsNullOrEmpty(user))
+                requests.Add(
+                    new SetStateRequest
                     {
-                        this.logger.LogInformation($"Impersonating {user} to activate processes.");
+                        EntityMoniker = deployedProcess.ToEntityReference(),
+                        State = stateCode,
+                        Status = statusCode,
+                    });
+            }
 
-                        this.crmSvc.Execute<SetStateResponse>(setStateRequest, user, fallbackToExistingUser: true);
-                    }
-                    else
-                    {
-                        this.crmSvc.Execute(setStateRequest);
-                    }
-                }
-                catch (Exception ex)
+            if (!requests.Any())
+            {
+                return;
+            }
+
+            var executeMultipleRes = string.IsNullOrEmpty(user) ?
+                this.crmSvc.ExecuteMultiple(requests, true, true) : this.crmSvc.ExecuteMultiple(requests, user, true, true);
+
+            if (executeMultipleRes.IsFaulted)
+            {
+                this.logger.LogError("Error(s) encountered when setting process states.");
+                foreach (var failedResponse in executeMultipleRes.Responses.Where(r => r.Fault != null))
                 {
-                    this.logger.LogError(ex, $"Status for process {deployedProcess.Attributes[Constants.Workflow.Fields.Name]} could not be set. {ex.Message}");
+                    var failedRequest = (SetStateRequest)requests[failedResponse.RequestIndex];
+                    this.logger.LogError($"Failed to set state for process {failedRequest.EntityMoniker.Name} with the following error: {failedResponse.Fault.Message}.");
                 }
             }
         }
@@ -143,7 +156,7 @@
         {
             var query = new QueryExpression(Constants.Workflow.LogicalName)
             {
-                ColumnSet = new ColumnSet(false),
+                ColumnSet = new ColumnSet(Constants.Workflow.Fields.Name, Constants.Workflow.Fields.StateCode, Constants.Workflow.Fields.Type),
             };
             query.Criteria.AddCondition(Constants.Workflow.Fields.Name, ConditionOperator.In, names.ToArray<object>());
             query.Criteria.AddCondition(Constants.Workflow.Fields.Type, ConditionOperator.Equal, Constants.Workflow.TypeDefinition);

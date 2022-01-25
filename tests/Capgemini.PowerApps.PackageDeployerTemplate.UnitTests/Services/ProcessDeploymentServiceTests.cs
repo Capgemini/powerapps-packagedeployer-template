@@ -3,13 +3,14 @@
     using System;
     using System.Collections.Generic;
     using System.Linq;
-    using System.ServiceModel;
+    using System.Linq.Expressions;
     using Capgemini.PowerApps.PackageDeployerTemplate.Adapters;
     using Capgemini.PowerApps.PackageDeployerTemplate.Services;
     using FluentAssertions;
     using Microsoft.Crm.Sdk.Messages;
     using Microsoft.Extensions.Logging;
     using Microsoft.Xrm.Sdk;
+    using Microsoft.Xrm.Sdk.Messages;
     using Microsoft.Xrm.Sdk.Query;
     using Moq;
     using Xunit;
@@ -58,30 +59,30 @@
         [Fact]
         public void SetStatesBySolution_ProcessInComponentsToDeactivateList_DeactivatesProcess()
         {
-            var processToDeactivateName = "Process to deactivate";
-            var solutionProcesses = new List<Entity>
-            {
-                new Entity(Constants.Workflow.LogicalName)
-                {
-                    Id = Guid.NewGuid(),
-                    Attributes =
-                    {
-                        { Constants.Workflow.Fields.Name, processToDeactivateName },
-                    },
-                },
-            };
+            var solutionProcesses = new List<Entity> { GetProcess(Constants.Workflow.StateCodeActive) };
             this.MockBySolutionProcesses(solutionProcesses);
+            this.MockExecuteMultipleResponse(
+                null,
+                svc => svc.ExecuteMultiple(
+                It.Is<IEnumerable<OrganizationRequest>>(
+                    reqs => reqs.Cast<SetStateRequest>().Any(
+                        req =>
+                        req.EntityMoniker.LogicalName == Constants.Workflow.LogicalName &&
+                        req.EntityMoniker.Id == solutionProcesses.First().Id &&
+                        req.State.Value == Constants.Workflow.StateCodeInactive &&
+                        req.Status.Value == Constants.Workflow.StatusCodeInactive)),
+                It.IsAny<bool>(),
+                It.IsAny<bool>()),
+                true);
 
-            this.processDeploymentSvc.SetStatesBySolution(Solutions, new List<string> { processToDeactivateName });
+            this.processDeploymentSvc.SetStatesBySolution(
+                Solutions,
+                new List<string>
+                {
+                    solutionProcesses.First().GetAttributeValue<string>("name"),
+                });
 
-            this.crmServiceAdapterMock.Verify(
-                svc => svc.Execute(
-                    It.Is<SetStateRequest>(u =>
-                        u.EntityMoniker.LogicalName == Constants.Workflow.LogicalName &&
-                        u.EntityMoniker.Id == solutionProcesses[0].Id &&
-                        u.State.Value == Constants.Workflow.StateCodeInactive &&
-                        u.Status.Value == Constants.Workflow.StatusCodeInactive)),
-                Times.Once());
+            this.crmServiceAdapterMock.VerifyAll();
         }
 
         [Fact]
@@ -90,20 +91,21 @@
             var userToImpersonate = "licenseduser@domaincom";
             var solutionProcesses = new List<Entity>
             {
-                new Entity(Constants.Workflow.LogicalName)
-                {
-                    Id = Guid.NewGuid(),
-                    Attributes =
-                    {
-                        { Constants.Workflow.Fields.Name, "A process" },
-                    },
-                },
+                GetProcess(Constants.Workflow.StateCodeInactive),
             };
             this.MockBySolutionProcesses(solutionProcesses);
+            this.MockExecuteMultipleResponse(
+                null,
+                svc => svc.ExecuteMultiple(
+                    It.IsAny<IEnumerable<OrganizationRequest>>(),
+                    userToImpersonate,
+                    It.IsAny<bool>(),
+                    It.IsAny<bool>()));
 
-            this.processDeploymentSvc.SetStatesBySolution(Solutions, user: userToImpersonate);
+            this.processDeploymentSvc.SetStatesBySolution(
+                Solutions, user: userToImpersonate);
 
-            this.crmServiceAdapterMock.Verify(svc => svc.Execute<SetStateResponse>(It.IsAny<SetStateRequest>(), userToImpersonate, true));
+            this.crmServiceAdapterMock.VerifyAll();
         }
 
         [Fact]
@@ -143,10 +145,7 @@
         [Fact]
         public void SetStates_FoundProcessCountDiffersFromProvidedNamesCount_LogsMismatchWarning()
         {
-            var foundProcesses = new List<Entity>
-            {
-                new Entity(Constants.Workflow.LogicalName) { Attributes = { { Constants.Workflow.Fields.Name, "Found process" } } },
-            };
+            var foundProcesses = new List<Entity> { GetProcess(Constants.Workflow.StateCodeActive) };
             this.MockSetStatesProcesses(foundProcesses);
             var processesToFind = new List<string>
             {
@@ -162,60 +161,59 @@
         [Fact]
         public void SetStates_ProcessInComponentsToActivateFound_ActivatesProcess()
         {
-            var foundProcesses = new List<Entity>
-            {
-                new Entity(Constants.Workflow.LogicalName) { Attributes = { { Constants.Workflow.Fields.Name, "Found process" } } },
-            };
+            var foundProcesses = new List<Entity> { GetProcess(Constants.Workflow.StateCodeInactive) };
             this.MockSetStatesProcesses(foundProcesses);
+            this.MockExecuteMultipleResponse();
 
             this.processDeploymentSvc.SetStates(new List<string>
             {
                 foundProcesses.First().GetAttributeValue<string>(Constants.Workflow.Fields.Name),
             });
 
-            this.crmServiceAdapterMock.Verify(
-                svc => svc.Execute(
-                    It.Is<SetStateRequest>(u =>
-                        u.EntityMoniker.LogicalName == Constants.Workflow.LogicalName &&
-                        u.EntityMoniker.Id == foundProcesses.First().Id &&
-                        u.State.Value == Constants.Workflow.StateCodeActive &&
-                        u.Status.Value == Constants.Workflow.StatusCodeActive)),
-                Times.Once());
+            this.crmServiceAdapterMock.VerifyAll();
         }
 
         [Fact]
         public void SetStates_ProcessInComponentsToDeactivateFound_DectivatesProcess()
         {
-            var foundProcesses = new List<Entity>
-            {
-                new Entity(Constants.Workflow.LogicalName) { Attributes = { { Constants.Workflow.Fields.Name, "Found process" } } },
-            };
+            var foundProcesses = new List<Entity> { GetProcess(Constants.Workflow.StateCodeActive) };
             this.MockSetStatesProcesses(foundProcesses);
+            this.MockExecuteMultipleResponse(
+                null,
+                svc => svc.ExecuteMultiple(
+                It.Is<IEnumerable<OrganizationRequest>>(
+                    reqs => reqs.Cast<SetStateRequest>().Any(
+                        req =>
+                        req.EntityMoniker.LogicalName == Constants.Workflow.LogicalName &&
+                        req.EntityMoniker.Id == foundProcesses.First().Id &&
+                        req.State.Value == Constants.Workflow.StateCodeInactive &&
+                        req.Status.Value == Constants.Workflow.StatusCodeInactive)),
+                It.IsAny<bool>(),
+                It.IsAny<bool>()),
+                true);
 
             this.processDeploymentSvc.SetStates(Enumerable.Empty<string>(), new List<string>
             {
                 foundProcesses.First().GetAttributeValue<string>(Constants.Workflow.Fields.Name),
             });
 
-            this.crmServiceAdapterMock.Verify(
-                svc => svc.Execute(
-                    It.Is<SetStateRequest>(u =>
-                        u.EntityMoniker.LogicalName == Constants.Workflow.LogicalName &&
-                        u.EntityMoniker.Id == foundProcesses.First().Id &&
-                        u.State.Value == Constants.Workflow.StateCodeInactive &&
-                        u.Status.Value == Constants.Workflow.StatusCodeInactive)),
-                Times.Once());
+            this.crmServiceAdapterMock.VerifyAll();
         }
 
         [Fact]
         public void SetStates_WithUserParameter_ExecutesAsUser()
         {
-            var foundProcesses = new List<Entity>
-            {
-                new Entity(Constants.Workflow.LogicalName) { Attributes = { { Constants.Workflow.Fields.Name, "Found process" } } },
-            };
+            var foundProcesses = new List<Entity> { GetProcess(Constants.Workflow.StateCodeInactive) };
             this.MockSetStatesProcesses(foundProcesses);
             var userToImpersonate = "licenseduser@domaincom";
+            this.MockExecuteMultipleResponse(
+               null,
+               svc => svc.ExecuteMultiple(
+               It.IsAny<IEnumerable<OrganizationRequest>>(),
+               userToImpersonate,
+               It.IsAny<bool>(),
+               It.IsAny<bool>()),
+               true);
 
             this.processDeploymentSvc.SetStates(
                 new List<string>
@@ -225,21 +223,25 @@
                 Enumerable.Empty<string>(),
                 userToImpersonate);
 
-            this.crmServiceAdapterMock.Verify(svc => svc.Execute<SetStateResponse>(It.IsAny<SetStateRequest>(), userToImpersonate, true));
+            this.crmServiceAdapterMock.VerifyAll();
         }
 
         [Fact]
         public void SetStates_WithError_LogsError()
         {
-            var foundProcesses = new List<Entity>
-            {
-                new Entity(Constants.Workflow.LogicalName) { Attributes = { { Constants.Workflow.Fields.Name, "Found process" } } },
-            };
+            var foundProcesses = new List<Entity> { GetProcess(Constants.Workflow.StateCodeInactive) };
             this.MockSetStatesProcesses(foundProcesses);
-            var exception = new FaultException();
-            this.crmServiceAdapterMock
-                .Setup(svc => svc.Execute(It.IsAny<SetStateRequest>()))
-                .Throws(exception);
+            var fault = new OrganizationServiceFault { Message = "Some error." };
+            var response = new ExecuteMultipleResponse
+            {
+                Results = new ParameterCollection
+                {
+                    { "Responses", new ExecuteMultipleResponseItemCollection() },
+                    { "IsFaulted", true },
+                },
+            };
+            response.Responses.Add(new ExecuteMultipleResponseItem { Fault = fault });
+            this.MockExecuteMultipleResponse(response);
 
             this.processDeploymentSvc.SetStates(
                 new List<string>
@@ -248,7 +250,48 @@
                 },
                 Enumerable.Empty<string>());
 
-            this.loggerMock.VerifyLog(l => l.LogError(exception, It.IsAny<string>()));
+            this.loggerMock.VerifyLog(l => l.LogError(It.Is<string>(s => s.Contains(fault.Message))));
+        }
+
+        private static Entity GetProcess(int stateCode)
+        {
+            return new Entity(Constants.Workflow.LogicalName, Guid.NewGuid())
+            {
+                Attributes =
+                    {
+                        {
+                            Constants.Workflow.Fields.Name, "Process"
+                        },
+                        {
+                            Constants.Workflow.Fields.StateCode, new OptionSetValue(stateCode)
+                        },
+                    },
+            };
+        }
+
+        private void MockExecuteMultipleResponse(ExecuteMultipleResponse response = null, Expression<Func<ICrmServiceAdapter, ExecuteMultipleResponse>> expression = null, bool verifiable = false)
+        {
+            if (expression == null)
+            {
+                expression = svc => svc.ExecuteMultiple(
+                    It.IsAny<IEnumerable<OrganizationRequest>>(),
+                    It.IsAny<bool>(),
+                    It.IsAny<bool>());
+            }
+
+            if (response == null)
+            {
+                response = new ExecuteMultipleResponse();
+            }
+
+            var returnResult = this.crmServiceAdapterMock
+                .Setup(expression)
+                .Returns(response);
+
+            if (verifiable)
+            {
+                returnResult.Verifiable();
+            }
         }
 
         private void MockSetStatesProcesses(IList<Entity> processes)
