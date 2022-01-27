@@ -31,7 +31,7 @@ stages:
             inputs:
               authenticationType: PowerPlatformSPN
               PowerPlatformSPN: Dataverse (placeholder)
-              DisplayName: Package Deployer Template - PR $(System.PullRequest.PullRequestNumber)
+              DisplayName: Package Deployer Template - PR $(Environment.Identifier)
               EnvironmentSku: Sandbox
               LocationName: unitedkingdom
               LanguageName: 1033
