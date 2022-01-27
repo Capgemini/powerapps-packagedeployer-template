@@ -2,6 +2,9 @@ parameters:
   - name: environmentUrl
     displayName: Environment URL
     type: string
+  - name: environmentName
+    displayName: environmentName
+    type: string
   - name: username
     displayName: Username
     type: string
@@ -64,7 +67,7 @@ jobs:
           arguments: >
             -Username ${{ parameters.username }}
             -Password (ConvertTo-SecureString -String $env:CONNECTIONOWNER_PASSWORD -AsPlainText -Force)
-            -EnvironmentName $env:BUILDTOOLS_ENVIRONMENTID
+            -EnvironmentName ${{ parameters.environmentName }}
             -Region unitedkingdom
             -Connector shared_approvals
             -ConnectionParameters @{ }

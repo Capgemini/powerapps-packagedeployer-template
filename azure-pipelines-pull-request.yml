@@ -37,7 +37,9 @@ stages:
               LanguageName: 1033
               CurrencyName: GBP
               DomainName: $(TestEnvironment.DomainName)
-          - powershell: echo "##vso[task.setvariable variable=EnvironmentUrl;isOutput=true]$env:BUILDTOOLS_ENVIRONMENTURL"
+          - powershell: |
+              echo "##vso[task.setvariable variable=EnvironmentUrl;isOutput=true]$env:BUILDTOOLS_ENVIRONMENTURL"
+              echo "##vso[task.setvariable variable=EnvironmentName;isOutput=true]$env:BUILDTOOLS_ENVIRONMENTID"
             displayName: Set output variables
             name: SetEnvironmentOutputVariables  
   - stage: BuildAndTest
@@ -45,10 +47,12 @@ stages:
     dependsOn: ProvisionEnvironment
     variables:
       BuildTools.EnvironmentUrl: $[ stageDependencies.ProvisionEnvironment.ProvisionEnvironmentJob.outputs['SetEnvironmentOutputVariables.EnvironmentUrl'] ]
+      BuildTools.EnvironmentId: $[ stageDependencies.ProvisionEnvironment.ProvisionEnvironmentJob.outputs['SetEnvironmentOutputVariables.EnvironmentName'] ]
     jobs:
       - template: templates/build-and-test-job.yml
         parameters:
           environmentUrl: $(BuildTools.EnvironmentUrl)
+          environmentName: $(BuildTools.EnvironmentId)
           username: $(DataverseUsers.AzureDevOps.Username)
           password: $(DataverseUsers.AzureDevOps.Password)
   - stage: ManualValidation
@@ -76,12 +80,12 @@ stages:
     dependsOn:
       - ProvisionEnvironment
       - ManualValidation
-    condition: and(not(canceled()), ne(variables['BuildTools.EnvironmentUrl'], ''))
     variables:
       BuildTools.EnvironmentUrl: $[ stageDependencies.ProvisionEnvironment.ProvisionEnvironmentJob.outputs['SetEnvironmentOutputVariables.EnvironmentUrl'] ]
     jobs:
       - job: DeleteEnvironmentJob
         displayName: Delete environment
+        condition: ne(variables['BuildTools.EnvironmentUrl'], '')
         steps:
           - checkout: none
           - task: PowerPlatformToolInstaller@0
