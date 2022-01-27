@@ -54,7 +54,7 @@ stages:
     dependsOn:
       - ProvisionEnvironment
       - BuildAndTest
-    condition: succeededOrFailed()
+    condition: and(not(canceled()), ne(variables['BuildTools.EnvironmentUrl'], ''))
     variables:
       BuildTools.EnvironmentUrl: $[ stageDependencies.ProvisionEnvironment.ProvisionEnvironmentJob.outputs['SetEnvironmentUrl.EnvironmentUrl'] ]
     jobs:
