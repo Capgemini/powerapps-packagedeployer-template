@@ -22,7 +22,6 @@ stages:
       - job: ProvisionEnvironmentJob
         displayName: Provision environment
         steps:
-          - checkout: none
           - task: PowerPlatformToolInstaller@0
             displayName: Install Power Platform Build Tools
             inputs:
@@ -39,13 +38,13 @@ stages:
               CurrencyName: GBP
               DomainName: $(TestEnvironment.DomainName)
           - powershell: echo "##vso[task.setvariable variable=EnvironmentUrl;isOutput=true]$env:BUILDTOOLS_ENVIRONMENTURL"
-            displayName: Set environment URL output variable
-            name: SetEnvironmentUrl
+            displayName: Set output variables
+            name: SetEnvironmentOutputVariables  
   - stage: BuildAndTest
     displayName: Build and Test
     dependsOn: ProvisionEnvironment
     variables:
-      BuildTools.EnvironmentUrl: $[ stageDependencies.ProvisionEnvironment.ProvisionEnvironmentJob.outputs['SetEnvironmentUrl.EnvironmentUrl'] ]
+      BuildTools.EnvironmentUrl: $[ stageDependencies.ProvisionEnvironment.ProvisionEnvironmentJob.outputs['SetEnvironmentOutputVariables.EnvironmentUrl'] ]
     jobs:
       - template: templates/build-and-test-job.yml
         parameters:
@@ -59,7 +58,7 @@ stages:
       - BuildAndTest
     condition: and(not(canceled()), ne(variables['BuildTools.EnvironmentUrl'], ''))
     variables:
-      BuildTools.EnvironmentUrl: $[ stageDependencies.ProvisionEnvironment.ProvisionEnvironmentJob.outputs['SetEnvironmentUrl.EnvironmentUrl'] ]
+      BuildTools.EnvironmentUrl: $[ stageDependencies.ProvisionEnvironment.ProvisionEnvironmentJob.outputs['SetEnvironmentOutputVariables.EnvironmentUrl'] ]
     jobs:
       - job: ManualValidationJob
         displayName: Manual validation
@@ -79,7 +78,7 @@ stages:
       - ManualValidation
     condition: and(not(canceled()), ne(variables['BuildTools.EnvironmentUrl'], ''))
     variables:
-      BuildTools.EnvironmentUrl: $[ stageDependencies.ProvisionEnvironment.ProvisionEnvironmentJob.outputs['SetEnvironmentUrl.EnvironmentUrl'] ]
+      BuildTools.EnvironmentUrl: $[ stageDependencies.ProvisionEnvironment.ProvisionEnvironmentJob.outputs['SetEnvironmentOutputVariables.EnvironmentUrl'] ]
     jobs:
       - job: DeleteEnvironmentJob
         displayName: Delete environment

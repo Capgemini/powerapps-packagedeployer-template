@@ -57,12 +57,30 @@ jobs:
           solution: '$(solution)'
           platform: '$(buildPlatform)'
           configuration: '$(buildConfiguration)'
+      - task: PowerShell@2
+        displayName: Create Approvals connection
+        inputs:
+          filePath: $(Build.SourcesDirectory)\scripts\New-PowerAppFlowConnection.ps1
+          arguments: >
+            -Username ${{ parameters.username }}
+            -Password (ConvertTo-SecureString -String $env:CONNECTIONOWNER_PASSWORD -AsPlainText -Force)
+            -EnvironmentName $env:BUILDTOOLS_ENVIRONMENTID
+            -Region unitedkingdom
+            -Connector shared_approvals
+            -ConnectionParameters @{ }
+            -OutputVariable "TestEnvironment.Connection.Approvals"
+          targetType: filePath
+        env:
+          CONNECTIONOWNER_PASSWORD: ${{ parameters.password }}
       - task: VSTest@2
         displayName: Run tests
         env:
           CAPGEMINI_PACKAGE_DEPLOYER_TESTS_URL: ${{ parameters.environmentUrl }}
           CAPGEMINI_PACKAGE_DEPLOYER_TESTS_USERNAME: ${{ parameters.username }}
           CAPGEMINI_PACKAGE_DEPLOYER_TESTS_PASSWORD: ${{ parameters.password }}
+          PACKAGEDEPLOYER_SETTINGS_CONNREF_PDT_SHAREDAPPROVALS_D7DCB: $(TestEnvironment.Connection.Approvals)
+          PACKAGEDEPLOYER_SETTINGS_ENVVAR_PDT_TESTVARIABLE: Any string
+          PACKAGEDEPLOYER_SETTINGS_CONNBASEURL_pdt_5Fexample-20api: https://anyurl.com
         inputs:
           codeCoverageEnabled: true
           platform: '$(buildPlatform)'
