@@ -20,6 +20,7 @@ stages:
       - job: ProvisionEnvironmentJob
         displayName: Provision environment
         steps:
+          - checkout: none
           - task: PowerPlatformToolInstaller@0
             displayName: Install Power Platform Build Tools
             inputs:
@@ -63,6 +64,7 @@ stages:
         pool: server
         timeoutInMinutes: 8640
         steps:
+          - checkout: none
           - task: ManualValidation@0
             displayName: Wait for manual validation
             timeoutInMinutes: 7200
