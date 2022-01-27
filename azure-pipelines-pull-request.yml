@@ -25,6 +25,7 @@ stages:
             inputs:
               DefaultVersion: true
           - task: PowerPlatformCreateEnvironment@0
+            displayName: Create environment
             inputs:
               authenticationType: PowerPlatformSPN
               PowerPlatformSPN: Dataverse (placeholder)
