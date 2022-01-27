@@ -76,13 +76,12 @@ stages:
     dependsOn:
       - ProvisionEnvironment
       - ManualValidation
-    condition: succeededOrFailed()
+    condition: and(not(canceled()), ne(variables['BuildTools.EnvironmentUrl'], ''))
     variables:
       BuildTools.EnvironmentUrl: $[ stageDependencies.ProvisionEnvironment.ProvisionEnvironmentJob.outputs['SetEnvironmentUrl.EnvironmentUrl'] ]
     jobs:
       - job: DeleteEnvironmentJob
         displayName: Delete environment
-        condition: and(succeeded(), ne(variables['BuildTools.EnvironmentUrl'], ''))
         steps:
           - checkout: none
           - task: PowerPlatformToolInstaller@0
