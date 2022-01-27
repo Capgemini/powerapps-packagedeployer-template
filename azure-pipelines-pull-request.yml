@@ -9,8 +9,10 @@ pool:
   vmImage: windows-latest
 
 variables:
+  - name: Environment.Identifier
+    value: $[ coalesce(variables['System.PullRequest.PullRequestNumber'], variables['Build.BuildId']) ]
   - name: TestEnvironment.DomainName
-    value: packagedeployertemplate-pr-$(System.PullRequest.PullRequestNumber)
+    value: pdt-pr-$(Environment.Identifier)
   - group: Dataverse users
 
 stages:
