@@ -1,28 +1,25 @@
 name: $(GITVERSION_FullSemVer)
+
 trigger:
  batch: true
  branches:
   include:
     - master
+
 pr: none
+
 pool:
-  vmImage: 'windows-latest'
-variables:
-- name: GitVersion.SemVer
-  value: ''
-- name: solution
-  value: '**/*.sln'
-- name: buildPlatform
-  value: 'anycpu'
-- name: buildConfiguration
-  value: 'Release'
+  vmImage: windows-latest
+
 stages:
-  - stage: BuildAndTest
-    displayName: Build and Test
-    jobs:
-    - template: templates/build-and-test-job.yml    
+  - template: templates/build-and-test-stages.yml
+    parameters:
+      environmentIdentifier: $(Build.BuildId)
+      environmentDisplayName: Package Deployer Template - CI
+      environmentDomainName: pdt-ci
   - stage: Publish
     displayName: Publish
+    dependsOn: ManualValidation
     jobs:
       - job: PublishJob
         displayName: Publish 
