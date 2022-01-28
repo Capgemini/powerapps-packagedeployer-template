@@ -72,7 +72,8 @@
                         req.State.Value == Constants.Workflow.StateCodeInactive &&
                         req.Status.Value == Constants.Workflow.StatusCodeInactive)),
                 It.IsAny<bool>(),
-                It.IsAny<bool>()),
+                It.IsAny<bool>(),
+                It.IsAny<int?>()),
                 true);
 
             this.processDeploymentSvc.SetStatesBySolution(
@@ -100,7 +101,8 @@
                     It.IsAny<IEnumerable<OrganizationRequest>>(),
                     userToImpersonate,
                     It.IsAny<bool>(),
-                    It.IsAny<bool>()));
+                    It.IsAny<bool>(),
+                    It.IsAny<int?>()));
 
             this.processDeploymentSvc.SetStatesBySolution(
                 Solutions, user: userToImpersonate);
@@ -189,7 +191,8 @@
                         req.State.Value == Constants.Workflow.StateCodeInactive &&
                         req.Status.Value == Constants.Workflow.StatusCodeInactive)),
                 It.IsAny<bool>(),
-                It.IsAny<bool>()),
+                It.IsAny<bool>(),
+                It.IsAny<int?>()),
                 true);
 
             this.processDeploymentSvc.SetStates(Enumerable.Empty<string>(), new List<string>
@@ -212,7 +215,8 @@
                It.IsAny<IEnumerable<OrganizationRequest>>(),
                userToImpersonate,
                It.IsAny<bool>(),
-               It.IsAny<bool>()),
+               It.IsAny<bool>(),
+               It.IsAny<int?>()),
                true);
 
             this.processDeploymentSvc.SetStates(
@@ -276,7 +280,8 @@
                 expression = svc => svc.ExecuteMultiple(
                     It.IsAny<IEnumerable<OrganizationRequest>>(),
                     It.IsAny<bool>(),
-                    It.IsAny<bool>());
+                    It.IsAny<bool>(),
+                    It.IsAny<int?>());
             }
 
             if (response == null)

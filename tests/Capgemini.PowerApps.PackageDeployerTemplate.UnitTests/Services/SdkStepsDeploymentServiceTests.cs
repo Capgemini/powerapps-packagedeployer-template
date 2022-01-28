@@ -71,7 +71,8 @@
                         req.State.Value == Constants.SdkMessageProcessingStep.StateCodeInactive &&
                         req.Status.Value == Constants.SdkMessageProcessingStep.StatusCodeInactive)),
                 It.IsAny<bool>(),
-                It.IsAny<bool>()),
+                It.IsAny<bool>(),
+                It.IsAny<int?>()),
                 true);
 
             this.sdkStepDeploymentSvc.SetStatesBySolution(
@@ -165,7 +166,8 @@
                         req.State.Value == Constants.SdkMessageProcessingStep.StateCodeInactive &&
                         req.Status.Value == Constants.SdkMessageProcessingStep.StatusCodeInactive)),
                 It.IsAny<bool>(),
-                It.IsAny<bool>()),
+                It.IsAny<bool>(),
+                It.IsAny<int?>()),
                 true);
 
             this.sdkStepDeploymentSvc.SetStates(Enumerable.Empty<string>(), new List<string>
@@ -226,7 +228,8 @@
                 expression = svc => svc.ExecuteMultiple(
                     It.IsAny<IEnumerable<OrganizationRequest>>(),
                     It.IsAny<bool>(),
-                    It.IsAny<bool>());
+                    It.IsAny<bool>(),
+                    It.IsAny<int?>());
             }
 
             if (response == null)

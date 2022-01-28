@@ -45,7 +45,7 @@
         {
             // Arrange
             this.crmServiceAdapterMock
-                .Setup(x => x.ExecuteMultiple(It.IsAny<List<OrganizationRequest>>(), It.IsAny<bool>(), It.IsAny<bool>()))
+                .Setup(x => x.ExecuteMultiple(It.IsAny<List<OrganizationRequest>>(), It.IsAny<bool>(), It.IsAny<bool>(), It.IsAny<int?>()))
                 .Returns(() =>
                 {
                     var responseItemCollection = new ExecuteMultipleResponseItemCollection
@@ -81,7 +81,7 @@
         {
             // Arrage
             this.crmServiceAdapterMock
-            .Setup(x => x.ExecuteMultiple(It.IsAny<List<OrganizationRequest>>(), It.IsAny<bool>(), It.IsAny<bool>()))
+            .Setup(x => x.ExecuteMultiple(It.IsAny<List<OrganizationRequest>>(), It.IsAny<bool>(), It.IsAny<bool>(), It.IsAny<int?>()))
             .Returns(() =>
             {
                 var responseItemCollection = new ExecuteMultipleResponseItemCollection
@@ -110,14 +110,14 @@
             // Assert
             this.loggerMock.VerifyLog(x => x.LogInformation("Adding auto-number seed request. Entity Name: test_table. Auto-number Attribute: test_autonumberone. Value: 1000"));
             this.loggerMock.VerifyLog(x => x.LogInformation("Adding auto-number seed request. Entity Name: test_table. Auto-number Attribute: test_autonumbertwo. Value: 2000"));
-            this.crmServiceAdapterMock.Verify(svc => svc.ExecuteMultiple(It.IsAny<List<OrganizationRequest>>(), It.IsAny<bool>(), It.IsAny<bool>()));
+            this.crmServiceAdapterMock.Verify(svc => svc.ExecuteMultiple(It.IsAny<List<OrganizationRequest>>(), It.IsAny<bool>(), It.IsAny<bool>(), It.IsAny<int?>()));
         }
 
         [Fact]
         public void ExecuteMultiple_Errors_LogErrors()
         {
             this.crmServiceAdapterMock
-            .Setup(x => x.ExecuteMultiple(It.IsAny<List<OrganizationRequest>>(), It.IsAny<bool>(), It.IsAny<bool>()))
+            .Setup(x => x.ExecuteMultiple(It.IsAny<List<OrganizationRequest>>(), It.IsAny<bool>(), It.IsAny<bool>(), It.IsAny<int?>()))
             .Returns(() =>
             {
                 var responseItemCollection = new ExecuteMultipleResponseItemCollection
