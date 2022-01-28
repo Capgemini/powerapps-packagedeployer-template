@@ -8,18 +8,17 @@ parameters:
   - name: environmentDomainName
     displayName: Environment domain name
 
-variables:
-  - name: Environment.Identifier
-    value: ${{ parameters.environmentIdentifier }}
-  - name: Environment.DisplayName
-    value: ${{ parameters.displayName }} $(Environment.Identifier)
-  - name: TestEnvironment.DomainName
-    value: ${{ parameters.domainName }}-$(Environment.Identifier)
-  - group: Dataverse users
-
 stages:
   - stage: ProvisionEnvironment
     displayName: Provision environment
+    variables:
+      - name: Environment.Identifier
+        value: ${{ parameters.environmentIdentifier }}
+      - name: Environment.DisplayName
+        value: ${{ parameters.displayName }} $(Environment.Identifier)
+      - name: TestEnvironment.DomainName
+        value: ${{ parameters.domainName }}-$(Environment.Identifier)
+      - group: Dataverse users
     jobs:
       - job: ProvisionEnvironmentJob
         displayName: Provision environment
@@ -48,8 +47,11 @@ stages:
     displayName: Build and Test
     dependsOn: ProvisionEnvironment
     variables:
-      BuildTools.EnvironmentUrl: $[ stageDependencies.ProvisionEnvironment.ProvisionEnvironmentJob.outputs['SetEnvironmentOutputVariables.EnvironmentUrl'] ]
-      BuildTools.EnvironmentId: $[ stageDependencies.ProvisionEnvironment.ProvisionEnvironmentJob.outputs['SetEnvironmentOutputVariables.EnvironmentName'] ]
+      - name: BuildTools.EnvironmentUrl
+        value: $[ stageDependencies.ProvisionEnvironment.ProvisionEnvironmentJob.outputs['SetEnvironmentOutputVariables.EnvironmentUrl'] ]
+      - name: BuildTools.EnvironmentId
+        value: $[ stageDependencies.ProvisionEnvironment.ProvisionEnvironmentJob.outputs['SetEnvironmentOutputVariables.EnvironmentName'] ]
+      - group: Dataverse users
     jobs:
       - template: build-and-test-job.yml
         parameters:
