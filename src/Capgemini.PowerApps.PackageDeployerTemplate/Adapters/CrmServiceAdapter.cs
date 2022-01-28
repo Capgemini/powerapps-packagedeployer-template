@@ -381,7 +381,7 @@
 
         private TimeSpan SetTimeout(TimeSpan timeout)
         {
-            var previousTimeout = TimeSpan.Zero;
+            TimeSpan previousTimeout;
 
             if (this.crmSvc.OrganizationServiceProxy != null)
             {
