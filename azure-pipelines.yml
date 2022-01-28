@@ -19,7 +19,9 @@ stages:
       environmentDomainName: pdt-ci
   - stage: Publish
     displayName: Publish
-    dependsOn: ManualValidation
+    dependsOn: 
+      - BuildAndTest
+      - ManualValidation
     jobs:
       - job: PublishJob
         displayName: Publish 
