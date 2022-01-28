@@ -3,11 +3,14 @@
     using System;
     using System.Collections.Generic;
     using System.Linq;
+    using System.Linq.Expressions;
     using Capgemini.PowerApps.PackageDeployerTemplate.Adapters;
     using Capgemini.PowerApps.PackageDeployerTemplate.Services;
     using FluentAssertions;
+    using Microsoft.Crm.Sdk.Messages;
     using Microsoft.Extensions.Logging;
     using Microsoft.Xrm.Sdk;
+    using Microsoft.Xrm.Sdk.Messages;
     using Microsoft.Xrm.Sdk.Query;
     using Moq;
     using Xunit;
@@ -19,14 +22,13 @@
         private readonly Mock<ILogger> loggerMock;
         private readonly Mock<ICrmServiceAdapter> crmServiceAdapterMock;
 
-        private readonly SdkStepDeploymentService sdkStepSvc;
+        private readonly SdkStepDeploymentService sdkStepDeploymentSvc;
 
         public SdkStepsDeploymentServiceTests()
         {
             this.loggerMock = new Mock<ILogger>();
             this.crmServiceAdapterMock = new Mock<ICrmServiceAdapter>();
-
-            this.sdkStepSvc = new SdkStepDeploymentService(this.loggerMock.Object, this.crmServiceAdapterMock.Object);
+            this.sdkStepDeploymentSvc = new SdkStepDeploymentService(this.loggerMock.Object, this.crmServiceAdapterMock.Object);
         }
 
         [Fact]
@@ -48,7 +50,7 @@
         [Fact]
         public void SetStatesBySolution_NullSolutionsArgument_LogsNoSolutions()
         {
-            this.sdkStepSvc.SetStatesBySolution(null);
+            this.sdkStepDeploymentSvc.SetStatesBySolution(null);
 
             this.loggerMock.VerifyLog(x => x.LogInformation("No solutions were provided to activate SDK steps for."));
         }
@@ -56,35 +58,36 @@
         [Fact]
         public void SetStatesBySolution_SdkStepInComponentsToDeactivateList_DeactivatesSdkStep()
         {
-            var sdkStepToDeactivateName = "SDK step to deactivate";
-            var solutionSdkSteps = new List<Entity>
-            {
-                new Entity(Constants.SdkMessageProcessingStep.LogicalName)
-                {
-                    Id = Guid.NewGuid(),
-                    Attributes =
-                    {
-                        { Constants.SdkMessageProcessingStep.Fields.Name, sdkStepToDeactivateName },
-                    },
-                },
-            };
+            var solutionSdkSteps = new List<Entity> { GetSdkStep(Constants.SdkMessageProcessingStep.StateCodeActive) };
             this.MockBySolutionSdkSteps(solutionSdkSteps);
+            this.MockExecuteMultipleResponse(
+                null,
+                svc => svc.ExecuteMultiple(
+                It.Is<IEnumerable<OrganizationRequest>>(
+                    reqs => reqs.Cast<SetStateRequest>().Any(
+                        req =>
+                        req.EntityMoniker.LogicalName == Constants.SdkMessageProcessingStep.LogicalName &&
+                        req.EntityMoniker.Id == solutionSdkSteps.First().Id &&
+                        req.State.Value == Constants.SdkMessageProcessingStep.StateCodeInactive &&
+                        req.Status.Value == Constants.SdkMessageProcessingStep.StatusCodeInactive)),
+                It.IsAny<bool>(),
+                It.IsAny<bool>()),
+                true);
 
-            this.sdkStepSvc.SetStatesBySolution(Solutions, new List<string> { sdkStepToDeactivateName });
+            this.sdkStepDeploymentSvc.SetStatesBySolution(
+                Solutions,
+                new List<string>
+                {
+                    solutionSdkSteps.First().GetAttributeValue<string>("name"),
+                });
 
-            this.crmServiceAdapterMock.Verify(
-                c => c.UpdateStateAndStatusForEntity(
-                    Constants.SdkMessageProcessingStep.LogicalName,
-                    solutionSdkSteps[0].Id,
-                    Constants.SdkMessageProcessingStep.StateCodeInactive,
-                    Constants.SdkMessageProcessingStep.StatusCodeInactive),
-                Times.Once());
+            this.crmServiceAdapterMock.VerifyAll();
         }
 
         [Fact]
         public void SetStates_ComponentsToActivateNull_ThrowsArgumentNullException()
         {
-            Action setStatesWithoutComponentsToActivate = () => this.sdkStepSvc.SetStates(null);
+            Action setStatesWithoutComponentsToActivate = () => this.sdkStepDeploymentSvc.SetStates(null);
 
             setStatesWithoutComponentsToActivate.Should().Throw<ArgumentNullException>();
         }
@@ -92,7 +95,7 @@
         [Fact]
         public void SetStates_ComponentsToDeactivateNull_DoesNotThrow()
         {
-            Action setStatesWithoutComponentsToDeactivate = () => this.sdkStepSvc.SetStates(Enumerable.Empty<string>());
+            Action setStatesWithoutComponentsToDeactivate = () => this.sdkStepDeploymentSvc.SetStates(Enumerable.Empty<string>());
 
             setStatesWithoutComponentsToDeactivate.Should().NotThrow<ArgumentNullException>();
         }
@@ -100,7 +103,7 @@
         [Fact]
         public void SetStates_NoSdkStepsPassed_LogsNoSdkStepsProvided()
         {
-            this.sdkStepSvc.SetStates(Enumerable.Empty<string>());
+            this.sdkStepDeploymentSvc.SetStates(Enumerable.Empty<string>());
 
             this.loggerMock.VerifyLog(l => l.LogInformation("No SDK steps were provided."));
         }
@@ -110,7 +113,7 @@
         {
             this.MockSetStatesSdkSteps(new List<Entity>());
 
-            this.sdkStepSvc.SetStates(new List<string> { "Not found SDK step" });
+            this.sdkStepDeploymentSvc.SetStates(new List<string> { "Not found SDK step" });
 
             this.loggerMock.VerifyLog(l => l.LogInformation("No SDK steps were found with the names provided."));
         }
@@ -118,10 +121,7 @@
         [Fact]
         public void SetStates_FoundSdkStepCountDiffersFromProvidedNamesCount_LogsMismatchWarning()
         {
-            var foundSdkSteps = new List<Entity>
-            {
-                new Entity(Constants.SdkMessageProcessingStep.LogicalName) { Attributes = { { Constants.SdkMessageProcessingStep.Fields.Name, "Found SDK step" } } },
-            };
+            var foundSdkSteps = new List<Entity> { GetSdkStep(Constants.SdkMessageProcessingStep.StateCodeActive) };
             this.MockSetStatesSdkSteps(foundSdkSteps);
             var sdkStepsToFind = new List<string>
             {
@@ -129,7 +129,7 @@
                 "Not found SDK step",
             };
 
-            this.sdkStepSvc.SetStates(sdkStepsToFind);
+            this.sdkStepDeploymentSvc.SetStates(sdkStepsToFind);
 
             this.loggerMock.VerifyLog(l => l.LogWarning($"Found {foundSdkSteps.Count} deployed SDK steps but expected {sdkStepsToFind.Count}."));
         }
@@ -137,47 +137,111 @@
         [Fact]
         public void SetStates_SdkStepInComponentsToActivateFound_ActivatesSdkStep()
         {
-            var foundSdkSteps = new List<Entity>
-            {
-                new Entity(Constants.SdkMessageProcessingStep.LogicalName) { Attributes = { { Constants.SdkMessageProcessingStep.Fields.Name, "Found SDK step" } } },
-            };
+            var foundSdkSteps = new List<Entity> { GetSdkStep(Constants.SdkMessageProcessingStep.StateCodeInactive) };
             this.MockSetStatesSdkSteps(foundSdkSteps);
+            this.MockExecuteMultipleResponse();
 
-            this.sdkStepSvc.SetStates(new List<string>
+            this.sdkStepDeploymentSvc.SetStates(new List<string>
             {
                 foundSdkSteps.First().GetAttributeValue<string>(Constants.SdkMessageProcessingStep.Fields.Name),
             });
 
-            this.crmServiceAdapterMock.Verify(
-                svc => svc.UpdateStateAndStatusForEntity(
-                    Constants.SdkMessageProcessingStep.LogicalName,
-                    foundSdkSteps.First().Id,
-                    Constants.SdkMessageProcessingStep.StateCodeActive,
-                    Constants.SdkMessageProcessingStep.StatusCodeActive),
-                Times.Once());
+            this.crmServiceAdapterMock.VerifyAll();
         }
 
         [Fact]
         public void SetStates_SdkStepInComponentsToDeactivateFound_DectivatesSdkStep()
         {
-            var foundSdkSteps = new List<Entity>
-            {
-                new Entity(Constants.SdkMessageProcessingStep.LogicalName) { Attributes = { { Constants.SdkMessageProcessingStep.Fields.Name, "Found SDK step" } } },
-            };
+            var foundSdkSteps = new List<Entity> { GetSdkStep(Constants.SdkMessageProcessingStep.StateCodeActive) };
             this.MockSetStatesSdkSteps(foundSdkSteps);
+            this.MockExecuteMultipleResponse(
+                null,
+                svc => svc.ExecuteMultiple(
+                It.Is<IEnumerable<OrganizationRequest>>(
+                    reqs => reqs.Cast<SetStateRequest>().Any(
+                        req =>
+                        req.EntityMoniker.LogicalName == Constants.SdkMessageProcessingStep.LogicalName &&
+                        req.EntityMoniker.Id == foundSdkSteps.First().Id &&
+                        req.State.Value == Constants.SdkMessageProcessingStep.StateCodeInactive &&
+                        req.Status.Value == Constants.SdkMessageProcessingStep.StatusCodeInactive)),
+                It.IsAny<bool>(),
+                It.IsAny<bool>()),
+                true);
 
-            this.sdkStepSvc.SetStates(Enumerable.Empty<string>(), new List<string>
+            this.sdkStepDeploymentSvc.SetStates(Enumerable.Empty<string>(), new List<string>
             {
                 foundSdkSteps.First().GetAttributeValue<string>(Constants.SdkMessageProcessingStep.Fields.Name),
             });
 
-            this.crmServiceAdapterMock.Verify(
-                svc => svc.UpdateStateAndStatusForEntity(
-                    Constants.SdkMessageProcessingStep.LogicalName,
-                    foundSdkSteps.First().Id,
-                    Constants.SdkMessageProcessingStep.StateCodeInactive,
-                    Constants.SdkMessageProcessingStep.StatusCodeInactive),
-                Times.Once());
+            this.crmServiceAdapterMock.VerifyAll();
+        }
+
+        [Fact]
+        public void SetStates_WithError_LogsError()
+        {
+            var foundSdkSteps = new List<Entity> { GetSdkStep(Constants.SdkMessageProcessingStep.StateCodeInactive) };
+            this.MockSetStatesSdkSteps(foundSdkSteps);
+            var fault = new OrganizationServiceFault { Message = "Some error." };
+            var response = new ExecuteMultipleResponse
+            {
+                Results = new ParameterCollection
+                {
+                    { "Responses", new ExecuteMultipleResponseItemCollection() },
+                    { "IsFaulted", true },
+                },
+            };
+            response.Responses.Add(new ExecuteMultipleResponseItem { Fault = fault });
+            this.MockExecuteMultipleResponse(response);
+
+            this.sdkStepDeploymentSvc.SetStates(
+                new List<string>
+                {
+                    foundSdkSteps.First().GetAttributeValue<string>(Constants.SdkMessageProcessingStep.Fields.Name),
+                },
+                Enumerable.Empty<string>());
+
+            this.loggerMock.VerifyLog(l => l.LogError(It.Is<string>(s => s.Contains(fault.Message))));
+        }
+
+        private static Entity GetSdkStep(int stateCode)
+        {
+            return new Entity(Constants.SdkMessageProcessingStep.LogicalName, Guid.NewGuid())
+            {
+                Attributes =
+                    {
+                        {
+                            Constants.SdkMessageProcessingStep.Fields.Name, "SdkStep"
+                        },
+                        {
+                            Constants.SdkMessageProcessingStep.Fields.StateCode, new OptionSetValue(stateCode)
+                        },
+                    },
+            };
+        }
+
+        private void MockExecuteMultipleResponse(ExecuteMultipleResponse response = null, Expression<Func<ICrmServiceAdapter, ExecuteMultipleResponse>> expression = null, bool verifiable = false)
+        {
+            if (expression == null)
+            {
+                expression = svc => svc.ExecuteMultiple(
+                    It.IsAny<IEnumerable<OrganizationRequest>>(),
+                    It.IsAny<bool>(),
+                    It.IsAny<bool>());
+            }
+
+            if (response == null)
+            {
+                response = new ExecuteMultipleResponse();
+            }
+
+            var returnResult = this.crmServiceAdapterMock
+                .Setup(expression)
+                .Returns(response);
+
+            if (verifiable)
+            {
+                returnResult.Verifiable();
+            }
         }
 
         private void MockSetStatesSdkSteps(IList<Entity> sdkSteps)
