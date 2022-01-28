@@ -33,7 +33,7 @@ stages:
             inputs:
               authenticationType: PowerPlatformSPN
               PowerPlatformSPN: Dataverse (placeholder)
-              DisplayName: Package Deployer Template - PR $(Environment.Identifier)
+              DisplayName: $(Environment.DisplayName)
               EnvironmentSku: Sandbox
               LocationName: unitedkingdom
               LanguageName: 1033
