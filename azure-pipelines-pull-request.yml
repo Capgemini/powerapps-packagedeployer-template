@@ -1,11 +1,16 @@
 name: $(GITVERSION_FullSemVer)
+
 trigger: none
+
 pr:
   - master
+
 pool:
-  vmImage: 'windows-latest'
+  vmImage: windows-latest
+
 stages:
-  - stage: BuildAndTest
-    displayName: Build and Test
-    jobs:
-    - template: templates/build-and-test-job.yml
+  - template: templates/build-and-test-stages.yml
+    parameters:
+      environmentIdentifier: $[ coalesce(variables['System.PullRequest.PullRequestNumber'], variables['Build.BuildId']) ]
+      environmentDisplayName: Package Deployer Template - PR
+      environmentDomainName: pdt-pr
