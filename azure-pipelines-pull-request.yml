@@ -60,7 +60,7 @@ stages:
     dependsOn:
       - ProvisionEnvironment
       - BuildAndTest
-    condition: and(not(canceled()), ne(variables['BuildTools.EnvironmentUrl'], ''))
+    condition: and(not(canceled()), ne(dependencies.ProvisionEnvironment.outputs['ProvisionEnvironmentJob.SetEnvironmentOutputVariables.EnvironmentUrl'], ''))
     variables:
       BuildTools.EnvironmentUrl: $[ stageDependencies.ProvisionEnvironment.ProvisionEnvironmentJob.outputs['SetEnvironmentOutputVariables.EnvironmentUrl'] ]
     jobs:
@@ -80,12 +80,12 @@ stages:
     dependsOn:
       - ProvisionEnvironment
       - ManualValidation
+    condition: ne(dependencies.ProvisionEnvironment.outputs['ProvisionEnvironmentJob.SetEnvironmentOutputVariables.EnvironmentUrl'], '')
     variables:
       BuildTools.EnvironmentUrl: $[ stageDependencies.ProvisionEnvironment.ProvisionEnvironmentJob.outputs['SetEnvironmentOutputVariables.EnvironmentUrl'] ]
     jobs:
       - job: DeleteEnvironmentJob
         displayName: Delete environment
-        condition: ne(variables['BuildTools.EnvironmentUrl'], '')
         steps:
           - checkout: none
           - task: PowerPlatformToolInstaller@0
