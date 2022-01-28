@@ -7,6 +7,7 @@ parameters:
     type: string
   - name: environmentDomainName
     displayName: Environment domain name
+    type: string
 
 stages:
   - stage: ProvisionEnvironment
@@ -15,9 +16,9 @@ stages:
       - name: Environment.Identifier
         value: ${{ parameters.environmentIdentifier }}
       - name: Environment.DisplayName
-        value: ${{ parameters.displayName }} $(Environment.Identifier)
+        value: ${{ parameters.environmentDisplayName }} $(Environment.Identifier)
       - name: TestEnvironment.DomainName
-        value: ${{ parameters.domainName }}-$(Environment.Identifier)
+        value: ${{ parameters.environmentDomainName }}-$(Environment.Identifier)
       - group: Dataverse users
     jobs:
       - job: ProvisionEnvironmentJob
