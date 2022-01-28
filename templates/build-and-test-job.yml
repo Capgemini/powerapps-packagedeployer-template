@@ -1,97 +1,116 @@
+parameters:
+  - name: environmentUrl
+    displayName: Environment URL
+    type: string
+  - name: environmentName
+    displayName: environmentName
+    type: string
+  - name: username
+    displayName: Username
+    type: string
+  - name: password
+    displayName: Password
+    type: string
+
 jobs:
-- job: BuildAndTestJob
-  displayName: Build and Test
-  variables:
-    - name: GitVersion.SemVer
-      value: ''
-    - name: solution
-      value: '**/*.sln'
-    - name: buildPlatform
-      value: 'anycpu'
-    - name: buildConfiguration
-      value: 'Release'
-    - group: Cap Dev - CI
-  steps:
-
-    - task: gitversion/setup@0
-      displayName: Install GitVersion
-      inputs:
-        versionSpec: '5.x'
-
-    - task: gitversion/execute@0
-      displayName: Execute GitVersion
-      inputs:
-        useConfigFile: true
-        configFilePath: '$(Build.SourcesDirectory)\GitVersion.yml'
-        updateAssemblyInfo: false
-
-    - pwsh: Write-Host "##vso[task.setvariable variable=SemVer;isOutput=true]$(GitVersion.SemVer)"
-      name: OutputSemVerTask
-      displayName: Output SemVer
-
-    - task: DotNetCoreCLI@2
-      displayName: Restore NuGet packages
-      inputs:
-        command: restore
-        projects: '**/*.csproj'
-
-    - task: SonarCloudPrepare@1
-      displayName: Prepare SonarCloud
-      inputs:
-        SonarCloud: 'SonarCloud'
-        organization: 'capgemini-1' 
-        scannerMode: 'MSBuild'
-        projectKey: 'Capgemini_xrm-packagedeployer'
-        projectName: 'xrm-packagedeployer'
-        projectVersion: '$(GitVersion.SemVer)'
-        extraProperties: |
-          sonar.exclusions=**\*.css
-
-    - task: VSBuild@1
-      displayName: Build solution
-      inputs:
-        solution: '$(solution)'
-        platform: '$(buildPlatform)'
-        configuration: '$(buildConfiguration)'
-    
-    - task: VSTest@2
-      displayName: Run tests
-      env:
-        CAPGEMINI_PACKAGE_DEPLOYER_TESTS_URL: $(URL)
-        CAPGEMINI_PACKAGE_DEPLOYER_TESTS_USERNAME: $(User ADO Integration Username)
-        CAPGEMINI_PACKAGE_DEPLOYER_TESTS_PASSWORD: $(User ADO Integration Password)
-      inputs:
-        codeCoverageEnabled: true
-        platform: '$(buildPlatform)'
-        configuration: '$(buildConfiguration)'
-        testAssemblyVer2: '**\*Tests.dll' 
-        searchFolder: tests
-
-    - task: SonarCloudAnalyze@1
-      displayName: Analyse with SonarCloud
-
-    - task: SonarCloudPublish@1
-      displayName: Publish SonarCloud results
-      inputs:
-        pollingTimeoutSec: '300'
-
-    - task: WhiteSource Bolt@20
-      displayName: Detect security and licence issues
-      inputs:
-        cwd: '$(Build.SourcesDirectory)'
-        
-    - task: DotNetCoreCLI@2
-      displayName: Pack NuGet package
-      inputs:
-        command: pack
-        packagesToPack: src\Capgemini.PowerApps.PackageDeployerTemplate\Capgemini.PowerApps.PackageDeployerTemplate.csproj
-        modifyOutputPath: true 
-        versioningScheme: byEnvVar
-        versionEnvVar: GitVersion.NuGetVersionV2
-        includesymbols: false
-        buildProperties: Configuration=$(buildConfiguration)
-        packDirectory: $(Build.ArtifactStagingDirectory)/out
-
-    - publish: $(Build.ArtifactStagingDirectory)/out
-      displayName: Publish NuGet artifact
-      artifact: Capgemini.PowerApps.PackageDeployerTemplate
+  - job: BuildAndTestJob
+    displayName: Build and Test
+    variables:
+      - name: GitVersion.SemVer
+        value: ''
+      - name: solution
+        value: '**/*.sln'
+      - name: buildPlatform
+        value: 'anycpu'
+      - name: buildConfiguration
+        value: 'Release'
+    steps:
+      - task: gitversion/setup@0
+        displayName: Install GitVersion
+        inputs:
+          versionSpec: '5.x'
+      - task: gitversion/execute@0
+        displayName: Execute GitVersion
+        inputs:
+          useConfigFile: true
+          configFilePath: '$(Build.SourcesDirectory)\GitVersion.yml'
+          updateAssemblyInfo: false
+      - pwsh: Write-Host "##vso[task.setvariable variable=SemVer;isOutput=true]$(GitVersion.SemVer)"
+        name: OutputSemVerTask
+        displayName: Output SemVer
+      - task: DotNetCoreCLI@2
+        displayName: Restore NuGet packages
+        inputs:
+          command: restore
+          projects: '**/*.csproj'
+      - task: SonarCloudPrepare@1
+        displayName: Prepare SonarCloud
+        inputs:
+          SonarCloud: 'SonarCloud'
+          organization: 'capgemini-1' 
+          scannerMode: 'MSBuild'
+          projectKey: 'Capgemini_xrm-packagedeployer'
+          projectName: 'xrm-packagedeployer'
+          projectVersion: '$(GitVersion.SemVer)'
+          extraProperties: |
+            sonar.exclusions=**\*.css
+      - task: VSBuild@1
+        displayName: Build solution
+        inputs:
+          solution: '$(solution)'
+          platform: '$(buildPlatform)'
+          configuration: '$(buildConfiguration)'
+      - task: PowerShell@2
+        displayName: Create Approvals connection
+        inputs:
+          filePath: $(Build.SourcesDirectory)\scripts\New-PowerAppFlowConnection.ps1
+          arguments: >
+            -Username ${{ parameters.username }}
+            -Password (ConvertTo-SecureString -String $env:CONNECTIONOWNER_PASSWORD -AsPlainText -Force)
+            -EnvironmentName ${{ parameters.environmentName }}
+            -Region unitedkingdom
+            -Connector shared_approvals
+            -ConnectionParameters @{ }
+            -OutputVariable "TestEnvironment.Connection.Approvals"
+          targetType: filePath
+        env:
+          CONNECTIONOWNER_PASSWORD: ${{ parameters.password }}
+      - task: VSTest@2
+        displayName: Run tests
+        env:
+          CAPGEMINI_PACKAGE_DEPLOYER_TESTS_URL: ${{ parameters.environmentUrl }}
+          CAPGEMINI_PACKAGE_DEPLOYER_TESTS_USERNAME: ${{ parameters.username }}
+          CAPGEMINI_PACKAGE_DEPLOYER_TESTS_PASSWORD: ${{ parameters.password }}
+          PACKAGEDEPLOYER_SETTINGS_CONNREF_PDT_SHAREDAPPROVALS_D7DCB: $(TestEnvironment.Connection.Approvals)
+          PACKAGEDEPLOYER_SETTINGS_ENVVAR_PDT_TESTVARIABLE: Any string
+          PACKAGEDEPLOYER_SETTINGS_CONNBASEURL_pdt_5Fexample-20api: https://anyurl.com
+        inputs:
+          codeCoverageEnabled: true
+          platform: '$(buildPlatform)'
+          configuration: '$(buildConfiguration)'
+          testAssemblyVer2: '**\*Tests.dll' 
+          searchFolder: tests
+      - task: SonarCloudAnalyze@1
+        displayName: Analyse with SonarCloud
+      - task: SonarCloudPublish@1
+        displayName: Publish SonarCloud results
+        inputs:
+          pollingTimeoutSec: '300'
+      - task: WhiteSource Bolt@20
+        displayName: Detect security and licence issues
+        inputs:
+          cwd: '$(Build.SourcesDirectory)'
+      - task: DotNetCoreCLI@2
+        displayName: Pack NuGet package
+        inputs:
+          command: pack
+          packagesToPack: src\Capgemini.PowerApps.PackageDeployerTemplate\Capgemini.PowerApps.PackageDeployerTemplate.csproj
+          modifyOutputPath: true 
+          versioningScheme: byEnvVar
+          versionEnvVar: GitVersion.NuGetVersionV2
+          includesymbols: false
+          buildProperties: Configuration=$(buildConfiguration)
+          packDirectory: $(Build.ArtifactStagingDirectory)/out
+      - publish: $(Build.ArtifactStagingDirectory)/out
+        displayName: Publish NuGet artifact
+        artifact: Capgemini.PowerApps.PackageDeployerTemplate
