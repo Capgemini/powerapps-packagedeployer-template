@@ -33,7 +33,7 @@
         public Guid? CallerAADObjectId { get => this.crmSvc.CallerAADObjectId; set => this.crmSvc.CallerAADObjectId = value; }
 
         /// <inheritdoc/>
-        public ExecuteMultipleResponse ExecuteMultiple(IEnumerable<OrganizationRequest> requests, bool continueOnError = true, bool returnResponses = true)
+        public ExecuteMultipleResponse ExecuteMultiple(IEnumerable<OrganizationRequest> requests, bool continueOnError = true, bool returnResponses = true, int? timeout = null)
         {
             var executeMultipleRequest = new ExecuteMultipleRequest
             {
@@ -46,11 +46,21 @@
             };
             executeMultipleRequest.Requests.AddRange(requests);
 
-            return (ExecuteMultipleResponse)this.crmSvc.Execute(executeMultipleRequest);
+            var previousTimeout = timeout.HasValue ?
+                this.SetTimeout(TimeSpan.FromSeconds(timeout.Value)) : (TimeSpan?)null;
+
+            var response = (ExecuteMultipleResponse)this.crmSvc.Execute(executeMultipleRequest);
+
+            if (previousTimeout.HasValue)
+            {
+                this.SetTimeout(previousTimeout.Value);
+            }
+
+            return response;
         }
 
         /// <inheritdoc/>
-        public ExecuteMultipleResponse ExecuteMultiple(IEnumerable<OrganizationRequest> requests, string username, bool continueOnError = true, bool returnResponses = true)
+        public ExecuteMultipleResponse ExecuteMultiple(IEnumerable<OrganizationRequest> requests, string username, bool continueOnError = true, bool returnResponses = true, int? timeout = null)
         {
             if (requests is null)
             {
@@ -69,7 +79,7 @@
             try
             {
                 this.CallerAADObjectId = this.RetrieveAzureAdObjectIdByDomainName(username);
-                response = this.ExecuteMultiple(requests, continueOnError, returnResponses);
+                response = this.ExecuteMultiple(requests, continueOnError, returnResponses, timeout);
             }
             finally
             {
@@ -337,6 +347,26 @@
         {
             GC.SuppressFinalize(this);
             this.crmSvc.Dispose();
+        }
+
+        private TimeSpan SetTimeout(TimeSpan timeout)
+        {
+            TimeSpan previousTimeout;
+
+            if (this.crmSvc.OrganizationServiceProxy != null)
+            {
+                previousTimeout = this.crmSvc.OrganizationServiceProxy.Timeout;
+                this.crmSvc.OrganizationServiceProxy.Timeout = timeout;
+            }
+            else
+            {
+                previousTimeout = this.crmSvc.OrganizationWebProxyClient
+                    .InnerChannel.OperationTimeout;
+                this.crmSvc.OrganizationWebProxyClient
+                    .InnerChannel.OperationTimeout = timeout;
+            }
+
+            return previousTimeout;
         }
     }
 }

@@ -138,8 +138,9 @@
                 return;
             }
 
+            var timeout = 120 + (requests.Count * 10);
             var executeMultipleRes = string.IsNullOrEmpty(user) ?
-                this.crmSvc.ExecuteMultiple(requests, true, true) : this.crmSvc.ExecuteMultiple(requests, user, true, true);
+                this.crmSvc.ExecuteMultiple(requests, true, true, timeout) : this.crmSvc.ExecuteMultiple(requests, user, true, true, timeout);
 
             if (executeMultipleRes.IsFaulted)
             {
