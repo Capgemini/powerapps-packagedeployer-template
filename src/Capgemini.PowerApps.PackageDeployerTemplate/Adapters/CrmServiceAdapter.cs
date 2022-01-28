@@ -2,6 +2,7 @@
 {
     using System;
     using System.Collections.Generic;
+    using System.Diagnostics;
     using System.IO;
     using System.Linq;
     using Microsoft.Extensions.Logging;
@@ -33,7 +34,7 @@
         public Guid? CallerAADObjectId { get => this.crmSvc.CallerAADObjectId; set => this.crmSvc.CallerAADObjectId = value; }
 
         /// <inheritdoc/>
-        public ExecuteMultipleResponse ExecuteMultiple(IEnumerable<OrganizationRequest> requests, bool continueOnError = true, bool returnResponses = true)
+        public ExecuteMultipleResponse ExecuteMultiple(IEnumerable<OrganizationRequest> requests, bool continueOnError = true, bool returnResponses = true, int? timeout = null)
         {
             var executeMultipleRequest = new ExecuteMultipleRequest
             {
@@ -46,7 +47,47 @@
             };
             executeMultipleRequest.Requests.AddRange(requests);
 
-            return (ExecuteMultipleResponse)this.crmSvc.Execute(executeMultipleRequest);
+            var previousTimeout = timeout.HasValue ?
+                this.SetTimeout(TimeSpan.FromSeconds(timeout.Value)) : (TimeSpan?)null;
+
+            var response = (ExecuteMultipleResponse)this.crmSvc.Execute(executeMultipleRequest);
+
+            if (previousTimeout.HasValue)
+            {
+                this.SetTimeout(previousTimeout.Value);
+            }
+
+            return response;
+        }
+
+        /// <inheritdoc/>
+        public ExecuteMultipleResponse ExecuteMultiple(IEnumerable<OrganizationRequest> requests, string username, bool continueOnError = true, bool returnResponses = true, int? timeout = null)
+        {
+            if (requests is null)
+            {
+                throw new ArgumentNullException(nameof(requests));
+            }
+
+            if (username is null)
+            {
+                throw new ArgumentNullException(nameof(username));
+            }
+
+            this.logger.LogDebug($"Executing {requests.Count()} requests as {username}.");
+
+            var previousCallerObjectId = this.CallerAADObjectId;
+            ExecuteMultipleResponse response = null;
+            try
+            {
+                this.CallerAADObjectId = this.RetrieveAzureAdObjectIdByDomainName(username);
+                response = this.ExecuteMultiple(requests, continueOnError, returnResponses, timeout);
+            }
+            finally
+            {
+                this.CallerAADObjectId = previousCallerObjectId;
+            }
+
+            return response;
         }
 
         /// <inheritdoc/>
@@ -337,6 +378,26 @@
         {
             GC.SuppressFinalize(this);
             this.crmSvc.Dispose();
+        }
+
+        private TimeSpan SetTimeout(TimeSpan timeout)
+        {
+            var previousTimeout = TimeSpan.Zero;
+
+            if (this.crmSvc.OrganizationServiceProxy != null)
+            {
+                previousTimeout = this.crmSvc.OrganizationServiceProxy.Timeout;
+                this.crmSvc.OrganizationServiceProxy.Timeout = timeout;
+            }
+            else
+            {
+                previousTimeout = this.crmSvc.OrganizationWebProxyClient
+                    .InnerChannel.OperationTimeout;
+                this.crmSvc.OrganizationWebProxyClient
+                    .InnerChannel.OperationTimeout = timeout;
+            }
+
+            return previousTimeout;
         }
     }
 }

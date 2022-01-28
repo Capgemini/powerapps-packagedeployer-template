@@ -131,7 +131,7 @@
                 return;
             }
 
-            var executeMultipleRes = this.crmSvc.ExecuteMultiple(requests, true, true);
+            var executeMultipleRes = this.crmSvc.ExecuteMultiple(requests, true, true, 120 + (requests.Count * 10));
 
             if (executeMultipleRes.IsFaulted)
             {

@@ -124,47 +124,40 @@
                 this.logger.LogInformation($"Setting process status for {deployedProcess[Constants.Workflow.Fields.Name]} with statecode {stateCode.Value} and statuscode {statusCode.Value}");
 
                 // SetStateRequest is supposedly deprecated but UpdateRequest doesn't work for deactivating active flows
-                requests.Add(
-                    new SetStateRequest
-                    {
-                        EntityMoniker = deployedProcess.ToEntityReference(),
-                        State = stateCode,
-                        Status = statusCode,
-                    });
+                var setStateRequest = new SetStateRequest { EntityMoniker = deployedProcess.ToEntityReference(), State = stateCode, Status = statusCode };
+
+                var timeout = 120 + (requests.Count * 10);
+                var executeMultipleRes = string.IsNullOrEmpty(user) ?
+                    this.crmSvc.ExecuteMultiple(requests, true, true, timeout) : this.crmSvc.ExecuteMultiple(requests, user, true, true, timeout);
+
+                this.crmSvc.Execute<SetStateResponse>(setStateRequest, user, fallbackToExistingUser: true);
             }
-
-            if (!requests.Any())
+                    else
             {
-                return;
+                this.crmSvc.Execute(setStateRequest);
             }
-
-            var executeMultipleRes = string.IsNullOrEmpty(user) ?
-                this.crmSvc.ExecuteMultiple(requests, true, true) : this.crmSvc.ExecuteMultiple(requests, user, true, true);
-
-            if (executeMultipleRes.IsFaulted)
-            {
-                this.logger.LogError("Error(s) encountered when setting process states.");
-                foreach (var failedResponse in executeMultipleRes.Responses.Where(r => r.Fault != null))
+        }
+                catch (Exception ex)
                 {
                     var failedRequest = (SetStateRequest)requests[failedResponse.RequestIndex];
                     this.logger.LogError($"Failed to set state for process {failedRequest.EntityMoniker.Name} with the following error: {failedResponse.Fault.Message}.");
                 }
-            }
+}
         }
 
         private EntityCollection RetrieveProcesses(IEnumerable<string> names)
-        {
-            var query = new QueryExpression(Constants.Workflow.LogicalName)
-            {
-                ColumnSet = new ColumnSet(Constants.Workflow.Fields.Name, Constants.Workflow.Fields.StateCode, Constants.Workflow.Fields.Type),
-            };
-            query.Criteria.AddCondition(Constants.Workflow.Fields.Name, ConditionOperator.In, names.ToArray<object>());
-            query.Criteria.AddCondition(Constants.Workflow.Fields.Type, ConditionOperator.Equal, Constants.Workflow.TypeDefinition);
+{
+    var query = new QueryExpression(Constants.Workflow.LogicalName)
+    {
+        ColumnSet = new ColumnSet(false),
+    };
+    query.Criteria.AddCondition(Constants.Workflow.Fields.Name, ConditionOperator.In, names.ToArray<object>());
+    query.Criteria.AddCondition(Constants.Workflow.Fields.Type, ConditionOperator.Equal, Constants.Workflow.TypeDefinition);
 
-            var results = this.crmSvc.RetrieveMultiple(query);
-            this.logger.LogInformation($"Found {results.Entities.Count} processes matching the {names.Count()} provided names.");
+    var results = this.crmSvc.RetrieveMultiple(query);
+    this.logger.LogInformation($"Found {results.Entities.Count} processes matching the {names.Count()} provided names.");
 
-            return results;
-        }
+    return results;
+}
     }
 }
