@@ -51,8 +51,9 @@
         /// <param name="requests">The requests.</param>
         /// <param name="continueOnError">Whether to continue on error.</param>
         /// <param name="returnResponses">Whether to return responses.</param>
+        /// <param name="timeout">Timeout in seconds.</param>
         /// <returns>The <see cref="ExecuteMultipleResponse"/>.</returns>
-        ExecuteMultipleResponse ExecuteMultiple(IEnumerable<OrganizationRequest> requests, bool continueOnError = true, bool returnResponses = true);
+        ExecuteMultipleResponse ExecuteMultiple(IEnumerable<OrganizationRequest> requests, bool continueOnError = true, bool returnResponses = true, int? timeout = null);
 
         /// <summary>
         /// Execute multiple requests.
@@ -61,8 +62,9 @@
         /// <param name="username">The user to impersonate.</param>
         /// <param name="continueOnError">Whether to continue on error.</param>
         /// <param name="returnResponses">Whether to return responses.</param>
+        /// <param name="timeout">Timeout in seconds.</param>
         /// <returns>The <see cref="ExecuteMultipleResponse"/>.</returns>
-        ExecuteMultipleResponse ExecuteMultiple(IEnumerable<OrganizationRequest> requests, string username, bool continueOnError = true, bool returnResponses = true);
+        ExecuteMultipleResponse ExecuteMultiple(IEnumerable<OrganizationRequest> requests, string username, bool continueOnError = true, bool returnResponses = true, int? timeout = null);
 
         /// <summary>
         /// Updates the state and status for an entity.
