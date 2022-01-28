@@ -4,6 +4,7 @@
     using System.Collections.Generic;
     using System.Linq;
     using Capgemini.PowerApps.PackageDeployerTemplate.Adapters;
+    using Microsoft.Crm.Sdk.Messages;
     using Microsoft.Extensions.Logging;
     using Microsoft.Xrm.Sdk;
     using Microsoft.Xrm.Sdk.Query;
@@ -46,7 +47,9 @@
                 solutions,
                 Constants.SolutionComponent.ComponentTypeSdkStep,
                 Constants.SdkMessageProcessingStep.LogicalName,
-                new ColumnSet(Constants.SdkMessageProcessingStep.Fields.Name)).Entities;
+                new ColumnSet(
+                    Constants.SdkMessageProcessingStep.Fields.Name,
+                    Constants.SdkMessageProcessingStep.Fields.StateCode)).Entities;
 
             this.SetStates(deployedSdkSteps, componentsToDeactivate);
         }
@@ -88,28 +91,55 @@
             this.SetStates(sdkSteps, componentsToDeactivate);
         }
 
-        private void SetStates(IEnumerable<Entity> sdkSteps, IEnumerable<string> sdkStepsToDeactivate)
+        private void SetStates(IEnumerable<Entity> sdkSteps, IEnumerable<string> sdkStepsToDeactivate = null)
         {
             if (sdkSteps is null)
             {
                 return;
             }
 
+            var requests = new List<OrganizationRequest>();
             foreach (var deployedSdkStep in sdkSteps)
             {
-                var stateCode = Constants.SdkMessageProcessingStep.StateCodeActive;
-                var statusCode = Constants.SdkMessageProcessingStep.StatusCodeActive;
+                var stateCode = new OptionSetValue(Constants.SdkMessageProcessingStep.StateCodeActive);
+                var statusCode = new OptionSetValue(Constants.SdkMessageProcessingStep.StatusCodeActive);
 
                 if (sdkStepsToDeactivate != null && sdkStepsToDeactivate.Contains(deployedSdkStep[Constants.SdkMessageProcessingStep.Fields.Name]))
                 {
-                    stateCode = Constants.SdkMessageProcessingStep.StateCodeInactive;
-                    statusCode = Constants.SdkMessageProcessingStep.StatusCodeInactive;
+                    stateCode.Value = Constants.SdkMessageProcessingStep.StateCodeInactive;
+                    statusCode.Value = Constants.SdkMessageProcessingStep.StatusCodeInactive;
                 }
 
-                this.logger.LogInformation($"Setting SDK step status for {deployedSdkStep[Constants.SdkMessageProcessingStep.Fields.Name]} with statecode {stateCode} and statuscode {statusCode}");
-                if (!this.crmSvc.UpdateStateAndStatusForEntity(Constants.SdkMessageProcessingStep.LogicalName, deployedSdkStep.Id, stateCode, statusCode))
+                if (stateCode.Value == deployedSdkStep.GetAttributeValue<OptionSetValue>(Constants.SdkMessageProcessingStep.Fields.StateCode).Value)
                 {
-                    this.logger.LogError($"Status for SDK step {deployedSdkStep.Attributes[Constants.SdkMessageProcessingStep.Fields.Name]} could not be set.");
+                    this.logger.LogInformation($"SDK step {deployedSdkStep[Constants.SdkMessageProcessingStep.Fields.Name]} already has desired state. Skipping.");
+                    continue;
+                }
+
+                this.logger.LogInformation($"Setting SDK step status for {deployedSdkStep[Constants.SdkMessageProcessingStep.Fields.Name]} with statecode {stateCode.Value} and statuscode {statusCode.Value}");
+                requests.Add(
+                    new SetStateRequest
+                    {
+                        EntityMoniker = deployedSdkStep.ToEntityReference(),
+                        State = stateCode,
+                        Status = statusCode,
+                    });
+            }
+
+            if (!requests.Any())
+            {
+                return;
+            }
+
+            var executeMultipleRes = this.crmSvc.ExecuteMultiple(requests, true, true);
+
+            if (executeMultipleRes.IsFaulted)
+            {
+                this.logger.LogError("Error(s) encountered when setting SDK step states.");
+                foreach (var failedResponse in executeMultipleRes.Responses.Where(r => r.Fault != null))
+                {
+                    var failedRequest = (SetStateRequest)requests[failedResponse.RequestIndex];
+                    this.logger.LogError($"Failed to set state for SDK step {failedRequest.EntityMoniker.Name} with the following error: {failedResponse.Fault.Message}.");
                 }
             }
         }
@@ -118,7 +148,9 @@
         {
             var query = new QueryExpression(Constants.SdkMessageProcessingStep.LogicalName)
             {
-                ColumnSet = new ColumnSet(false),
+                ColumnSet = new ColumnSet(
+                    Constants.SdkMessageProcessingStep.Fields.Name,
+                    Constants.SdkMessageProcessingStep.Fields.StateCode),
             };
             query.Criteria.AddCondition(Constants.SdkMessageProcessingStep.Fields.Name, ConditionOperator.In, names.ToArray<object>());
 

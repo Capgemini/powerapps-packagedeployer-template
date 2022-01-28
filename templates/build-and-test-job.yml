@@ -84,6 +84,8 @@ jobs:
           PACKAGEDEPLOYER_SETTINGS_CONNREF_PDT_SHAREDAPPROVALS_D7DCB: $(TestEnvironment.Connection.Approvals)
           PACKAGEDEPLOYER_SETTINGS_ENVVAR_PDT_TESTVARIABLE: Any string
           PACKAGEDEPLOYER_SETTINGS_CONNBASEURL_pdt_5Fexample-20api: https://anyurl.com
+          PACKAGEDEPLOYER_SETTINGS_LICENSEDUSERNAME: ${{ parameters.username }}
+          PACKAGEDEPLOYER_SETTINGS_LICENSEDPASSWORD: ${{ parameters.password }}
         inputs:
           codeCoverageEnabled: true
           platform: '$(buildPlatform)'
