@@ -287,6 +287,7 @@
             if (response == null)
             {
                 response = new ExecuteMultipleResponse();
+                response.Results["Responses"] = new ExecuteMultipleResponseItemCollection();
             }
 
             var returnResult = this.crmServiceAdapterMock
