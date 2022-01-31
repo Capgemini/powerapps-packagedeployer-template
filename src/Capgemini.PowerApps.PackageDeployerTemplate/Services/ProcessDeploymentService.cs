@@ -8,6 +8,7 @@
     using Microsoft.Extensions.Logging;
     using Microsoft.Xrm.Sdk;
     using Microsoft.Xrm.Sdk.Query;
+    using Polly;
 
     /// <summary>
     /// Deployment functionality relating to processes.
@@ -138,16 +139,33 @@
                 return;
             }
 
-            var timeout = 120 + (requests.Count * 10);
-            var executeMultipleRes = string.IsNullOrEmpty(user) ?
-                this.crmSvc.ExecuteMultiple(requests, true, true, timeout) : this.crmSvc.ExecuteMultiple(requests, user, true, true, timeout);
-
-            if (executeMultipleRes.IsFaulted)
+            // Due to unpredictable process dependencies we should retry failed requests until there are zero successful responses.
+            var remainingRequests = new List<OrganizationRequest>(requests);
+            var successfulResponses = new List<ExecuteMultipleResponseItem>();
+            var failedResponses = new List<ExecuteMultipleResponseItem>();
+            do
             {
-                this.logger.LogError("Error(s) encountered when setting process states.");
-                foreach (var failedResponse in executeMultipleRes.Responses.Where(r => r.Fault != null))
+                var timeout = 120 + (remainingRequests.Count * 10);
+                var executeMultipleRes = string.IsNullOrEmpty(user) ?
+                    this.crmSvc.ExecuteMultiple(remainingRequests, true, true, timeout) : this.crmSvc.ExecuteMultiple(remainingRequests, user, true, true, timeout);
+
+                successfulResponses = executeMultipleRes.Responses
+                    .Where(r => r.Fault == null)
+                    .ToList();
+                failedResponses = executeMultipleRes.Responses
+                    .Except(successfulResponses)
+                    .ToList();
+                remainingRequests = failedResponses
+                    .Select(r => remainingRequests[r.RequestIndex])
+                    .ToList();
+            }
+            while (successfulResponses.Any() && remainingRequests.Count > 0);
+
+            if (!successfulResponses.Any() && remainingRequests.Any())
+            {
+                foreach (var failedResponse in failedResponses)
                 {
-                    var failedRequest = (SetStateRequest)requests[failedResponse.RequestIndex];
+                    var failedRequest = (SetStateRequest)remainingRequests[failedResponse.RequestIndex];
                     this.logger.LogError($"Failed to set state for process {failedRequest.EntityMoniker.Name} with the following error: {failedResponse.Fault.Message}.");
                 }
             }
