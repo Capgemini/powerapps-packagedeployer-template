@@ -3,12 +3,12 @@
     using System;
     using System.Collections.Generic;
     using System.Linq;
+    using System.Threading;
     using Capgemini.PowerApps.PackageDeployerTemplate.Adapters;
     using Microsoft.Crm.Sdk.Messages;
     using Microsoft.Extensions.Logging;
     using Microsoft.Xrm.Sdk;
     using Microsoft.Xrm.Sdk.Query;
-    using Polly;
 
     /// <summary>
     /// Deployment functionality relating to processes.
@@ -121,6 +121,8 @@
             IEnumerable<ExecuteMultipleResponseItem> successfulResponses;
             IEnumerable<ExecuteMultipleResponseItem> failedResponses;
 
+            var attempt = 1;
+            var maxAttempts = 3;
             do
             {
                 var timeout = 120 + (remainingRequests.Count * 10);
@@ -136,8 +138,16 @@
                 remainingRequests = failedResponses
                     .Select(r => remainingRequests[r.RequestIndex])
                     .ToList();
+
+                attempt = successfulResponses.Any() ? 1 : attempt++;
+
+                if (!successfulResponses.Any() && attempt <= maxAttempts)
+                {
+                    // Short delay to account for errors such as where metadata cannot yet be retrieved by flows for newly activated actions.
+                    Thread.Sleep(1000);
+                }
             }
-            while (successfulResponses.Any() && remainingRequests.Count > 0);
+            while (successfulResponses.Any() && remainingRequests.Count > 0 && attempt <= maxAttempts);
 
             if (!successfulResponses.Any() && remainingRequests.Any())
             {
