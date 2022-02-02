@@ -139,15 +139,16 @@
                     .Select(r => remainingRequests[r.RequestIndex])
                     .ToList();
 
+                // Reset attempt number if there are any successful responses.
                 attempt = successfulResponses.Any() ? 1 : attempt++;
 
-                if (!successfulResponses.Any() && attempt <= maxAttempts)
+                // Delay if any flow activations failed due to failures getting metadata for actions
+                if (failedResponses.Any(f => f.Fault.ErrorCode == -2147089305 && f.Fault.Message.Contains("GetMetadataFor")) && attempt <= maxAttempts)
                 {
-                    // Short delay to account for errors such as where metadata cannot yet be retrieved by flows for newly activated actions.
-                    Thread.Sleep(1000);
+                    Thread.Sleep(10000);
                 }
             }
-            while (successfulResponses.Any() && remainingRequests.Count > 0 && attempt <= maxAttempts);
+            while (remainingRequests.Count > 0 && attempt <= maxAttempts);
 
             if (!successfulResponses.Any() && remainingRequests.Any())
             {
