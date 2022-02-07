@@ -208,6 +208,7 @@
         {
             var foundProcesses = new List<Entity> { GetProcess(Constants.Workflow.StateCodeInactive) };
             this.MockSetStatesProcesses(foundProcesses);
+
             var userToImpersonate = "licenseduser@domaincom";
             this.MockExecuteMultipleResponse(
                null,
@@ -235,17 +236,11 @@
         {
             var foundProcesses = new List<Entity> { GetProcess(Constants.Workflow.StateCodeInactive) };
             this.MockSetStatesProcesses(foundProcesses);
+
+            var failedResponse = GetNewExecuteMultipleResponse(isFaulted: true);
             var fault = new OrganizationServiceFault { Message = "Some error." };
-            var response = new ExecuteMultipleResponse
-            {
-                Results = new ParameterCollection
-                {
-                    { "Responses", new ExecuteMultipleResponseItemCollection() },
-                    { "IsFaulted", true },
-                },
-            };
-            response.Responses.Add(new ExecuteMultipleResponseItem { Fault = fault });
-            this.MockExecuteMultipleResponse(response);
+            failedResponse.Responses.Add(new ExecuteMultipleResponseItem { Fault = fault });
+            this.MockExecuteMultipleResponse(failedResponse);
 
             this.processDeploymentSvc.SetStates(
                 new List<string>
@@ -255,6 +250,70 @@
                 Enumerable.Empty<string>());
 
             this.loggerMock.VerifyLog(l => l.LogError(It.Is<string>(s => s.Contains(fault.Message))));
+        }
+
+        [Fact]
+        public void SetStates_WithError_RetriesUpToThreeTimes()
+        {
+            var foundProcesses = new List<Entity> { GetProcess(Constants.Workflow.StateCodeInactive) };
+            this.MockSetStatesProcesses(foundProcesses);
+
+            var failedResponse = GetNewExecuteMultipleResponse(isFaulted: true);
+            failedResponse.Responses.Add(new ExecuteMultipleResponseItem { Fault = new OrganizationServiceFault { Message = "Flow error." } });
+
+            var successfulResponse = GetNewExecuteMultipleResponse(isFaulted: false);
+            successfulResponse.Responses.Add(new ExecuteMultipleResponseItem());
+
+            this.MockExecuteMultipleResponses(failedResponse, failedResponse, successfulResponse);
+
+            this.processDeploymentSvc.SetStates(
+                new List<string>
+                {
+                    foundProcesses.First().GetAttributeValue<string>(Constants.Workflow.Fields.Name),
+                },
+                Enumerable.Empty<string>());
+
+            this.crmServiceAdapterMock.Verify(
+                svc => svc.ExecuteMultiple(
+                    It.IsAny<IEnumerable<OrganizationRequest>>(),
+                    It.IsAny<bool>(),
+                    It.IsAny<bool>(),
+                    It.IsAny<int?>()),
+                Times.Exactly(3));
+        }
+
+        [Fact]
+        public void SetStates_WithError_LogsErrorAfterThirdRetry()
+        {
+            var foundProcesses = new List<Entity> { GetProcess(Constants.Workflow.StateCodeInactive) };
+            this.MockSetStatesProcesses(foundProcesses);
+
+            var failedResponse = GetNewExecuteMultipleResponse(isFaulted: true);
+            var fault = new OrganizationServiceFault { Message = "Some error." };
+            failedResponse.Responses.Add(new ExecuteMultipleResponseItem { Fault = fault });
+
+            this.MockExecuteMultipleResponses(failedResponse, failedResponse, failedResponse);
+
+            this.processDeploymentSvc.SetStates(
+                new List<string>
+                {
+                    foundProcesses.First().GetAttributeValue<string>(Constants.Workflow.Fields.Name),
+                },
+                Enumerable.Empty<string>());
+
+            this.loggerMock.VerifyLog(l => l.LogError(It.Is<string>(s => s.Contains(fault.Message))));
+        }
+
+        private static ExecuteMultipleResponse GetNewExecuteMultipleResponse(bool isFaulted)
+        {
+            return new ExecuteMultipleResponse
+            {
+                Results = new ParameterCollection
+                {
+                    { "Responses", new ExecuteMultipleResponseItemCollection() },
+                    { "IsFaulted", isFaulted },
+                },
+            };
         }
 
         private static Entity GetProcess(int stateCode)
@@ -297,6 +356,22 @@
             if (verifiable)
             {
                 returnResult.Verifiable();
+            }
+        }
+
+        private void MockExecuteMultipleResponses(params ExecuteMultipleResponse[] responses)
+        {
+            var setup = this.crmServiceAdapterMock
+                .SetupSequence(svc =>
+                    svc.ExecuteMultiple(
+                        It.IsAny<IEnumerable<OrganizationRequest>>(),
+                        It.IsAny<bool>(),
+                        It.IsAny<bool>(),
+                        It.IsAny<int?>()));
+
+            foreach (var response in responses)
+            {
+                setup.Returns(response);
             }
         }
 
