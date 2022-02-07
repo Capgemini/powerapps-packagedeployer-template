@@ -140,10 +140,11 @@
                     .ToList();
 
                 // Reset attempt number if there are any successful responses.
-                attempt = successfulResponses.Any() ? 1 : attempt++;
+                attempt = successfulResponses.Any() ? 1 : attempt + 1;
 
-                // Delay if any flow activations failed due to failures getting metadata for actions
-                if (failedResponses.Any(f => f.Fault.ErrorCode == -2147089305 && f.Fault.Message.Contains("GetMetadataFor")) && attempt <= maxAttempts)
+                // Delay if any process activation errors are due to a FlowServiceClientError response.
+                // This is needed due to issues such as where recently activated actions are not available to flows straight away.
+                if (failedResponses.Any(f => f.Fault.ErrorCode == -2147089305 /*FlowServiceClientError*/ && attempt <= maxAttempts))
                 {
                     Thread.Sleep(10000);
                 }
