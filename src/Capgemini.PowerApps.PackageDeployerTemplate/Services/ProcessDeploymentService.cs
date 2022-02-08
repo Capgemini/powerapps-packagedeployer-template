@@ -146,7 +146,7 @@
                 // This is needed due to issues such as where recently activated actions are not available to flows straight away.
                 if (failedResponses.Any(f => f.Fault.ErrorCode == -2147089305 /*FlowServiceClientError*/ && attempt <= maxAttempts))
                 {
-                    Thread.Sleep(10000);
+                    Thread.Sleep(30000);
                 }
             }
             while (remainingRequests.Count > 0 && attempt <= maxAttempts);
