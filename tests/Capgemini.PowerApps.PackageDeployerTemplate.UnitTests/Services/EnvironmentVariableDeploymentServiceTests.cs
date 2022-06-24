@@ -75,7 +75,7 @@ namespace Capgemini.PowerApps.PackageDeployerTemplate.UnitTests.Services
                 .Verifiable();
 
             this.environmentVariableDeploymentService.SetEnvironmentVariables(environmentVariableConfigs);
-            this.loggerMock.VerifyLog(x => x.LogError($"Environment variable {environmentVariableConfigs.ElementAt(0).Key} not found on target instance."));
+            this.loggerMock.VerifyLog(x => x.LogInformation($"Environment variable {environmentVariableConfigs.ElementAt(0).Key} not found on target instance."));
         }
 
         [Fact]
