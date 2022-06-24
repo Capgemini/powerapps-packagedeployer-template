@@ -8,3 +8,5 @@ $packageDirectory = Get-Location
 
 Get-CrmPackages -PackageDirectory $packageDirectory -PackageName $packageName
 Import-CrmPackage -CrmConnection $connectionString -PackageDirectory $packageDirectory -PackageName $packageName -LogWriteDirectory $packageDirectory -Verbose 
+
+exit 0
