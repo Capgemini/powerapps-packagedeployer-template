@@ -1,10 +1,29 @@
-$ErrorActionPreference = "Stop"
+Write-Host "Installing PAC CLI..."
 
-Install-Module -Name Microsoft.Xrm.Tooling.PackageDeployment.Powershell -Force -Scope CurrentUser
+nuget install Microsoft.PowerApps.CLI -OutputDirectory pac
 
-$connectionString = "Url=$env:CAPGEMINI_PACKAGE_DEPLOYER_TESTS_URL; Username=$env:CAPGEMINI_PACKAGE_DEPLOYER_TESTS_USERNAME; Password=$env:CAPGEMINI_PACKAGE_DEPLOYER_TESTS_PASSWORD; AuthType=OAuth; AppId=51f81489-12ee-4a9e-aaae-a2591f45987d; RedirectUri=app://58145B91-0C36-4500-8554-080854F2AC97"
+$pacNugetFolder = Get-ChildItem "pac" | Where-Object {$_.Name -match "Microsoft.PowerApps.CLI."}
+$pacPath = $pacNugetFolder.FullName + "\tools"
+$env:PATH = $env:PATH + ";" + $pacPath
+
 $packageName = "Capgemini.PowerApps.PackageDeployerTemplate.MockPackage.dll"
-$packageDirectory = Get-Location
+$pacAuthName = "$(New-Guid)".Replace("-", "").SubString(0, 20)
 
-Get-CrmPackages -PackageDirectory $packageDirectory -PackageName $packageName
-Import-CrmPackage -CrmConnection $connectionString -PackageDirectory $packageDirectory -PackageName $packageName -LogWriteDirectory $packageDirectory -Verbose 
+Write-Host "Create Auth profile with name $pacAuthName..."
+pac auth create --name $pacAuthName --url $env:CAPGEMINI_PACKAGE_DEPLOYER_TESTS_URL --username $env:CAPGEMINI_PACKAGE_DEPLOYER_TESTS_USERNAME --password $env:CAPGEMINI_PACKAGE_DEPLOYER_TESTS_PASSWORD 
+
+try {
+  Write-Host "Running Deploy command..."
+  pac package deploy --package $packageName --logConsole
+}
+catch {
+  Write-Host "An error occurred:"
+  Write-Host $_.ScriptStackTrace
+}
+finally {
+  Write-Host "Deleting Auth profile with name $pacAuthName..."
+  pac auth delete --name $pacAuthName
+}
+
+
+exit 0
