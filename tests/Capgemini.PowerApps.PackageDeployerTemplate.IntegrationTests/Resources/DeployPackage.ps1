@@ -6,6 +6,7 @@ $pacNugetFolder = Get-ChildItem "pac" | Where-Object {$_.Name -match "Microsoft.
 $pacPath = $pacNugetFolder.FullName + "\tools"
 $env:PATH = $env:PATH + ";" + $pacPath
 
+$packageName = "Capgemini.PowerApps.PackageDeployerTemplate.MockPackage.dll"
 $pacAuthName = "$(New-Guid)".Replace("-", "").SubString(0, 20)
 
 Write-Host "Create Auth profile with name $pacAuthName..."
