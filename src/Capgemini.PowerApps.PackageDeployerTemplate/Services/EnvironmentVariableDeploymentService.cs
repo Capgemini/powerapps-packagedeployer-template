@@ -65,7 +65,7 @@ namespace Capgemini.PowerApps.PackageDeployerTemplate.Services
             var definition = this.GetDefinitionByKey(key, new ColumnSet(false));
             if (definition == null)
             {
-                this.logger.LogError($"Environment variable {key} not found on target instance.");
+                this.logger.LogInformation($"Environment variable {key} not found on target instance.");
                 return;
             }
 

@@ -44,7 +44,7 @@ namespace Capgemini.PowerApps.PackageDeployerTemplate.IntegrationTests
 
             if (process.ExitCode != 0)
             {
-                throw new Exception("Script `DeployPackage.ps1` failed");
+                this.LogDiagnosticMessage("Script `DeployPackage.ps1` failed. Exit code: " + process.ExitCode);
             }
 
             ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
