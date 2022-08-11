@@ -11,7 +11,7 @@ Please first discuss the change you wish to make via an issue before making a ch
 
 ## Lifecycle calls
 
-Below is a summary of the different methods and when they are called during the lifecycle of the package deployer process. These details were taken from the microsoft docs found [here](https://docs.microsoft.com/en-us/power-platform/alm/package-deployer-tool#step-5-define-custom-code-for-your-package).
+Below is a summary of the different methods and when they are called during the lifecycle of the package deployer process. These details were taken from the microsoft docs found [here](https://docs.microsoft.com/en-us/power-platform/alm/package-deployer-tool#step-5-define-custom-code-for-your-package) and the package's API found [here](https://docs.microsoft.com/en-us/dotnet/api/microsoft.xrm.tooling.packagedeployment.crmpackageextentionbase.importextension?view=dataverse-sdk-latest).
 
 1. `InitializeCustomExtension` - Called to Initialize any functions in the Custom Extension.
 1. `OverrideConfigurationDataFileLanguage` - Allows the currently selected language for data import to be overridden by a user selection.
