@@ -11,16 +11,16 @@ Please first discuss the change you wish to make via an issue before making a ch
 
 ## Lifecycle calls
 
-Below is a summary of the different methods and when they are called during the lifecycle of the package deployer process. These details were taken from the microsoft docs found [here](https://docs.microsoft.com/en-us/power-platform/alm/package-deployer-tool#step-5-define-custom-code-for-your-package).
+Below is a summary of the different methods and when they are called during the lifecycle of the package deployer process. These details were taken from the microsoft docs found [here](https://docs.microsoft.com/en-us/power-platform/alm/package-deployer-tool#step-5-define-custom-code-for-your-package) and the package's API found [here](https://docs.microsoft.com/en-us/dotnet/api/microsoft.xrm.tooling.packagedeployment.crmpackageextentionbase.importextension?view=dataverse-sdk-latest).
 
-`InitializeCustomExtension` - Called to Initialize any functions in the Custom Extension.
-`OverrideConfigurationDataFileLanguage` - Allows the currently selected language for data import to be overridden by a user selection.
-Per solution:
-    `OverrideSolutionImportDecision` - Called by the Solution Import subsystem after a decision is made by the import system.
-    `PreSolutionImport` - Raised before the named solution is imported to allow for any configuration settings to be made to the import process.
-    `RunSolutionUpgradeMigrationStep` - Is called during a solution upgrade when both solutions, old and Holding, are present in the system.
-`BeforeImportStage` - Called before the Main Import process begins, after solutions and data.
-`AfterPrimaryImport` - Called After all Import steps are complete, allowing for final customizations or tweaking of the CRM instance.
+1. `InitializeCustomExtension` - Called to Initialize any functions in the Custom Extension.
+1. `OverrideConfigurationDataFileLanguage` - Allows the currently selected language for data import to be overridden by a user selection.
+1. **Per solution:**
+    1. `OverrideSolutionImportDecision` - Called by the Solution Import subsystem after a decision is made by the import system.
+    1. `PreSolutionImport` - Raised before the named solution is imported to allow for any configuration settings to be made to the import process.
+    1. `RunSolutionUpgradeMigrationStep` - Is called during a solution upgrade when both solutions, old and Holding, are present in the system.
+1. `BeforeImportStage` - Called before the Main Import process begins, after solutions and data.
+1. `AfterPrimaryImport` - Called After all Import steps are complete, allowing for final customizations or tweaking of the CRM instance.
 
 ## Integration testing
 
