@@ -3,12 +3,12 @@
     using System;
     using System.Collections.Generic;
     using System.Linq;
+    using System.ServiceModel;
     using Capgemini.PowerApps.PackageDeployerTemplate.Adapters;
-    using Microsoft.Crm.Sdk.Messages;
     using Microsoft.Extensions.Logging;
     using Microsoft.Xrm.Sdk;
+    using Microsoft.Xrm.Sdk.Messages;
     using Microsoft.Xrm.Sdk.Query;
-    using Polly;
 
     /// <summary>
     /// Deployment functionality relating to processes.
@@ -114,75 +114,91 @@
             this.ExecuteSetStateRequests(requests, user);
         }
 
-        private void ExecuteSetStateRequests(IEnumerable<OrganizationRequest> requests, string user = null)
+        private void ExecuteSetStateRequests(IDictionary<Entity, UpdateRequest> requests, string user = null)
         {
-            // Due to unpredictable process dependencies we should retry failed requests until there are zero successful responses.
-            var remainingRequests = new List<OrganizationRequest>(requests);
-            IEnumerable<ExecuteMultipleResponseItem> successfulResponses;
-            IEnumerable<ExecuteMultipleResponseItem> failedResponses;
+            var remainingRequests = requests;
+
+            IDictionary<Entity, UpdateRequest> failedRequests;
+            IDictionary<Entity, UpdateRequest> successfulRequests;
+            IDictionary<Entity, FaultException<OrganizationServiceFault>> errors;
 
             do
             {
-                var timeout = 120 + (remainingRequests.Count * 10);
-                var executeMultipleRes = string.IsNullOrEmpty(user) ?
-                    this.crmSvc.ExecuteMultiple(remainingRequests, true, true, timeout) : this.crmSvc.ExecuteMultiple(remainingRequests, user, true, true, timeout);
+                failedRequests = new Dictionary<Entity, UpdateRequest>();
+                successfulRequests = new Dictionary<Entity, UpdateRequest>();
+                errors = new Dictionary<Entity, FaultException<OrganizationServiceFault>>();
 
-                successfulResponses = executeMultipleRes.Responses
-                    .Where(r => r.Fault == null)
-                    .ToList();
-                failedResponses = executeMultipleRes.Responses
-                    .Except(successfulResponses)
-                    .ToList();
-                remainingRequests = failedResponses
-                    .Select(r => remainingRequests[r.RequestIndex])
-                    .ToList();
-            }
-            while (successfulResponses.Any() && remainingRequests.Count > 0);
-
-            if (!successfulResponses.Any() && remainingRequests.Any())
-            {
-                foreach (var failedResponse in failedResponses)
+                foreach (var req in remainingRequests)
                 {
-                    var failedRequest = (SetStateRequest)remainingRequests[failedResponse.RequestIndex];
-                    this.logger.LogError($"Failed to set state for process {failedRequest.EntityMoniker.Name} with the following error: {failedResponse.Fault.Message}.");
+                    if (req.Value == null)
+                    {
+                        this.logger.LogInformation($"Process {req.Key[Constants.Workflow.Fields.Name]} already has desired state. Skipping.");
+                        continue;
+                    }
+
+                    if (req.Value.Target.GetAttributeValue<OptionSetValue>(Constants.Workflow.Fields.StateCode).Value == 1)
+                    {
+                        this.logger.LogInformation($"Activating {req.Key[Constants.Workflow.Fields.Name]}.");
+                    }
+                    else
+                    {
+                        this.logger.LogInformation($"Deactivating {req.Key[Constants.Workflow.Fields.Name]}.");
+                    }
+
+                    try
+                    {
+                        var response = string.IsNullOrEmpty(user) ?
+                            (UpdateResponse)this.crmSvc.Execute(req.Value) : this.crmSvc.Execute<UpdateResponse>(req.Value, user, true);
+
+                        successfulRequests.Add(req.Key, req.Value);
+                    }
+                    catch (FaultException<OrganizationServiceFault> ex)
+                    {
+                        failedRequests.Add(req.Key, req.Value);
+                        errors.Add(req.Key, ex);
+                    }
                 }
+
+                remainingRequests = failedRequests;
+            }
+            while (remainingRequests.Count > 0 && successfulRequests.Any());
+
+            foreach (var error in errors)
+            {
+                this.logger.LogError($"Failed to set state for process {error.Key[Constants.Workflow.Fields.Name]} with the following error: {error.Value.Message}.");
             }
         }
 
-        private List<OrganizationRequest> GetSetStateRequests(IEnumerable<Entity> processes, IEnumerable<string> processesToDeactivate)
+        private IDictionary<Entity, UpdateRequest> GetSetStateRequests(IEnumerable<Entity> processes, IEnumerable<string> processesToDeactivate)
         {
-            var requests = new List<OrganizationRequest>();
-
-            foreach (var deployedProcess in processes)
+            return processes.ToDictionary(p => p, p =>
             {
                 var stateCode = new OptionSetValue(Constants.Workflow.StateCodeActive);
                 var statusCode = new OptionSetValue(Constants.Workflow.StatusCodeActive);
 
-                if (processesToDeactivate != null && processesToDeactivate.Contains(deployedProcess[Constants.Workflow.Fields.Name]))
+                if (processesToDeactivate != null && processesToDeactivate.Contains(p[Constants.Workflow.Fields.Name]))
                 {
                     stateCode.Value = Constants.Workflow.StateCodeInactive;
                     statusCode.Value = Constants.Workflow.StatusCodeInactive;
                 }
 
-                if (stateCode.Value == deployedProcess.GetAttributeValue<OptionSetValue>(Constants.Workflow.Fields.StateCode).Value)
+                if (stateCode.Value == p.GetAttributeValue<OptionSetValue>(Constants.Workflow.Fields.StateCode).Value)
                 {
-                    this.logger.LogInformation($"Process {deployedProcess[Constants.Workflow.Fields.Name]} already has desired state. Skipping.");
-                    continue;
+                    return null;
                 }
 
-                this.logger.LogInformation($"Setting process status for {deployedProcess[Constants.Workflow.Fields.Name]} with statecode {stateCode.Value} and statuscode {statusCode.Value}");
-
-                // SetStateRequest is supposedly deprecated but UpdateRequest doesn't work for deactivating active flows
-                requests.Add(
-                    new SetStateRequest
+                return new UpdateRequest
+                {
+                    Target = new Entity(p.LogicalName, p.Id)
                     {
-                        EntityMoniker = deployedProcess.ToEntityReference(),
-                        State = stateCode,
-                        Status = statusCode,
-                    });
-            }
-
-            return requests;
+                        Attributes =
+                            {
+                                { "statecode", stateCode },
+                                { "statuscode", statusCode },
+                            },
+                    },
+                };
+            });
         }
 
         private EntityCollection RetrieveProcesses(IEnumerable<string> names)
