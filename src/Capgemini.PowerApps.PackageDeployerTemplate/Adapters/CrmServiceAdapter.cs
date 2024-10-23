@@ -375,6 +375,7 @@
 
                 if (failedResponses.Any())
                 {
+                    requests = failedResponses.Select(response => requests.ElementAt(response.RequestIndex));
                     throw new SolutionHistoryOperationException($"{failedResponses.Count} requests failed due to the error code {Constants.ErrorCodes.CustomizationLockExBlockedUnknown}");
                 }
             });
