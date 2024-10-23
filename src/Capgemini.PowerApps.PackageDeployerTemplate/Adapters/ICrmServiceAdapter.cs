@@ -123,11 +123,10 @@
         string GetEntityTypeCode(string entityLogicalName);
 
         /// <summary>
-        /// Checks whether there are any Solution History records in a <b>Started</b> state.
+        /// Waits for Solution History records in a <b>Started</b> state to complete.
         /// </summary>
         /// <param name="logger">Instane of ILogger.</param>
-        /// <returns>Returns <c>true</c> if active records are present in the Solution History; otherwise, returns <c>false</c>.</returns>
-        bool HasStartedSolutionHistoryRecords(ILogger logger);
+        void WaitForSolutionHistoryRecordsToComplete(ILogger logger);
 
         /// <summary>
         /// Executes multiple requests and performs a check on the Solution History during the operation.

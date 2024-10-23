@@ -316,18 +316,18 @@
         }
 
         /// <inheritdoc/>
-        public bool HasStartedSolutionHistoryRecords(ILogger logger)
+        public void WaitForSolutionHistoryRecordsToComplete(ILogger logger)
         {
             var retryPolicy = Policy
-                .HandleResult<bool>(hasActiveRecords => !hasActiveRecords)
+                .HandleResult<bool>(hasActiveRecords => hasActiveRecords)
                 .WaitAndRetryForever(
                     sleepDurationProvider: retryAttempt => TimeSpan.FromSeconds(20),
                     onRetry: (result, timeSpan) =>
                     {
-                        logger.LogInformation($"Active records still present within Solution History.  Waiting for {timeSpan.TotalSeconds} seconds before retrying...");
+                        logger.LogInformation($"Active records are still present within Solution History.  Waiting for {timeSpan.TotalSeconds} seconds before retrying.");
                     });
 
-            var result = retryPolicy.Execute(() =>
+            retryPolicy.Execute(() =>
             {
                 var entityCollection = this.crmSvc.RetrieveMultiple(new QueryByAttribute()
                 {
@@ -347,8 +347,6 @@
                 });
                 return entityCollection.TotalRecordCount > 0;
             });
-
-            return result;
         }
 
         /// <inheritdoc/>
@@ -362,7 +360,7 @@
                     sleepDurationProvider: retryAttempt => TimeSpan.FromSeconds(10),
                     onRetry: (ex, timeSpan) =>
                     {
-                        this.HasStartedSolutionHistoryRecords(logger);
+                        this.WaitForSolutionHistoryRecordsToComplete(logger);
                     });
 
             retryPolicy.Execute(() =>
