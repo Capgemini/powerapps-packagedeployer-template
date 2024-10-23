@@ -3,6 +3,7 @@
     using System;
     using System.Collections.Generic;
     using System.IO;
+    using Microsoft.Extensions.Logging;
     using Microsoft.Xrm.Sdk;
     using Microsoft.Xrm.Sdk.Messages;
     using Microsoft.Xrm.Sdk.Query;
@@ -120,5 +121,22 @@
         /// <param name="entityLogicalName">The unique name of the solution.</param>
         /// <returns> EntityTypeCode for a given entity type.</returns>
         string GetEntityTypeCode(string entityLogicalName);
+
+        /// <summary>
+        /// Checks whether there are any Solution History records in a <b>Started</b> state.
+        /// </summary>
+        /// <param name="logger">Instane of ILogger.</param>
+        /// <returns>Returns <c>true</c> if active records are present in the Solution History; otherwise, returns <c>false</c>.</returns>
+        bool HasStartedSolutionHistoryRecords(ILogger logger);
+
+        /// <summary>
+        /// Executes multiple requests and performs a check on the Solution History during the operation.
+        /// </summary>
+        /// <param name="requests">The collection of <see cref="OrganizationRequest"/> to execute.</param>
+        /// <param name="username">The user to impersonate.</param>
+        /// <param name="logger">The <see cref="ILogger"/> instance.</param>
+        /// <param name="timeout">Timeout in seconds.</param>
+        /// <returns>Returns an <see cref="ExecuteMultipleResponse"/>. </returns>
+        ExecuteMultipleResponse ExecuteMultipleSolutionHistoryOperation(IEnumerable<OrganizationRequest> requests, string username, ILogger logger, int? timeout = null);
     }
 }
