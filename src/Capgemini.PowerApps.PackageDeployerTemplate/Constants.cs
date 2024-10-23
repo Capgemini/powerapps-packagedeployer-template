@@ -604,5 +604,16 @@
                 public const int Started = 0;
             }
         }
+
+        /// <summary>
+        /// Constants relating to web service error codes.
+        /// </summary>
+        public static class ErrorCodes
+        {
+            /// <summary>
+            /// Cannot start the requested operation because there is another [<c>operation_name</c>] running at this moment.
+            /// </summary>
+            public const int CustomizationLockExBlockedUnknown = -2147159966;
+        }
     }
 }
