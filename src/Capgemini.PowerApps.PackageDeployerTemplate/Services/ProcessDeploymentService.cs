@@ -8,7 +8,6 @@
     using Microsoft.Extensions.Logging;
     using Microsoft.Xrm.Sdk;
     using Microsoft.Xrm.Sdk.Query;
-    using Polly;
 
     /// <summary>
     /// Deployment functionality relating to processes.
