@@ -329,19 +329,20 @@
 
             var result = retryPolicy.Execute(() =>
             {
-                var entityCollection = this.crmSvc.RetrieveMultiple(new QueryExpression()
+                var entityCollection = this.crmSvc.RetrieveMultiple(new QueryByAttribute()
                 {
                     EntityName = Constants.SolutionHistory.LogicalName,
                     ColumnSet = new ColumnSet(
-                    Constants.SolutionHistory.Fields.SolutionHistoryId,
-                    Constants.SolutionHistory.Fields.Name,
-                    Constants.SolutionHistory.Fields.Status),
-                    Criteria =
+                        Constants.SolutionHistory.Fields.SolutionHistoryId,
+                        Constants.SolutionHistory.Fields.Name,
+                        Constants.SolutionHistory.Fields.Status),
+                    Attributes =
                     {
-                        Conditions =
-                        {
-                            new ConditionExpression(Constants.SolutionHistory.Fields.Status, ConditionOperator.Equal, Constants.SolutionHistory.Statuses.Started),
-                        },
+                        Constants.SolutionHistory.Fields.Status,
+                    },
+                    Values =
+                    {
+                        Constants.SolutionHistory.Statuses.Started,
                     },
                 });
                 return entityCollection.TotalRecordCount > 0;
