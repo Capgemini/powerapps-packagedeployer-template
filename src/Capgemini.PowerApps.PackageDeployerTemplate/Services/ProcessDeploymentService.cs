@@ -124,8 +124,7 @@
             do
             {
                 var timeout = 120 + (remainingRequests.Count * 10);
-                var executeMultipleRes = string.IsNullOrEmpty(user) ?
-                    this.crmSvc.ExecuteMultiple(remainingRequests, true, true, timeout) : this.crmSvc.ExecuteMultiple(remainingRequests, user, true, true, timeout);
+                var executeMultipleRes = this.crmSvc.ExecuteMultipleSolutionHistoryOperation(remainingRequests, user, this.logger, timeout);
 
                 successfulResponses = executeMultipleRes.Responses
                     .Where(r => r.Fault == null)
