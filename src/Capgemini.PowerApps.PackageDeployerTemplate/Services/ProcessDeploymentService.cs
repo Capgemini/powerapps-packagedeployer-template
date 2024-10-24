@@ -8,7 +8,6 @@
     using Microsoft.Extensions.Logging;
     using Microsoft.Xrm.Sdk;
     using Microsoft.Xrm.Sdk.Query;
-    using Polly;
 
     /// <summary>
     /// Deployment functionality relating to processes.
@@ -124,8 +123,7 @@
             do
             {
                 var timeout = 120 + (remainingRequests.Count * 10);
-                var executeMultipleRes = string.IsNullOrEmpty(user) ?
-                    this.crmSvc.ExecuteMultiple(remainingRequests, true, true, timeout) : this.crmSvc.ExecuteMultiple(remainingRequests, user, true, true, timeout);
+                var executeMultipleRes = this.crmSvc.ExecuteMultipleSolutionHistoryOperation(remainingRequests, user, timeout);
 
                 successfulResponses = executeMultipleRes.Responses
                     .Where(r => r.Fault == null)

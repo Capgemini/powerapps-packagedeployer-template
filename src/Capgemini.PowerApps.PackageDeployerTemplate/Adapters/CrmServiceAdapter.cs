@@ -4,11 +4,13 @@
     using System.Collections.Generic;
     using System.IO;
     using System.Linq;
+    using Capgemini.PowerApps.PackageDeployerTemplate.Exceptions;
     using Microsoft.Extensions.Logging;
     using Microsoft.Xrm.Sdk;
     using Microsoft.Xrm.Sdk.Messages;
     using Microsoft.Xrm.Sdk.Query;
     using Microsoft.Xrm.Tooling.Connector;
+    using Polly;
 
     /// <summary>
     /// An extended <see cref="IOrganizationService"/> built on <see cref="CrmServiceClient"/>.
@@ -311,6 +313,72 @@
             this.logger.LogInformation($"Falling back to executing {request.RequestName} as {this.crmSvc.OAuthUserId}.");
 
             return (TResponse)this.Execute(request);
+        }
+
+        /// <inheritdoc/>
+        public void WaitForSolutionHistoryRecordsToComplete()
+        {
+            var retryPolicy = Policy
+                .HandleResult<bool>(hasActiveRecords => hasActiveRecords)
+                .WaitAndRetryForever(
+                    sleepDurationProvider: retryAttempt => TimeSpan.FromSeconds(20),
+                    onRetry: (result, timeSpan) =>
+                    {
+                        this.logger.LogInformation($"Active records are still present within Solution History.  Waiting for {timeSpan.TotalSeconds} seconds before retrying.");
+                    });
+
+            retryPolicy.Execute(() =>
+            {
+                var entityCollection = this.crmSvc.RetrieveMultiple(new QueryByAttribute()
+                {
+                    EntityName = Constants.SolutionHistory.LogicalName,
+                    ColumnSet = new ColumnSet(
+                        Constants.SolutionHistory.Fields.SolutionHistoryId,
+                        Constants.SolutionHistory.Fields.Name,
+                        Constants.SolutionHistory.Fields.Status),
+                    Attributes =
+                    {
+                        Constants.SolutionHistory.Fields.Status,
+                    },
+                    Values =
+                    {
+                        Constants.SolutionHistory.Statuses.Started,
+                    },
+                });
+                return entityCollection.TotalRecordCount > 0;
+            });
+        }
+
+        /// <inheritdoc/>
+        public ExecuteMultipleResponse ExecuteMultipleSolutionHistoryOperation(IEnumerable<OrganizationRequest> requests, string username, int? timeout = null)
+        {
+            ExecuteMultipleResponse executeMultipleRes = null;
+
+            var retryPolicy = Policy
+                .Handle<SolutionHistoryOperationException>()
+                .WaitAndRetryForever(
+                    sleepDurationProvider: retryAttempt => TimeSpan.FromSeconds(10),
+                    onRetry: (ex, timeSpan) =>
+                    {
+                        this.WaitForSolutionHistoryRecordsToComplete();
+                    });
+
+            retryPolicy.Execute(() =>
+            {
+                executeMultipleRes = string.IsNullOrEmpty(username) ?
+                    this.ExecuteMultiple(requests, true, true, timeout) : this.ExecuteMultiple(requests, username, true, true, timeout);
+                var failedResponses = executeMultipleRes.Responses
+                    .Where(r => r.Fault.ErrorCode == Constants.ErrorCodes.CustomizationLockExBlockedUnknown)
+                    .ToList();
+
+                if (failedResponses.Any())
+                {
+                    requests = failedResponses.Select(response => requests.ElementAt(response.RequestIndex));
+                    throw new SolutionHistoryOperationException($"{failedResponses.Count} requests failed due to the error code {Constants.ErrorCodes.CustomizationLockExBlockedUnknown}");
+                }
+            });
+
+            return executeMultipleRes;
         }
 
         /// <inheritdoc/>

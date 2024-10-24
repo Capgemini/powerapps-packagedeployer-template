@@ -556,5 +556,64 @@
                 public const string Value = "value";
             }
         }
+
+        /// <summary>
+        /// Constants relating to the <b>msdyn_solutionhistory</b> entity.
+        /// </summary>
+        public static class SolutionHistory
+        {
+            /// <summary>
+            /// The logical name.
+            /// </summary>
+            public const string LogicalName = "msdyn_solutionhistory";
+
+            /// <summary>
+            /// Field logical names.
+            /// </summary>
+            public static class Fields
+            {
+                /// <summary>
+                /// The solution history name.
+                /// </summary>
+                public const string Name = "msdyn_name";
+
+                /// <summary>
+                /// The solution history status.
+                /// </summary>
+                public const string Status = "msdyn_status";
+
+                /// <summary>
+                /// The unique solution history ID.
+                /// </summary>
+                public const string SolutionHistoryId = "msdyn_solutionhistoryid";
+            }
+
+            /// <summary>
+            /// Staus Reasons.
+            /// </summary>
+            public static class Statuses
+            {
+                /// <summary>
+                /// Status reason Completed.
+                /// </summary>
+                public const int Completed = 1;
+
+                /// <summary>
+                /// Status reason Started.
+                /// </summary>
+                public const int Started = 0;
+            }
+        }
+
+        /// <summary>
+        /// Constants relating to web service error codes.
+        /// </summary>
+        public static class ErrorCodes
+        {
+            /// <summary>
+            /// Cannot start the requested operation because there is another [<c>operation_name</c>] running at this moment.
+            /// </summary>
+            public const int CustomizationLockExBlockedUnknown = -2147159966;
+        }
     }
 }

@@ -120,5 +120,19 @@
         /// <param name="entityLogicalName">The unique name of the solution.</param>
         /// <returns> EntityTypeCode for a given entity type.</returns>
         string GetEntityTypeCode(string entityLogicalName);
+
+        /// <summary>
+        /// Waits for Solution History records in a <b>Started</b> state to complete.
+        /// </summary>
+        void WaitForSolutionHistoryRecordsToComplete();
+
+        /// <summary>
+        /// Executes multiple requests and performs a check on the Solution History during the operation.
+        /// </summary>
+        /// <param name="requests">The collection of <see cref="OrganizationRequest"/> to execute.</param>
+        /// <param name="username">The user to impersonate.</param>
+        /// <param name="timeout">Timeout in seconds.</param>
+        /// <returns>Returns an <see cref="ExecuteMultipleResponse"/>. </returns>
+        ExecuteMultipleResponse ExecuteMultipleSolutionHistoryOperation(IEnumerable<OrganizationRequest> requests, string username, int? timeout = null);
     }
 }
