@@ -125,17 +125,15 @@
         /// <summary>
         /// Waits for Solution History records in a <b>Started</b> state to complete.
         /// </summary>
-        /// <param name="logger">Instane of ILogger.</param>
-        void WaitForSolutionHistoryRecordsToComplete(ILogger logger);
+        void WaitForSolutionHistoryRecordsToComplete();
 
         /// <summary>
         /// Executes multiple requests and performs a check on the Solution History during the operation.
         /// </summary>
         /// <param name="requests">The collection of <see cref="OrganizationRequest"/> to execute.</param>
         /// <param name="username">The user to impersonate.</param>
-        /// <param name="logger">The <see cref="ILogger"/> instance.</param>
         /// <param name="timeout">Timeout in seconds.</param>
         /// <returns>Returns an <see cref="ExecuteMultipleResponse"/>. </returns>
-        ExecuteMultipleResponse ExecuteMultipleSolutionHistoryOperation(IEnumerable<OrganizationRequest> requests, string username, ILogger logger, int? timeout = null);
+        ExecuteMultipleResponse ExecuteMultipleSolutionHistoryOperation(IEnumerable<OrganizationRequest> requests, string username, int? timeout = null);
     }
 }

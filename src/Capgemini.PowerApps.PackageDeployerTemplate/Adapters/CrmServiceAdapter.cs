@@ -316,7 +316,7 @@
         }
 
         /// <inheritdoc/>
-        public void WaitForSolutionHistoryRecordsToComplete(ILogger logger)
+        public void WaitForSolutionHistoryRecordsToComplete()
         {
             var retryPolicy = Policy
                 .HandleResult<bool>(hasActiveRecords => hasActiveRecords)
@@ -324,7 +324,7 @@
                     sleepDurationProvider: retryAttempt => TimeSpan.FromSeconds(20),
                     onRetry: (result, timeSpan) =>
                     {
-                        logger.LogInformation($"Active records are still present within Solution History.  Waiting for {timeSpan.TotalSeconds} seconds before retrying.");
+                        this.logger.LogInformation($"Active records are still present within Solution History.  Waiting for {timeSpan.TotalSeconds} seconds before retrying.");
                     });
 
             retryPolicy.Execute(() =>
@@ -350,7 +350,7 @@
         }
 
         /// <inheritdoc/>
-        public ExecuteMultipleResponse ExecuteMultipleSolutionHistoryOperation(IEnumerable<OrganizationRequest> requests, string username, ILogger logger, int? timeout = null)
+        public ExecuteMultipleResponse ExecuteMultipleSolutionHistoryOperation(IEnumerable<OrganizationRequest> requests, string username, int? timeout = null)
         {
             ExecuteMultipleResponse executeMultipleRes = null;
 
@@ -360,7 +360,7 @@
                     sleepDurationProvider: retryAttempt => TimeSpan.FromSeconds(10),
                     onRetry: (ex, timeSpan) =>
                     {
-                        this.WaitForSolutionHistoryRecordsToComplete(logger);
+                        this.WaitForSolutionHistoryRecordsToComplete();
                     });
 
             retryPolicy.Execute(() =>
