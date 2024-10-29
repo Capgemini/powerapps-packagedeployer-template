@@ -256,14 +256,14 @@
             return new Entity(Constants.Workflow.LogicalName, Guid.NewGuid())
             {
                 Attributes =
+                {
                     {
-                        {
-                            Constants.Workflow.Fields.Name, "Process"
-                        },
-                        {
-                            Constants.Workflow.Fields.StateCode, new OptionSetValue(stateCode)
-                        },
+                        Constants.Workflow.Fields.Name, "Process"
                     },
+                    {
+                        Constants.Workflow.Fields.StateCode, new OptionSetValue(stateCode)
+                    },
+                },
             };
         }
 
