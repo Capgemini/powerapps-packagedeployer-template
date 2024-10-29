@@ -123,12 +123,12 @@
             do
             {
                 var timeout = 120 + (remainingRequests.Count * 10);
-                var executeMultipleRes = this.crmSvc.ExecuteMultipleSolutionHistoryOperation(remainingRequests, user, timeout);
+                var executeMultipleResponses = this.crmSvc.ExecuteMultipleSolutionHistoryOperation(remainingRequests, user, timeout);
 
-                successfulResponses = executeMultipleRes.Responses
+                successfulResponses = executeMultipleResponses
                     .Where(r => r.Fault == null)
                     .ToList();
-                failedResponses = executeMultipleRes.Responses
+                failedResponses = executeMultipleResponses
                     .Except(successfulResponses)
                     .ToList();
                 remainingRequests = failedResponses
