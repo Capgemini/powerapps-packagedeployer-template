@@ -350,35 +350,54 @@
         }
 
         /// <inheritdoc/>
-        public ExecuteMultipleResponse ExecuteMultipleSolutionHistoryOperation(IEnumerable<OrganizationRequest> requests, string username, int? timeout = null)
+        public IEnumerable<ExecuteMultipleResponseItem> ExecuteMultipleSolutionHistoryOperation(IEnumerable<OrganizationRequest> requests, string username, int? timeout = null)
         {
-            ExecuteMultipleResponse executeMultipleRes = null;
+            var allResponses = new Dictionary<int, ExecuteMultipleResponseItem>(requests.Count());
+            var failedRequests = new Dictionary<int, OrganizationRequest>();
 
             var retryPolicy = Policy
                 .Handle<SolutionHistoryOperationException>()
-                .WaitAndRetryForever(
-                    sleepDurationProvider: retryAttempt => TimeSpan.FromSeconds(10),
-                    onRetry: (ex, timeSpan) =>
+                .RetryForever(
+                    onRetry: (ex, timespan) =>
                     {
                         this.WaitForSolutionHistoryRecordsToComplete();
                     });
 
+            // Track the original index of each request
+            var indexedRequests = requests
+                .Select((request, index) => new { Request = request, Index = index })
+                .ToDictionary(x => x.Index, x => x.Request);
+
             retryPolicy.Execute(() =>
             {
-                executeMultipleRes = string.IsNullOrEmpty(username) ?
+                var executeMultipleRes = string.IsNullOrEmpty(username) ?
                     this.ExecuteMultiple(requests, true, true, timeout) : this.ExecuteMultiple(requests, username, true, true, timeout);
-                var failedResponses = executeMultipleRes.Responses
-                    .Where(r => r.Fault.ErrorCode == Constants.ErrorCodes.CustomizationLockExBlockedUnknown)
-                    .ToList();
 
-                if (failedResponses.Any())
+                executeMultipleRes.Responses
+                    .ToList()
+                    .ForEach(response =>
+                    {
+                        bool hasFailedRequests = failedRequests.Count > 0;
+                        Func<ExecuteMultipleResponseItem, int> keySelector = response =>
+                            hasFailedRequests ? failedRequests.ElementAt(response.RequestIndex).Key : response.RequestIndex;
+
+                        executeMultipleRes.Responses
+                            .ToList()
+                            .ForEach(response => allResponses[keySelector(response)] = response);
+                    });
+
+                failedRequests = allResponses.Values
+                    .Where(response => response.Fault != null && response.Fault.ErrorCode == Constants.ErrorCodes.CustomizationLockExBlockedUnknown)
+                    .ToDictionary(response => response.RequestIndex, response => indexedRequests.ElementAt(response.RequestIndex).Value);
+
+                if (failedRequests.Any())
                 {
-                    requests = failedResponses.Select(response => requests.ElementAt(response.RequestIndex));
-                    throw new SolutionHistoryOperationException($"{failedResponses.Count} requests failed due to the error code {Constants.ErrorCodes.CustomizationLockExBlockedUnknown}");
+                    requests = failedRequests.Select(r => r.Value).AsEnumerable();
+                    throw new SolutionHistoryOperationException($"{failedRequests.Count} requests failed due to the error code {Constants.ErrorCodes.CustomizationLockExBlockedUnknown}");
                 }
             });
 
-            return executeMultipleRes;
+            return allResponses.Values.AsEnumerable();
         }
 
         /// <inheritdoc/>

@@ -132,7 +132,7 @@
         /// <param name="requests">The collection of <see cref="OrganizationRequest"/> to execute.</param>
         /// <param name="username">The user to impersonate.</param>
         /// <param name="timeout">Timeout in seconds.</param>
-        /// <returns>Returns an <see cref="ExecuteMultipleResponse"/>. </returns>
-        ExecuteMultipleResponse ExecuteMultipleSolutionHistoryOperation(IEnumerable<OrganizationRequest> requests, string username, int? timeout = null);
+        /// <returns>Returns an <see cref="ExecuteMultipleResponseItem"/>.</returns>
+        IEnumerable<ExecuteMultipleResponseItem> ExecuteMultipleSolutionHistoryOperation(IEnumerable<OrganizationRequest> requests, string username, int? timeout = null);
     }
 }
