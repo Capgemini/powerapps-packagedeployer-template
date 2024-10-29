@@ -239,7 +239,7 @@
                 },
             };
             response.Responses.Add(new ExecuteMultipleResponseItem { Fault = fault });
-            this.MockExecuteMultipleSolutionHistoryOperationResponse(response);
+            this.MockExecuteMultipleSolutionHistoryOperationResponse(response.r);
 
             this.processDeploymentSvc.SetStates(
                 new List<string>
@@ -319,7 +319,7 @@
                 .Returns(new EntityCollection(processes));
         }
 
-        private void MockExecuteMultipleSolutionHistoryOperationResponse(ExecuteMultipleResponse response = null, Expression<Func<ICrmServiceAdapter, ExecuteMultipleResponse>> expression = null, bool verifiable = false)
+        private void MockExecuteMultipleSolutionHistoryOperationResponse(IEnumerable<ExecuteMultipleResponseItem> responses = null, Expression<Func<ICrmServiceAdapter, IEnumerable<ExecuteMultipleResponseItem>>> expression = null, bool verifiable = false)
         {
             if (expression == null)
             {
@@ -329,15 +329,20 @@
                     It.IsAny<int?>());
             }
 
-            if (response == null)
+            if (responses == null)
             {
-                response = new ExecuteMultipleResponse();
-                response.Results["Responses"] = new ExecuteMultipleResponseItemCollection();
+                var executeMultipleResponse = new ExecuteMultipleResponse();
+                executeMultipleResponse.Results["Responses"] = new ExecuteMultipleResponseItemCollection()
+                {
+                    new ExecuteMultipleResponseItem() { RequestIndex = 0 },
+                    new ExecuteMultipleResponseItem() { RequestIndex = 1 },
+                };
+                responses = executeMultipleResponse.Responses;
             }
 
             var returnResult = this.crmServiceAdapterMock
                 .Setup(expression)
-                .Returns(response);
+                .Returns(responses);
 
             if (verifiable)
             {
