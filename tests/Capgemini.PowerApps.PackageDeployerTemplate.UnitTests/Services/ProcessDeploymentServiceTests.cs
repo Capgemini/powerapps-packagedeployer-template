@@ -267,33 +267,6 @@
             };
         }
 
-        private void MockExecuteMultipleResponse(ExecuteMultipleResponse response = null, Expression<Func<ICrmServiceAdapter, ExecuteMultipleResponse>> expression = null, bool verifiable = false)
-        {
-            if (expression == null)
-            {
-                expression = svc => svc.ExecuteMultiple(
-                    It.IsAny<IEnumerable<OrganizationRequest>>(),
-                    It.IsAny<bool>(),
-                    It.IsAny<bool>(),
-                    It.IsAny<int?>());
-            }
-
-            if (response == null)
-            {
-                response = new ExecuteMultipleResponse();
-                response.Results["Responses"] = new ExecuteMultipleResponseItemCollection();
-            }
-
-            var returnResult = this.crmServiceAdapterMock
-                .Setup(expression)
-                .Returns(response);
-
-            if (verifiable)
-            {
-                returnResult.Verifiable();
-            }
-        }
-
         private void MockSetStatesProcesses(IList<Entity> processes)
         {
             this.crmServiceAdapterMock.Setup(
