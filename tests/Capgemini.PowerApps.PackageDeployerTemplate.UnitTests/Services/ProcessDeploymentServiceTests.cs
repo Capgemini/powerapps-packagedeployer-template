@@ -239,7 +239,7 @@
                 },
             };
             response.Responses.Add(new ExecuteMultipleResponseItem { Fault = fault });
-            this.MockExecuteMultipleSolutionHistoryOperationResponse(response.r);
+            this.MockExecuteMultipleSolutionHistoryOperationResponse(response.Responses);
 
             this.processDeploymentSvc.SetStates(
                 new List<string>
