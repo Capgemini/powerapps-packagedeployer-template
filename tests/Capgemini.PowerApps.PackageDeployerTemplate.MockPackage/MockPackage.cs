@@ -1,8 +1,10 @@
-using Microsoft.Xrm.Tooling.PackageDeployment.CrmPackageExtentionBase;
-using System.ComponentModel.Composition;
-
 namespace Capgemini.PowerApps.PackageDeployerTemplate.MockPackage
 {
+    using Microsoft.Xrm.Tooling.PackageDeployment.CrmPackageExtentionBase;
+    using System;
+    using System.ComponentModel.Composition;
+    using System.IO;
+
     /// <summary>
     /// A mock package used for testing. 
     /// </summary>
@@ -16,5 +18,13 @@ namespace Capgemini.PowerApps.PackageDeployerTemplate.MockPackage
         public override string GetImportPackageDescriptionText => "Mock Package";
 
         public override string GetNameOfImport(bool plural) => "Mock Package";
+
+        public override bool AfterPrimaryImport()
+        {
+            var solutionPath = Path.Combine(Environment.CurrentDirectory, "PkgFolder", $"{Constants.Solutions.ActiveSolutionHistory}.zip");
+
+            this.CrmSvc.ImportSolutionToCrm(solutionPath, out _);
+            return base.AfterPrimaryImport();
+        }
     }
 }
