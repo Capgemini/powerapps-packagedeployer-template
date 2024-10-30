@@ -345,6 +345,7 @@
                         Constants.SolutionHistory.Statuses.Started,
                     },
                 });
+
                 return entityCollection.TotalRecordCount > 0;
             });
         }
@@ -363,8 +364,10 @@
                         this.WaitForSolutionHistoryRecordsToComplete();
                     });
 
-            // Track the original index of each request
-            var indexedRequests = requests
+            Func<ExecuteMultipleResponseItem, bool, int> keySelector = (response, hasFailedRequests) =>
+                        hasFailedRequests ? failedRequests.ElementAt(response.RequestIndex).Key : response.RequestIndex;
+
+            var originalRequestIndices = requests
                 .Select((request, index) => new { Request = request, Index = index })
                 .ToDictionary(x => x.Index, x => x.Request);
 
@@ -373,22 +376,15 @@
                 var executeMultipleRes = string.IsNullOrEmpty(username) ?
                     this.ExecuteMultiple(requests, true, true, timeout) : this.ExecuteMultiple(requests, username, true, true, timeout);
 
-                executeMultipleRes.Responses
-                    .ToList()
-                    .ForEach(response =>
-                    {
-                        bool hasFailedRequests = failedRequests.Count > 0;
-                        Func<ExecuteMultipleResponseItem, int> keySelector = response =>
-                            hasFailedRequests ? failedRequests.ElementAt(response.RequestIndex).Key : response.RequestIndex;
-
-                        executeMultipleRes.Responses
-                            .ToList()
-                            .ForEach(response => allResponses[keySelector(response)] = response);
-                    });
+                foreach (var response in executeMultipleRes.Responses)
+                {
+                    var responseIndex = keySelector(response, failedRequests.Count > 0);
+                    allResponses[responseIndex] = response;
+                }
 
                 failedRequests = allResponses.Values
                     .Where(response => response.Fault != null && response.Fault.ErrorCode == Constants.ErrorCodes.CustomizationLockExBlockedUnknown)
-                    .ToDictionary(response => response.RequestIndex, response => indexedRequests.ElementAt(response.RequestIndex).Value);
+                    .ToDictionary(response => response.RequestIndex, response => originalRequestIndices.ElementAt(response.RequestIndex).Value);
 
                 if (failedRequests.Any())
                 {
