@@ -28,7 +28,6 @@ stages:
             displayName: Install Power Platform Build Tools
             inputs:
               DefaultVersion: true
-              # temporary comment
           - task: PowerPlatformCreateEnvironment@2
             displayName: Create environment
             name: PowerPlatformCreateEnvironment
