@@ -28,8 +28,9 @@ stages:
             displayName: Install Power Platform Build Tools
             inputs:
               DefaultVersion: true
-          - task: PowerPlatformCreateEnvironment@0
+          - task: PowerPlatformCreateEnvironment@2
             displayName: Create environment
+            name: PowerPlatformCreateEnvironment
             inputs:
               authenticationType: PowerPlatformSPN
               PowerPlatformSPN: Dataverse (placeholder)
@@ -97,7 +98,7 @@ stages:
             displayName: Install Power Platform Build Tools
             inputs:
               DefaultVersion: true
-          - task: PowerPlatformDeleteEnvironment@0
+          - task: PowerPlatformDeleteEnvironment@2
             displayName: Delete environment
             continueOnError: true
             inputs:
