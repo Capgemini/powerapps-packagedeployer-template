@@ -113,16 +113,17 @@ namespace Capgemini.PowerApps.PackageDeployerTemplate.IntegrationTests
                 {
                     FilterOperator = LogicalOperator.Or,
                     Filters =
-                          {
-                            new FilterExpression
+                    {
+                        new FilterExpression
+                        {
+                            FilterOperator = LogicalOperator.Or,
+                            Conditions =
                             {
-                              FilterOperator = LogicalOperator.Or,
-                              Conditions =
-                              {
-                                new ConditionExpression(Constants.Solution.Fields.UniqueName, ConditionOperator.Equal, "pdt_PackageDeployerTemplate_MockSolution"),
-                              },
+                               new ConditionExpression(Constants.Solution.Fields.UniqueName, ConditionOperator.Equal, "pdt_PackageDeployerTemplate_MockSolution"),
+                               new ConditionExpression(Constants.Solution.Fields.UniqueName, ConditionOperator.Equal, "pdt_ActiveSolutionHistory"),
                             },
-                          },
+                        },
+                    },
                 },
             };
 
