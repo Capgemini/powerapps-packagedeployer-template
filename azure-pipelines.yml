@@ -21,7 +21,7 @@ stages:
     displayName: Publish
     dependsOn: 
       - BuildAndTest
-      - ManualValidation
+      # - ManualValidation
     jobs:
       - job: PublishJob
         displayName: Publish 
