@@ -13,10 +13,10 @@ pool:
 
 stages:
   - template: templates/build-and-test-stages.yml
-    parameters:
-      environmentIdentifier: $(Build.BuildId)
-      environmentDisplayName: Package Deployer Template - CI
-      environmentDomainName: pdt-ci
+    # parameters:
+    #   environmentIdentifier: $(Build.BuildId)
+    #   environmentDisplayName: Package Deployer Template - CI
+    #   environmentDomainName: pdt-ci
   - stage: Publish
     displayName: Publish
     dependsOn: 
