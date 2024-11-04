@@ -43,17 +43,17 @@ jobs:
         inputs:
           command: restore
           projects: '**/*.csproj'
-      - task: SonarCloudPrepare@1
-        displayName: Prepare SonarCloud
-        inputs:
-          SonarCloud: 'SonarCloud'
-          organization: 'capgemini-1' 
-          scannerMode: 'MSBuild'
-          projectKey: 'Capgemini_xrm-packagedeployer'
-          projectName: 'xrm-packagedeployer'
-          projectVersion: '$(GitVersion.SemVer)'
-          extraProperties: |
-            sonar.exclusions=**\*.css
+      # - task: SonarCloudPrepare@1
+      #   displayName: Prepare SonarCloud
+      #   inputs:
+      #     SonarCloud: 'SonarCloud'
+      #     organization: 'capgemini-1' 
+      #     scannerMode: 'MSBuild'
+      #     projectKey: 'Capgemini_xrm-packagedeployer'
+      #     projectName: 'xrm-packagedeployer'
+      #     projectVersion: '$(GitVersion.SemVer)'
+      #     extraProperties: |
+      #       sonar.exclusions=**\*.css
       - task: VSBuild@1
         displayName: Build solution
         inputs:
@@ -92,12 +92,12 @@ jobs:
       #     configuration: '$(buildConfiguration)'
       #     testAssemblyVer2: '**\*Tests.dll' 
       #     searchFolder: tests
-      - task: SonarCloudAnalyze@1
-        displayName: Analyse with SonarCloud
-      - task: SonarCloudPublish@1
-        displayName: Publish SonarCloud results
-        inputs:
-          pollingTimeoutSec: '300'
+      # - task: SonarCloudAnalyze@1
+      #   displayName: Analyse with SonarCloud
+      # - task: SonarCloudPublish@1
+      #   displayName: Publish SonarCloud results
+      #   inputs:
+      #     pollingTimeoutSec: '300'
       - task: WhiteSource Bolt@20
         displayName: Detect security and licence issues
         inputs:
