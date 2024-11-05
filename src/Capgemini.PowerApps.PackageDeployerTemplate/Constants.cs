@@ -611,9 +611,29 @@
         public static class ErrorCodes
         {
             /// <summary>
+            /// Cannot start the requested operation [<c>operation_name</c>] because there is a customization running at this moment.
+            /// </summary>
+            public const int CustomizationLockExBlockingUnknown = -2147159961;
+
+            /// <summary>
+            /// Cannot start the requested operation [<c>operation_name</c>] because there is another [<c>operation_name</c>] running at this moment.
+            /// </summary>
+            public const int CustomizationLockExBothKnownDifferent = -2147159964;
+
+            /// <summary>
+            /// Cannot start another [<c>operation_name</c>] because there is a previous [<c>operation_name</c>] running at this moment.
+            /// </summary>
+            public const int CustomizationLockExBothKnownSame = -2147159965;
+
+            /// <summary>
             /// Cannot start the requested operation because there is another [<c>operation_name</c>] running at this moment.
             /// </summary>
             public const int CustomizationLockExBlockedUnknown = -2147159966;
+
+            /// <summary>
+            /// Cannot start the requested operation because there is a customization running at this moment.
+            /// </summary>
+            public const int CustomizationLockExBothUnknown = -2147159967;
         }
     }
 }
