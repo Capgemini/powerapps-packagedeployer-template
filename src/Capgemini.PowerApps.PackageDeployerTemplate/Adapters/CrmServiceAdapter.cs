@@ -353,8 +353,19 @@
         /// <inheritdoc/>
         public IEnumerable<ExecuteMultipleResponseItem> ExecuteMultipleSolutionHistoryOperation(IEnumerable<OrganizationRequest> requests, string username, int? timeout = null)
         {
+            var customizationLockErrorCodes = new int[]
+            {
+                Constants.ErrorCodes.CustomizationLockExBlockingUnknown,
+                Constants.ErrorCodes.CustomizationLockExBothKnownDifferent,
+                Constants.ErrorCodes.CustomizationLockExBothKnownSame,
+                Constants.ErrorCodes.CustomizationLockExBlockedUnknown,
+                Constants.ErrorCodes.CustomizationLockExBothUnknown,
+            };
             var allResponses = new Dictionary<int, ExecuteMultipleResponseItem>(requests.Count());
             var failedRequests = new Dictionary<int, OrganizationRequest>();
+
+            Func<ExecuteMultipleResponseItem, bool, int> keySelector = (response, hasFailedRequests) =>
+                        hasFailedRequests ? failedRequests.ElementAt(response.RequestIndex).Key : response.RequestIndex;
 
             var retryPolicy = Policy
                 .Handle<SolutionHistoryOperationException>()
@@ -363,9 +374,6 @@
                     {
                         this.WaitForSolutionHistoryRecordsToComplete();
                     });
-
-            Func<ExecuteMultipleResponseItem, bool, int> keySelector = (response, hasFailedRequests) =>
-                        hasFailedRequests ? failedRequests.ElementAt(response.RequestIndex).Key : response.RequestIndex;
 
             var originalRequestIndices = requests
                 .Select((request, index) => new { Request = request, Index = index })
@@ -383,7 +391,7 @@
                 }
 
                 failedRequests = allResponses.Values
-                    .Where(response => response.Fault != null && response.Fault.ErrorCode == Constants.ErrorCodes.CustomizationLockExBlockedUnknown)
+                    .Where(response => response.Fault != null && customizationLockErrorCodes.Any(errorCode => errorCode == response.Fault.ErrorCode))
                     .ToDictionary(response => response.RequestIndex, response => originalRequestIndices.ElementAt(response.RequestIndex).Value);
 
                 if (failedRequests.Any())
