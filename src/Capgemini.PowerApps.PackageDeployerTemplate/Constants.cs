@@ -634,6 +634,11 @@
             /// Cannot start the requested operation because there is a customization running at this moment.
             /// </summary>
             public const int CustomizationLockExBothUnknown = -2147159967;
+
+            /// <summary>
+            /// The solution installation or removal failed due to the installation or removal of another solution at the same time.
+            /// </summary>
+            public const int SolutionConcurrencyFailure = -2147020463;
         }
     }
 }

@@ -360,6 +360,7 @@
                 Constants.ErrorCodes.CustomizationLockExBothKnownSame,
                 Constants.ErrorCodes.CustomizationLockExBlockedUnknown,
                 Constants.ErrorCodes.CustomizationLockExBothUnknown,
+                Constants.ErrorCodes.SolutionConcurrencyFailure,
             };
             var allResponses = new Dictionary<int, ExecuteMultipleResponseItem>(requests.Count());
             var failedRequests = new Dictionary<int, OrganizationRequest>();
@@ -397,7 +398,7 @@
                 if (failedRequests.Any())
                 {
                     requests = failedRequests.Select(r => r.Value).AsEnumerable();
-                    throw new SolutionHistoryOperationException($"{failedRequests.Count} requests failed due to the error code {Constants.ErrorCodes.CustomizationLockExBlockedUnknown}");
+                    throw new SolutionHistoryOperationException($"{failedRequests.Count} requests failed.");
                 }
             });
 
