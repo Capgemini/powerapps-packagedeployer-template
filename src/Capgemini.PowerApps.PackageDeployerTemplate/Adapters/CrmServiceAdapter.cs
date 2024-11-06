@@ -391,14 +391,17 @@
                     allResponses[responseIndex] = response;
                 }
 
-                failedRequests = allResponses.Values
-                    .Where(response => response.Fault != null && customizationLockErrorCodes.Any(errorCode => errorCode == response.Fault.ErrorCode))
-                    .ToDictionary(response => response.RequestIndex, response => originalRequestIndices.ElementAt(response.RequestIndex).Value);
-
-                if (failedRequests.Any())
+                if (executeMultipleRes.IsFaulted)
                 {
-                    requests = failedRequests.Select(r => r.Value).AsEnumerable();
-                    throw new SolutionHistoryOperationException($"{failedRequests.Count} requests failed.");
+                    failedRequests = allResponses.Values
+                        .Where(response => response.Fault != null && customizationLockErrorCodes.Any(errorCode => errorCode == response.Fault.ErrorCode))
+                        .ToDictionary(response => response.RequestIndex, response => originalRequestIndices.ElementAt(response.RequestIndex).Value);
+
+                    if (failedRequests.Any())
+                    {
+                        requests = failedRequests.Select(r => r.Value).AsEnumerable();
+                        throw new SolutionHistoryOperationException($"{failedRequests.Count} requests failed.");
+                    }
                 }
             });
 
