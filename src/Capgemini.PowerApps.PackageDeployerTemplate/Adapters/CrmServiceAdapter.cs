@@ -318,16 +318,13 @@
         /// <inheritdoc/>
         public void WaitForSolutionHistoryRecordsToComplete()
         {
-            var retryPolicy = Policy
-                .HandleResult<bool>(hasActiveRecords => hasActiveRecords)
+            var activeSolutionHistoryPolicy = Policy
+                .HandleResult<bool>(hasActiveRecords => !hasActiveRecords)
                 .WaitAndRetryForever(
                     sleepDurationProvider: retryAttempt => TimeSpan.FromSeconds(20),
-                    onRetry: (result, timeSpan) =>
-                    {
-                        this.logger.LogInformation($"Active records are still present within Solution History.  Waiting for {timeSpan.TotalSeconds} seconds before retrying.");
-                    });
+                    onRetry: (result, timeSpan) => { this.logger.LogInformation("Active records are still present within Solution History.  Waiting for {0} seconds before retrying.", timeSpan.TotalSeconds); });
 
-            retryPolicy.Execute(() =>
+            activeSolutionHistoryPolicy.Execute(() =>
             {
                 var entityCollection = this.crmSvc.RetrieveMultiple(new QueryByAttribute()
                 {
@@ -346,7 +343,7 @@
                     },
                 });
 
-                return entityCollection.TotalRecordCount > 0;
+                return entityCollection.TotalRecordCount == 0;
             });
         }
 
@@ -360,27 +357,30 @@
                 Constants.ErrorCodes.CustomizationLockExBothKnownSame,
                 Constants.ErrorCodes.CustomizationLockExBlockedUnknown,
                 Constants.ErrorCodes.CustomizationLockExBothUnknown,
-                Constants.ErrorCodes.SolutionConcurrencyFailure,
             };
+
             var allResponses = new Dictionary<int, ExecuteMultipleResponseItem>(requests.Count());
             var failedRequests = new Dictionary<int, OrganizationRequest>();
 
             Func<ExecuteMultipleResponseItem, bool, int> keySelector = (response, hasFailedRequests) =>
                         hasFailedRequests ? failedRequests.ElementAt(response.RequestIndex).Key : response.RequestIndex;
 
-            var retryPolicy = Policy
-                .Handle<SolutionHistoryOperationException>()
-                .RetryForever(
-                    onRetry: (ex, timespan) =>
-                    {
-                        this.WaitForSolutionHistoryRecordsToComplete();
-                    });
-
             var originalRequestIndices = requests
-                .Select((request, index) => new { Request = request, Index = index })
-                .ToDictionary(x => x.Index, x => x.Request);
+               .Select((request, index) => new { Request = request, Index = index })
+               .ToDictionary(x => x.Index, x => x.Request);
 
-            retryPolicy.Execute(() =>
+            var customizationLockPolicy = Policy
+                .Handle<CustomizationLockException>()
+                .RetryForever(onRetry: (ex, timeSpan) => { this.WaitForSolutionHistoryRecordsToComplete(); });
+
+            var solutionConcurrencyPolicy = Policy
+                .Handle<SolutionConcurrencyException>()
+                .WaitAndRetryForever(
+                    sleepDurationProvider: retryAttempt => TimeSpan.FromSeconds(30),
+                    onRetry: (ex, timeSpan) => { this.logger.LogInformation("A solution concurrency issue has occured.  Waiting for {0} seconds before retrying.", timeSpan.TotalSeconds); });
+
+            var policies = Policy.Wrap(customizationLockPolicy, solutionConcurrencyPolicy);
+            policies.Execute(() =>
             {
                 var executeMultipleRes = string.IsNullOrEmpty(username) ?
                     this.ExecuteMultiple(requests, true, true, timeout) : this.ExecuteMultiple(requests, username, true, true, timeout);
@@ -393,14 +393,28 @@
 
                 if (executeMultipleRes.IsFaulted)
                 {
-                    failedRequests = allResponses.Values
-                        .Where(response => response.Fault != null && customizationLockErrorCodes.Any(errorCode => errorCode == response.Fault.ErrorCode))
-                        .ToDictionary(response => response.RequestIndex, response => originalRequestIndices.ElementAt(response.RequestIndex).Value);
+                    var failedResponses = allResponses.Values
+                        .Where(response => response.Fault != null)
+                        .ToList();
 
-                    if (failedRequests.Any())
+                    failedRequests = failedResponses.ToDictionary(
+                        response => response.RequestIndex,
+                        response => originalRequestIndices[response.RequestIndex]);
+
+                    requests = failedRequests.Values.AsEnumerable();
+
+                    var hasSolutionConcurrencyErrors = failedResponses
+                        .Any(response => response.Fault.ErrorCode == Constants.ErrorCodes.SolutionConcurrencyFailure);
+                    if (hasSolutionConcurrencyErrors)
                     {
-                        requests = failedRequests.Select(r => r.Value).AsEnumerable();
-                        throw new SolutionHistoryOperationException($"{failedRequests.Count} requests failed.");
+                        throw new SolutionConcurrencyException($"{failedRequests.Count} requests failed.");
+                    }
+
+                    var hasCustomizationLockErrors = failedResponses
+                        .Any(response => customizationLockErrorCodes.ToList().Exists(errorCode => errorCode == response.Fault.ErrorCode));
+                    if (hasCustomizationLockErrors)
+                    {
+                        throw new CustomizationLockException($"{failedRequests.Count} requests failed.");
                     }
                 }
             });
