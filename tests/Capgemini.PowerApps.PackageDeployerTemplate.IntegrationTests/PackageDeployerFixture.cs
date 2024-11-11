@@ -64,7 +64,7 @@ namespace Capgemini.PowerApps.PackageDeployerTemplate.IntegrationTests
 
             this.DeleteWordTemplates();
             this.DeleteData();
-            this.UninstallSolution();
+            this.UninstallSolutions();
 
             this.ServiceClient.Dispose();
 
@@ -103,7 +103,7 @@ namespace Capgemini.PowerApps.PackageDeployerTemplate.IntegrationTests
             return url;
         }
 
-        private void UninstallSolution()
+        private void UninstallSolutions()
         {
             this.LogDiagnosticMessage("Uninstalling solution...");
 

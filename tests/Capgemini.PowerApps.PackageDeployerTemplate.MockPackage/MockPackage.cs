@@ -21,9 +21,10 @@ namespace Capgemini.PowerApps.PackageDeployerTemplate.MockPackage
 
         public override bool AfterPrimaryImport()
         {
-            var solutionPath = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "PkgFolder", $@"Solutions\{Constants.Solutions.ActiveSolutionHistory}.zip");
-            this.CrmSvc.ImportSolutionToCrm(solutionPath, out _);
-            
+            this.CrmSvc.ImportSolutionToCrm(
+                Path.Combine(this.PackageFolderPath, "Solutions", $"{Constants.Solutions.ActiveSolutionHistory}.zip"),
+                out _);
+
             return base.AfterPrimaryImport();
         }
     }

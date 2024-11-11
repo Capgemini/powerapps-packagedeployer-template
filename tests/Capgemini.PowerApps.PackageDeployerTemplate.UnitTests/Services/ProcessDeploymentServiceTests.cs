@@ -292,7 +292,10 @@
                 .Returns(new EntityCollection(processes));
         }
 
-        private void MockExecuteMultipleSolutionHistoryOperationResponse(IEnumerable<ExecuteMultipleResponseItem> responses = null, Expression<Func<ICrmServiceAdapter, IEnumerable<ExecuteMultipleResponseItem>>> expression = null, bool verifiable = false)
+        private void MockExecuteMultipleSolutionHistoryOperationResponse(
+            IEnumerable<ExecuteMultipleResponseItem> responses = null,
+            Expression<Func<ICrmServiceAdapter, IEnumerable<ExecuteMultipleResponseItem>>> expression = null,
+            bool verifiable = false)
         {
             if (expression == null)
             {

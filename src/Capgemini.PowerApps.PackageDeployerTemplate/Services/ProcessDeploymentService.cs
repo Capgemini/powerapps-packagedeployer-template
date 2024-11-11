@@ -117,27 +117,21 @@
         {
             // Due to unpredictable process dependencies we should retry failed requests until there are zero successful responses.
             var remainingRequests = new List<OrganizationRequest>(requests);
-            IEnumerable<ExecuteMultipleResponseItem> successfulResponses;
-            IEnumerable<ExecuteMultipleResponseItem> failedResponses;
+            IEnumerable<ExecuteMultipleResponseItem> successfulResponses, failedResponses;
 
             do
             {
                 var timeout = 120 + (remainingRequests.Count * 10);
-                var executeMultipleResponses = this.crmSvc.ExecuteMultipleSolutionHistoryOperation(remainingRequests, user, timeout);
+                var executeMultipleResponses = this.crmSvc
+                    .ExecuteMultipleSolutionHistoryOperation(remainingRequests, user, timeout);
 
-                successfulResponses = executeMultipleResponses
-                    .Where(r => r.Fault == null)
-                    .ToList();
-                failedResponses = executeMultipleResponses
-                    .Except(successfulResponses)
-                    .ToList();
-                remainingRequests = failedResponses
-                    .Select(r => remainingRequests[r.RequestIndex])
-                    .ToList();
+                successfulResponses = executeMultipleResponses.Where(r => r.Fault == null);
+                failedResponses = executeMultipleResponses.Except(successfulResponses);
+                remainingRequests = failedResponses.Select(r => remainingRequests[r.RequestIndex]).ToList();
             }
-            while (successfulResponses.Any() && remainingRequests.Count > 0);
+            while (successfulResponses.Any() && remainingRequests.Any());
 
-            if (!successfulResponses.Any() && remainingRequests.Any())
+            if (remainingRequests.Any())
             {
                 foreach (var failedResponse in failedResponses)
                 {
