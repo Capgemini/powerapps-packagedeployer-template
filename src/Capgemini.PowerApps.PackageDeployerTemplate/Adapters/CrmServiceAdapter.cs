@@ -353,6 +353,7 @@
                 Constants.ErrorCodes.CustomizationLockExBothUnknown,
             };
 
+            var firstIndexByRequest = requests.ToDictionary(request => request, request => (int?)null);
             var responsesByRequest = requests.ToDictionary(request => request, request => (ExecuteMultipleResponseItem)null);
 
             var retryPolicy = Policy
@@ -373,14 +374,26 @@
 
                 foreach (var response in res.Responses)
                 {
-                    responsesByRequest[requests.ElementAt(response.RequestIndex)] = response;
+                    var request = requests.ElementAt(response.RequestIndex);
+
+                    if (firstIndexByRequest[request].HasValue)
+                    {
+                        response.RequestIndex = firstIndexByRequest[request].Value;
+                    }
+                    else
+                    {
+                        firstIndexByRequest[request] = response.RequestIndex;
+                    }
+
+                    responsesByRequest[request] = response;
                 }
 
                 if (res.IsFaulted)
                 {
                     requests = res.Responses
                         .Where(r => r.Fault != null)
-                        .Select(r => requests.ElementAt(r.RequestIndex));
+                        .Select(r => requests.ElementAt(r.RequestIndex))
+                        .ToList();
 
                     var solutionConcurrencyErrors = res.Responses.Where(r => r.Fault?.ErrorCode == Constants.ErrorCodes.SolutionConcurrencyFailure);
                     if (solutionConcurrencyErrors.Any())

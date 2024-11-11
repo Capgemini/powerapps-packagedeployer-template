@@ -18,14 +18,5 @@ namespace Capgemini.PowerApps.PackageDeployerTemplate.MockPackage
         public override string GetImportPackageDescriptionText => "Mock Package";
 
         public override string GetNameOfImport(bool plural) => "Mock Package";
-
-        public override bool AfterPrimaryImport()
-        {
-            this.CrmSvc.ImportSolutionToCrm(
-                Path.Combine(this.PackageFolderPath, "Solutions", $"{Constants.Solutions.ActiveSolutionHistory}.zip"),
-                out _);
-
-            return base.AfterPrimaryImport();
-        }
     }
 }
