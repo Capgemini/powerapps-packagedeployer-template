@@ -382,13 +382,13 @@
                         .Where(r => r.Fault != null)
                         .Select(r => requests.ElementAt(r.RequestIndex));
 
-                    var solutionConcurrencyErrors = res.Responses.Where(r => r.Fault.ErrorCode == Constants.ErrorCodes.SolutionConcurrencyFailure);
+                    var solutionConcurrencyErrors = res.Responses.Where(r => r.Fault?.ErrorCode == Constants.ErrorCodes.SolutionConcurrencyFailure);
                     if (solutionConcurrencyErrors.Any())
                     {
                         throw new SolutionConcurrencyException($"{solutionConcurrencyErrors.Count()} requests failed due to solution concurrency errors.");
                     }
 
-                    var customizationLockErrors = res.Responses.Where(r => customizationLockErrorCodes.Contains(r.Fault.ErrorCode));
+                    var customizationLockErrors = res.Responses.Where(r => r.Fault != null && customizationLockErrorCodes.Contains(r.Fault.ErrorCode));
                     if (customizationLockErrors.Any())
                     {
                         throw new CustomizationLockException($"{customizationLockErrors.Count()} requests failed due to customization lock errors.");
