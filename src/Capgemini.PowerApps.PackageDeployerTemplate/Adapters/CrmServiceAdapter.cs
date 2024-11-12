@@ -353,8 +353,8 @@
                 Constants.ErrorCodes.CustomizationLockExBothUnknown,
             };
 
-            var firstIndexByRequest = requests.ToDictionary(request => request, request => (int?)null);
-            var responsesByRequest = requests.ToDictionary(request => request, request => (ExecuteMultipleResponseItem)null);
+            var firstIndexByRequest = requests.ToDictionary(request => request, request => default(int?));
+            var responseByRequest = requests.ToDictionary(request => request, request => (ExecuteMultipleResponseItem)null);
 
             var retryPolicy = Policy
                 .Handle<CustomizationLockException>()
@@ -376,16 +376,12 @@
                 {
                     var request = requests.ElementAt(response.RequestIndex);
 
-                    if (firstIndexByRequest[request].HasValue)
-                    {
-                        response.RequestIndex = firstIndexByRequest[request].Value;
-                    }
-                    else
+                    if (!firstIndexByRequest[request].HasValue)
                     {
                         firstIndexByRequest[request] = response.RequestIndex;
                     }
 
-                    responsesByRequest[request] = response;
+                    responseByRequest[request] = response;
                 }
 
                 if (res.IsFaulted)
@@ -409,7 +405,12 @@
                 }
             });
 
-            return responsesByRequest.Values;
+            foreach (var request in responseByRequest.Keys)
+            {
+                responseByRequest[request].RequestIndex = firstIndexByRequest[request].Value;
+            }
+
+            return responseByRequest.Values;
         }
 
         /// <inheritdoc/>
