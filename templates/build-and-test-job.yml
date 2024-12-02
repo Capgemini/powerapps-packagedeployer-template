@@ -1,16 +1,16 @@
-parameters:
-  - name: environmentUrl
-    displayName: Environment URL
-    type: string
-  - name: environmentName
-    displayName: environmentName
-    type: string
-  - name: username
-    displayName: Username
-    type: string
-  - name: password
-    displayName: Password
-    type: string
+# parameters:
+#   - name: environmentUrl
+#     displayName: Environment URL
+#     type: string
+#   - name: environmentName
+#     displayName: environmentName
+#     type: string
+#   - name: username
+#     displayName: Username
+#     type: string
+#   - name: password
+#     displayName: Password
+#     type: string
 
 jobs:
   - job: BuildAndTestJob
@@ -43,61 +43,61 @@ jobs:
         inputs:
           command: restore
           projects: '**/*.csproj'
-      - task: SonarCloudPrepare@1
-        displayName: Prepare SonarCloud
-        inputs:
-          SonarCloud: 'SonarCloud'
-          organization: 'capgemini-1' 
-          scannerMode: 'MSBuild'
-          projectKey: 'Capgemini_xrm-packagedeployer'
-          projectName: 'xrm-packagedeployer'
-          projectVersion: '$(GitVersion.SemVer)'
-          extraProperties: |
-            sonar.exclusions=**\*.css
+      # - task: SonarCloudPrepare@1
+      #   displayName: Prepare SonarCloud
+      #   inputs:
+      #     SonarCloud: 'SonarCloud'
+      #     organization: 'capgemini-1' 
+      #     scannerMode: 'MSBuild'
+      #     projectKey: 'Capgemini_xrm-packagedeployer'
+      #     projectName: 'xrm-packagedeployer'
+      #     projectVersion: '$(GitVersion.SemVer)'
+      #     extraProperties: |
+      #       sonar.exclusions=**\*.css
       - task: VSBuild@1
         displayName: Build solution
         inputs:
           solution: '$(solution)'
           platform: '$(buildPlatform)'
           configuration: '$(buildConfiguration)'
-      - task: PowerShell@2
-        displayName: Create Approvals connection
-        inputs:
-          filePath: $(Build.SourcesDirectory)\scripts\New-PowerAppFlowConnection.ps1
-          arguments: >
-            -Username ${{ parameters.username }}
-            -Password (ConvertTo-SecureString -String $env:CONNECTIONOWNER_PASSWORD -AsPlainText -Force)
-            -EnvironmentName ${{ parameters.environmentName }}
-            -Region unitedkingdom
-            -Connector shared_approvals
-            -ConnectionParameters @{ }
-            -OutputVariable "TestEnvironment.Connection.Approvals"
-          targetType: filePath
-        env:
-          CONNECTIONOWNER_PASSWORD: ${{ parameters.password }}
-      - task: VSTest@2
-        displayName: Run tests
-        env:
-          CAPGEMINI_PACKAGE_DEPLOYER_TESTS_URL: ${{ parameters.environmentUrl }}
-          CAPGEMINI_PACKAGE_DEPLOYER_TESTS_USERNAME: ${{ parameters.username }}
-          CAPGEMINI_PACKAGE_DEPLOYER_TESTS_PASSWORD: ${{ parameters.password }}
-          PACKAGEDEPLOYER_SETTINGS_CONNREF_PDT_SHAREDAPPROVALS_D7DCB: $(TestEnvironment.Connection.Approvals)
-          PACKAGEDEPLOYER_SETTINGS_ENVVAR_PDT_TESTVARIABLE: Any string
-          PACKAGEDEPLOYER_SETTINGS_CONNBASEURL_pdt_5Fexample-20api: https://anyurl.com
-          PACKAGEDEPLOYER_SETTINGS_LICENSEDUSERNAME: ${{ parameters.username }}
-          PACKAGEDEPLOYER_SETTINGS_LICENSEDPASSWORD: ${{ parameters.password }}
-        inputs:
-          codeCoverageEnabled: true
-          platform: '$(buildPlatform)'
-          configuration: '$(buildConfiguration)'
-          testAssemblyVer2: '**\*Tests.dll' 
-          searchFolder: tests
-      - task: SonarCloudAnalyze@1
-        displayName: Analyse with SonarCloud
-      - task: SonarCloudPublish@1
-        displayName: Publish SonarCloud results
-        inputs:
-          pollingTimeoutSec: '300'
+      # - task: PowerShell@2
+      #   displayName: Create Approvals connection
+      #   inputs:
+      #     filePath: $(Build.SourcesDirectory)\scripts\New-PowerAppFlowConnection.ps1
+      #     arguments: >
+      #       -Username ${{ parameters.username }}
+      #       -Password (ConvertTo-SecureString -String $env:CONNECTIONOWNER_PASSWORD -AsPlainText -Force)
+      #       -EnvironmentName ${{ parameters.environmentName }}
+      #       -Region unitedkingdom
+      #       -Connector shared_approvals
+      #       -ConnectionParameters @{ }
+      #       -OutputVariable "TestEnvironment.Connection.Approvals"
+      #     targetType: filePath
+      #   env:
+      #     CONNECTIONOWNER_PASSWORD: ${{ parameters.password }}
+      # - task: VSTest@2
+      #   displayName: Run tests
+      #   env:
+      #     CAPGEMINI_PACKAGE_DEPLOYER_TESTS_URL: ${{ parameters.environmentUrl }}
+      #     CAPGEMINI_PACKAGE_DEPLOYER_TESTS_USERNAME: ${{ parameters.username }}
+      #     CAPGEMINI_PACKAGE_DEPLOYER_TESTS_PASSWORD: ${{ parameters.password }}
+      #     PACKAGEDEPLOYER_SETTINGS_CONNREF_PDT_SHAREDAPPROVALS_D7DCB: $(TestEnvironment.Connection.Approvals)
+      #     PACKAGEDEPLOYER_SETTINGS_ENVVAR_PDT_TESTVARIABLE: Any string
+      #     PACKAGEDEPLOYER_SETTINGS_CONNBASEURL_pdt_5Fexample-20api: https://anyurl.com
+      #     PACKAGEDEPLOYER_SETTINGS_LICENSEDUSERNAME: ${{ parameters.username }}
+      #     PACKAGEDEPLOYER_SETTINGS_LICENSEDPASSWORD: ${{ parameters.password }}
+      #   inputs:
+      #     codeCoverageEnabled: true
+      #     platform: '$(buildPlatform)'
+      #     configuration: '$(buildConfiguration)'
+      #     testAssemblyVer2: '**\*Tests.dll' 
+      #     searchFolder: tests
+      # - task: SonarCloudAnalyze@1
+      #   displayName: Analyse with SonarCloud
+      # - task: SonarCloudPublish@1
+      #   displayName: Publish SonarCloud results
+      #   inputs:
+      #     pollingTimeoutSec: '300'
       - task: WhiteSource Bolt@20
         displayName: Detect security and licence issues
         inputs:

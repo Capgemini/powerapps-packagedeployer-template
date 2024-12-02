@@ -2,7 +2,6 @@ namespace Capgemini.PowerApps.PackageDeployerTemplate.IntegrationTests
 {
     using System;
     using System.Diagnostics;
-    using System.IO;
     using System.Linq;
     using System.Net;
     using Microsoft.Xrm.Sdk.Query;
@@ -65,7 +64,7 @@ namespace Capgemini.PowerApps.PackageDeployerTemplate.IntegrationTests
 
             this.DeleteWordTemplates();
             this.DeleteData();
-            this.UninstallSolution();
+            this.UninstallSolutions();
 
             this.ServiceClient.Dispose();
 
@@ -104,7 +103,7 @@ namespace Capgemini.PowerApps.PackageDeployerTemplate.IntegrationTests
             return url;
         }
 
-        private void UninstallSolution()
+        private void UninstallSolutions()
         {
             this.LogDiagnosticMessage("Uninstalling solution...");
 
@@ -114,16 +113,16 @@ namespace Capgemini.PowerApps.PackageDeployerTemplate.IntegrationTests
                 {
                     FilterOperator = LogicalOperator.Or,
                     Filters =
-                          {
-                            new FilterExpression
+                    {
+                        new FilterExpression
+                        {
+                            FilterOperator = LogicalOperator.Or,
+                            Conditions =
                             {
-                              FilterOperator = LogicalOperator.Or,
-                              Conditions =
-                              {
-                                new ConditionExpression(Constants.Solution.Fields.UniqueName, ConditionOperator.Equal, "pdt_PackageDeployerTemplate_MockSolution"),
-                              },
+                               new ConditionExpression(Constants.Solution.Fields.UniqueName, ConditionOperator.Equal, "pdt_PackageDeployerTemplate_MockSolution"),
                             },
-                          },
+                        },
+                    },
                 },
             };
 

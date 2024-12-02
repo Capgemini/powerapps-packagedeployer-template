@@ -556,5 +556,89 @@
                 public const string Value = "value";
             }
         }
+
+        /// <summary>
+        /// Constants relating to the <b>msdyn_solutionhistory</b> entity.
+        /// </summary>
+        public static class SolutionHistory
+        {
+            /// <summary>
+            /// The logical name.
+            /// </summary>
+            public const string LogicalName = "msdyn_solutionhistory";
+
+            /// <summary>
+            /// Field logical names.
+            /// </summary>
+            public static class Fields
+            {
+                /// <summary>
+                /// The solution history name.
+                /// </summary>
+                public const string Name = "msdyn_name";
+
+                /// <summary>
+                /// The solution history status.
+                /// </summary>
+                public const string Status = "msdyn_status";
+
+                /// <summary>
+                /// The unique solution history ID.
+                /// </summary>
+                public const string SolutionHistoryId = "msdyn_solutionhistoryid";
+            }
+
+            /// <summary>
+            /// Staus Reasons.
+            /// </summary>
+            public static class Statuses
+            {
+                /// <summary>
+                /// Status reason Completed.
+                /// </summary>
+                public const int Completed = 1;
+
+                /// <summary>
+                /// Status reason Started.
+                /// </summary>
+                public const int Started = 0;
+            }
+        }
+
+        /// <summary>
+        /// Constants relating to web service error codes.
+        /// </summary>
+        public static class ErrorCodes
+        {
+            /// <summary>
+            /// Cannot start the requested operation [<c>operation_name</c>] because there is a customization running at this moment.
+            /// </summary>
+            public const int CustomizationLockExBlockingUnknown = -2147159961;
+
+            /// <summary>
+            /// Cannot start the requested operation [<c>operation_name</c>] because there is another [<c>operation_name</c>] running at this moment.
+            /// </summary>
+            public const int CustomizationLockExBothKnownDifferent = -2147159964;
+
+            /// <summary>
+            /// Cannot start another [<c>operation_name</c>] because there is a previous [<c>operation_name</c>] running at this moment.
+            /// </summary>
+            public const int CustomizationLockExBothKnownSame = -2147159965;
+
+            /// <summary>
+            /// Cannot start the requested operation because there is another [<c>operation_name</c>] running at this moment.
+            /// </summary>
+            public const int CustomizationLockExBlockedUnknown = -2147159966;
+
+            /// <summary>
+            /// Cannot start the requested operation because there is a customization running at this moment.
+            /// </summary>
+            public const int CustomizationLockExBothUnknown = -2147159967;
+
+            /// <summary>
+            /// The solution installation or removal failed due to the installation or removal of another solution at the same time.
+            /// </summary>
+            public const int SolutionConcurrencyFailure = -2147020463;
+        }
     }
 }

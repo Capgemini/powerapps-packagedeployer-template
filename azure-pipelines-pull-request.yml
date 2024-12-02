@@ -10,7 +10,7 @@ pool:
 
 stages:
   - template: templates/build-and-test-stages.yml
-    parameters:
-      environmentIdentifier: $[ coalesce(variables['System.PullRequest.PullRequestNumber'], variables['Build.BuildId']) ]
-      environmentDisplayName: Package Deployer Template - PR
-      environmentDomainName: pdt-pr
+    # parameters:
+    #   environmentIdentifier: $[ coalesce(variables['System.PullRequest.PullRequestNumber'], variables['Build.BuildId']) ]
+    #   environmentDisplayName: Package Deployer Template - PR
+    #   environmentDomainName: pdt-pr

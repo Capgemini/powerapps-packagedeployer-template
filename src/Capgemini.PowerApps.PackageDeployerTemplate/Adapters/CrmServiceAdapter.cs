@@ -4,11 +4,13 @@
     using System.Collections.Generic;
     using System.IO;
     using System.Linq;
+    using Capgemini.PowerApps.PackageDeployerTemplate.Exceptions;
     using Microsoft.Extensions.Logging;
     using Microsoft.Xrm.Sdk;
     using Microsoft.Xrm.Sdk.Messages;
     using Microsoft.Xrm.Sdk.Query;
     using Microsoft.Xrm.Tooling.Connector;
+    using Polly;
 
     /// <summary>
     /// An extended <see cref="IOrganizationService"/> built on <see cref="CrmServiceClient"/>.
@@ -311,6 +313,104 @@
             this.logger.LogInformation($"Falling back to executing {request.RequestName} as {this.crmSvc.OAuthUserId}.");
 
             return (TResponse)this.Execute(request);
+        }
+
+        /// <inheritdoc/>
+        public void WaitForSolutionHistoryRecordsToComplete()
+        {
+            Policy
+                .HandleResult(true)
+                .WaitAndRetryForever(
+                    sleepDurationProvider: retryAttempt => TimeSpan.FromSeconds(20),
+                    onRetry: (result, timeSpan) =>
+                    {
+                        this.logger.LogInformation("Active records are still present within Solution History.  Waiting for {0} seconds before retrying.", timeSpan.TotalSeconds);
+                    })
+                .Execute(() =>
+                {
+                    var solutionHistoryQuery = new QueryByAttribute(Constants.SolutionHistory.LogicalName);
+                    solutionHistoryQuery.ColumnSet.AddColumns(
+                        Constants.SolutionHistory.Fields.SolutionHistoryId,
+                        Constants.SolutionHistory.Fields.Name,
+                        Constants.SolutionHistory.Fields.Status);
+                    solutionHistoryQuery.AddAttributeValue(Constants.SolutionHistory.Fields.Status, Constants.SolutionHistory.Statuses.Started);
+
+                    var entityCollection = this.crmSvc.RetrieveMultiple(solutionHistoryQuery);
+
+                    return entityCollection.TotalRecordCount > 0;
+                });
+        }
+
+        /// <inheritdoc/>
+        public IEnumerable<ExecuteMultipleResponseItem> ExecuteMultipleSolutionHistoryOperation(IEnumerable<OrganizationRequest> requests, string username, int? timeout = null)
+        {
+            var customizationLockErrorCodes = new int[]
+            {
+                Constants.ErrorCodes.CustomizationLockExBlockingUnknown,
+                Constants.ErrorCodes.CustomizationLockExBothKnownDifferent,
+                Constants.ErrorCodes.CustomizationLockExBothKnownSame,
+                Constants.ErrorCodes.CustomizationLockExBlockedUnknown,
+                Constants.ErrorCodes.CustomizationLockExBothUnknown,
+            };
+
+            var firstIndexByRequest = requests.ToDictionary(request => request, request => default(int?));
+            var responseByRequest = requests.ToDictionary(request => request, request => (ExecuteMultipleResponseItem)null);
+
+            var retryPolicy = Policy
+                .Handle<CustomizationLockException>()
+                .RetryForever(_ => this.WaitForSolutionHistoryRecordsToComplete())
+                .Wrap(
+                    Policy
+                    .Handle<SolutionConcurrencyException>()
+                    .WaitAndRetryForever(
+                        sleepDurationProvider: retryAttempt => TimeSpan.FromSeconds(30),
+                        onRetry: (_, timeSpan) => this.logger.LogInformation("A solution concurrency issue has occured.  Waiting for {0} seconds before retrying.", timeSpan.TotalSeconds)));
+
+            retryPolicy.Execute(() =>
+            {
+                var res = string.IsNullOrEmpty(username)
+                    ? this.ExecuteMultiple(requests, true, true, timeout)
+                    : this.ExecuteMultiple(requests, username, true, true, timeout);
+
+                foreach (var response in res.Responses)
+                {
+                    var request = requests.ElementAt(response.RequestIndex);
+
+                    if (!firstIndexByRequest[request].HasValue)
+                    {
+                        firstIndexByRequest[request] = response.RequestIndex;
+                    }
+
+                    responseByRequest[request] = response;
+                }
+
+                if (res.IsFaulted)
+                {
+                    requests = res.Responses
+                        .Where(r => r.Fault != null)
+                        .Select(r => requests.ElementAt(r.RequestIndex))
+                        .ToList();
+
+                    var solutionConcurrencyErrors = res.Responses.Where(r => r.Fault?.ErrorCode == Constants.ErrorCodes.SolutionConcurrencyFailure);
+                    if (solutionConcurrencyErrors.Any())
+                    {
+                        throw new SolutionConcurrencyException($"{solutionConcurrencyErrors.Count()} requests failed due to solution concurrency errors.");
+                    }
+
+                    var customizationLockErrors = res.Responses.Where(r => r.Fault != null && customizationLockErrorCodes.Contains(r.Fault.ErrorCode));
+                    if (customizationLockErrors.Any())
+                    {
+                        throw new CustomizationLockException($"{customizationLockErrors.Count()} requests failed due to customization lock errors.");
+                    }
+                }
+            });
+
+            foreach (var request in responseByRequest.Keys)
+            {
+                responseByRequest[request].RequestIndex = firstIndexByRequest[request].Value;
+            }
+
+            return responseByRequest.Values;
         }
 
         /// <inheritdoc/>

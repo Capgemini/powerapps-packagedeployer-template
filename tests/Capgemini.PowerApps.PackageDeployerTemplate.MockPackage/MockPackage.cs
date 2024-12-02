@@ -1,8 +1,10 @@
-using Microsoft.Xrm.Tooling.PackageDeployment.CrmPackageExtentionBase;
-using System.ComponentModel.Composition;
-
 namespace Capgemini.PowerApps.PackageDeployerTemplate.MockPackage
 {
+    using Microsoft.Xrm.Tooling.PackageDeployment.CrmPackageExtentionBase;
+    using System.ComponentModel.Composition;
+    using System.IO;
+    using System.Reflection;
+
     /// <summary>
     /// A mock package used for testing. 
     /// </summary>

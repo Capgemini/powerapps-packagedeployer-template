@@ -29,11 +29,13 @@ A package template and solution have been added to this repository under the *te
 In order to run the integration tests, you must configure a couple of environment variables:
 
 | Environment variable                                       | Value                                                                                                                                                      |
-|------------------------------------------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| ---------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | CAPGEMINI_PACKAGE_DEPLOYER_TESTS_URL                       | The URL of the Dataverse environment.                                                                                                                      |
 | CAPGEMINI_PACKAGE_DEPLOYER_TESTS_USERNAME                  | The username to authenticate with when connecting to the Dataverse environment.                                                                            |
 | CAPGEMINI_PACKAGE_DEPLOYER_TESTS_PASSWORD                  | The password to authenticate with when connecting to the Dataverse environment.                                                                            |
 | PACKAGEDEPLOYER_SETTINGS_CONNREF_PDT_SHAREDAPPROVALS_D7DCB | The connection name of an Approvals connection. See [set connection references](./README.md#Set-connection-references) for how to get the connection name. |
+| PACKAGEDEPLOYER_SETTINGS_ENVVAR_PDT_TESTVARIABLE           | The value to assign to the `pdt_TestVariable` environment variable.                                                                                        |
+| PACKAGEDEPLOYER_SETTINGS_CONNBASEURL_pdt_5Fexample-20api   | The base URL to assign to the `pdt_5fexample-20api` connector.                                                                                             |
 
 In some cases, you may need to make changes to the solution to enable you to write integration tests. You first need to produced an unmanaged solution zip from the source by executing this command within the solution project folder:
 
