@@ -4,6 +4,7 @@
     using System.Collections.Generic;
     using System.IO;
     using System.Linq;
+    using System.ServiceModel;
     using Capgemini.PowerApps.PackageDeployerTemplate.Exceptions;
     using Microsoft.Extensions.Logging;
     using Microsoft.Xrm.Sdk;
@@ -17,8 +18,19 @@
     /// </summary>
     public class CrmServiceAdapter : ICrmServiceAdapter, IDisposable
     {
+        private static readonly int[] CustomizationLockErrorCodes = new int[]
+        {
+            Constants.ErrorCodes.CustomizationLockExBlockingUnknown,
+            Constants.ErrorCodes.CustomizationLockExBothKnownDifferent,
+            Constants.ErrorCodes.CustomizationLockExBothKnownSame,
+            Constants.ErrorCodes.CustomizationLockExBlockedUnknown,
+            Constants.ErrorCodes.CustomizationLockExBothUnknown,
+        };
+
         private readonly CrmServiceClient crmSvc;
         private readonly ILogger logger;
+
+        private Policy customizationLockPolicy;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="CrmServiceAdapter"/> class.
@@ -33,6 +45,24 @@
 
         /// <inheritdoc/>
         public Guid? CallerAADObjectId { get => this.crmSvc.CallerAADObjectId; set => this.crmSvc.CallerAADObjectId = value; }
+
+        private Policy CustomizationLockPolicy
+        {
+            get
+            {
+                this.customizationLockPolicy ??= Policy
+                        .Handle<CustomizationLockException>()
+                        .RetryForever(_ => this.WaitForSolutionHistoryRecordsToComplete())
+                        .Wrap(
+                            Policy
+                            .Handle<SolutionConcurrencyException>()
+                            .WaitAndRetryForever(
+                                sleepDurationProvider: retryAttempt => TimeSpan.FromSeconds(30),
+                                onRetry: (_, timeSpan) => this.logger.LogInformation("A solution concurrency issue has occured.  Waiting for {0} seconds before retrying.", timeSpan.TotalSeconds)));
+
+                return this.customizationLockPolicy;
+            }
+        }
 
         /// <inheritdoc/>
         public ExecuteMultipleResponse ExecuteMultiple(IEnumerable<OrganizationRequest> requests, bool continueOnError = true, bool returnResponses = true, int? timeout = null)
@@ -342,31 +372,13 @@
         }
 
         /// <inheritdoc/>
+        [Obsolete("Please use ExecuteManySolutionHistoryOperation.", true)]
         public IEnumerable<ExecuteMultipleResponseItem> ExecuteMultipleSolutionHistoryOperation(IEnumerable<OrganizationRequest> requests, string username, int? timeout = null)
         {
-            var customizationLockErrorCodes = new int[]
-            {
-                Constants.ErrorCodes.CustomizationLockExBlockingUnknown,
-                Constants.ErrorCodes.CustomizationLockExBothKnownDifferent,
-                Constants.ErrorCodes.CustomizationLockExBothKnownSame,
-                Constants.ErrorCodes.CustomizationLockExBlockedUnknown,
-                Constants.ErrorCodes.CustomizationLockExBothUnknown,
-            };
-
             var firstIndexByRequest = requests.ToDictionary(request => request, request => default(int?));
             var responseByRequest = requests.ToDictionary(request => request, request => (ExecuteMultipleResponseItem)null);
 
-            var retryPolicy = Policy
-                .Handle<CustomizationLockException>()
-                .RetryForever(_ => this.WaitForSolutionHistoryRecordsToComplete())
-                .Wrap(
-                    Policy
-                    .Handle<SolutionConcurrencyException>()
-                    .WaitAndRetryForever(
-                        sleepDurationProvider: retryAttempt => TimeSpan.FromSeconds(30),
-                        onRetry: (_, timeSpan) => this.logger.LogInformation("A solution concurrency issue has occured.  Waiting for {0} seconds before retrying.", timeSpan.TotalSeconds)));
-
-            retryPolicy.Execute(() =>
+            this.CustomizationLockPolicy.Execute(() =>
             {
                 var res = string.IsNullOrEmpty(username)
                     ? this.ExecuteMultiple(requests, true, true, timeout)
@@ -384,24 +396,26 @@
                     responseByRequest[request] = response;
                 }
 
-                if (res.IsFaulted)
+                if (!res.IsFaulted)
                 {
-                    requests = res.Responses
-                        .Where(r => r.Fault != null)
-                        .Select(r => requests.ElementAt(r.RequestIndex))
-                        .ToList();
+                    return;
+                }
 
-                    var solutionConcurrencyErrors = res.Responses.Where(r => r.Fault?.ErrorCode == Constants.ErrorCodes.SolutionConcurrencyFailure);
-                    if (solutionConcurrencyErrors.Any())
-                    {
-                        throw new SolutionConcurrencyException($"{solutionConcurrencyErrors.Count()} requests failed due to solution concurrency errors.");
-                    }
+                requests = res.Responses
+                    .Where(r => r.Fault != null)
+                    .Select(r => requests.ElementAt(r.RequestIndex))
+                    .ToList();
 
-                    var customizationLockErrors = res.Responses.Where(r => r.Fault != null && customizationLockErrorCodes.Contains(r.Fault.ErrorCode));
-                    if (customizationLockErrors.Any())
-                    {
-                        throw new CustomizationLockException($"{customizationLockErrors.Count()} requests failed due to customization lock errors.");
-                    }
+                var solutionConcurrencyErrors = res.Responses.Where(r => r.Fault?.ErrorCode == Constants.ErrorCodes.SolutionConcurrencyFailure);
+                if (solutionConcurrencyErrors.Any())
+                {
+                    throw new SolutionConcurrencyException($"{solutionConcurrencyErrors.Count()} requests failed due to solution concurrency errors.");
+                }
+
+                var customizationLockErrors = res.Responses.Where(r => r.Fault != null && CustomizationLockErrorCodes.Contains(r.Fault.ErrorCode));
+                if (customizationLockErrors.Any())
+                {
+                    throw new CustomizationLockException($"{customizationLockErrors.Count()} requests failed due to customization lock errors.");
                 }
             });
 
@@ -411,6 +425,66 @@
             }
 
             return responseByRequest.Values;
+        }
+
+        /// <inheritdoc/>
+        public IEnumerable<OrganizationResponse> ExecuteManySolutionHistoryOperation(IEnumerable<OrganizationRequest> requests, string username, Action<OrganizationRequest, Exception> onError = null)
+        {
+            var responses = requests.ToDictionary(r => r, r => (OrganizationResponse)null);
+            var remainingRequests = requests.Reverse().ToList();
+
+            while (remainingRequests.Any())
+            {
+                var exceptions = remainingRequests.ToDictionary(r => r, r => (Exception)null);
+                var initialRequestCount = remainingRequests.Count;
+
+                for (int i = remainingRequests.Count - 1; i >= 0; i--)
+                {
+                    try
+                    {
+                        this.CustomizationLockPolicy.Execute(() =>
+                        {
+                            try
+                            {
+                                if (string.IsNullOrEmpty(username))
+                                {
+                                    responses[remainingRequests[i]] = this.crmSvc.Execute(remainingRequests[i]);
+                                }
+
+                                responses[remainingRequests[i]] = this.Execute<OrganizationResponse>(remainingRequests[i], username, true);
+                            }
+                            catch (FaultException<OrganizationServiceFault> ex) when (ex.Detail.ErrorCode == Constants.ErrorCodes.SolutionConcurrencyFailure)
+                            {
+                                throw new SolutionConcurrencyException($"Request failed due to solution concurrency errors.");
+                            }
+                            catch (FaultException<OrganizationServiceFault> ex) when (CustomizationLockErrorCodes.Contains(ex.Detail.ErrorCode))
+                            {
+                                throw new CustomizationLockException($"Request failed due to customization lock errors.");
+                            }
+                        });
+
+                        remainingRequests.RemoveAt(i);
+                    }
+                    catch (Exception ex)
+                    {
+                        // Swallow and leave in remaining requests - possibly an activation order issue.
+                        exceptions[remainingRequests[i]] = ex;
+                    }
+                }
+
+                if (initialRequestCount == remainingRequests.Count)
+                {
+                    // No new successes this iteration.
+                    foreach (var kvp in exceptions.Where(kvp => kvp.Value != null))
+                    {
+                        onError(kvp.Key, kvp.Value);
+                    }
+
+                    break;
+                }
+            }
+
+            return responses.Values;
         }
 
         /// <inheritdoc/>

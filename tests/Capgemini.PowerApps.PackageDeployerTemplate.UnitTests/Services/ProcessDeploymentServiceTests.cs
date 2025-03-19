@@ -4,10 +4,10 @@
     using System.Collections.Generic;
     using System.Linq;
     using System.Linq.Expressions;
+    using System.ServiceModel;
     using Capgemini.PowerApps.PackageDeployerTemplate.Adapters;
     using Capgemini.PowerApps.PackageDeployerTemplate.Services;
     using FluentAssertions;
-    using Microsoft.Crm.Sdk.Messages;
     using Microsoft.Extensions.Logging;
     using Microsoft.Xrm.Sdk;
     using Microsoft.Xrm.Sdk.Messages;
@@ -61,18 +61,18 @@
         {
             var solutionProcesses = new List<Entity> { GetProcess(Constants.Workflow.StateCodeActive) };
             this.MockBySolutionProcesses(solutionProcesses);
-            this.MockExecuteMultipleSolutionHistoryOperationResponse(
+            this.MockExecuteManySolutionHistoryOperationResponse(
                 null,
-                svc => svc.ExecuteMultipleSolutionHistoryOperation(
+                svc => svc.ExecuteManySolutionHistoryOperation(
                 It.Is<IEnumerable<OrganizationRequest>>(
-                    reqs => reqs.Cast<SetStateRequest>().Any(
+                    reqs => reqs.Cast<UpdateRequest>().Any(
                         req =>
-                        req.EntityMoniker.LogicalName == Constants.Workflow.LogicalName &&
-                        req.EntityMoniker.Id == solutionProcesses.First().Id &&
-                        req.State.Value == Constants.Workflow.StateCodeInactive &&
-                        req.Status.Value == Constants.Workflow.StatusCodeInactive)),
+                        req.Target.LogicalName == Constants.Workflow.LogicalName &&
+                        req.Target.Id == solutionProcesses.First().Id &&
+                        req.Target.GetAttributeValue<OptionSetValue>(Constants.Workflow.Fields.StateCode).Value == Constants.Workflow.StateCodeInactive &&
+                        req.Target.GetAttributeValue<OptionSetValue>(Constants.Workflow.Fields.StatusCode).Value == Constants.Workflow.StatusCodeInactive)),
                 It.IsAny<string>(),
-                It.IsAny<int?>()),
+                It.IsAny<Action<OrganizationRequest, Exception>>()),
                 true);
 
             this.processDeploymentSvc.SetStatesBySolution(
@@ -94,12 +94,12 @@
                 GetProcess(Constants.Workflow.StateCodeInactive),
             };
             this.MockBySolutionProcesses(solutionProcesses);
-            this.MockExecuteMultipleSolutionHistoryOperationResponse(
+            this.MockExecuteManySolutionHistoryOperationResponse(
                 null,
-                svc => svc.ExecuteMultipleSolutionHistoryOperation(
+                svc => svc.ExecuteManySolutionHistoryOperation(
                     It.IsAny<IEnumerable<OrganizationRequest>>(),
                     userToImpersonate,
-                    It.IsAny<int?>()));
+                    It.IsAny<Action<OrganizationRequest, Exception>>()));
 
             this.processDeploymentSvc.SetStatesBySolution(
                 Solutions, user: userToImpersonate);
@@ -162,7 +162,7 @@
         {
             var foundProcesses = new List<Entity> { GetProcess(Constants.Workflow.StateCodeInactive) };
             this.MockSetStatesProcesses(foundProcesses);
-            this.MockExecuteMultipleSolutionHistoryOperationResponse();
+            this.MockExecuteManySolutionHistoryOperationResponse();
 
             this.processDeploymentSvc.SetStates(new List<string>
             {
@@ -177,18 +177,18 @@
         {
             var foundProcesses = new List<Entity> { GetProcess(Constants.Workflow.StateCodeActive) };
             this.MockSetStatesProcesses(foundProcesses);
-            this.MockExecuteMultipleSolutionHistoryOperationResponse(
+            this.MockExecuteManySolutionHistoryOperationResponse(
                 null,
-                svc => svc.ExecuteMultipleSolutionHistoryOperation(
+                svc => svc.ExecuteManySolutionHistoryOperation(
                 It.Is<IEnumerable<OrganizationRequest>>(
-                    reqs => reqs.Cast<SetStateRequest>().Any(
+                    reqs => reqs.Cast<UpdateRequest>().Any(
                         req =>
-                        req.EntityMoniker.LogicalName == Constants.Workflow.LogicalName &&
-                        req.EntityMoniker.Id == foundProcesses.First().Id &&
-                        req.State.Value == Constants.Workflow.StateCodeInactive &&
-                        req.Status.Value == Constants.Workflow.StatusCodeInactive)),
+                        req.Target.LogicalName == Constants.Workflow.LogicalName &&
+                        req.Target.Id == foundProcesses.First().Id &&
+                        req.Target.GetAttributeValue<OptionSetValue>(Constants.Workflow.Fields.StateCode).Value == Constants.Workflow.StateCodeInactive &&
+                        req.Target.GetAttributeValue<OptionSetValue>(Constants.Workflow.Fields.StatusCode).Value == Constants.Workflow.StatusCodeInactive)),
                 It.IsAny<string>(),
-                It.IsAny<int?>()),
+                It.IsAny<Action<OrganizationRequest, Exception>>()),
                 true);
 
             this.processDeploymentSvc.SetStates(Enumerable.Empty<string>(), new List<string>
@@ -205,12 +205,12 @@
             var foundProcesses = new List<Entity> { GetProcess(Constants.Workflow.StateCodeInactive) };
             this.MockSetStatesProcesses(foundProcesses);
             var userToImpersonate = "licenseduser@domaincom";
-            this.MockExecuteMultipleSolutionHistoryOperationResponse(
+            this.MockExecuteManySolutionHistoryOperationResponse(
                 null,
-                svc => svc.ExecuteMultipleSolutionHistoryOperation(
+                svc => svc.ExecuteManySolutionHistoryOperation(
                 It.IsAny<IEnumerable<OrganizationRequest>>(),
                 userToImpersonate,
-                It.IsAny<int?>()),
+                It.IsAny<Action<OrganizationRequest, Exception>>()),
                 true);
 
             this.processDeploymentSvc.SetStates(
@@ -230,16 +230,16 @@
             var foundProcesses = new List<Entity> { GetProcess(Constants.Workflow.StateCodeInactive) };
             this.MockSetStatesProcesses(foundProcesses);
             var fault = new OrganizationServiceFault { Message = "Some error." };
-            var response = new ExecuteMultipleResponse
-            {
-                Results = new ParameterCollection
-                {
-                    { "Responses", new ExecuteMultipleResponseItemCollection() },
-                    { "IsFaulted", true },
-                },
-            };
-            response.Responses.Add(new ExecuteMultipleResponseItem { Fault = fault });
-            this.MockExecuteMultipleSolutionHistoryOperationResponse(response.Responses);
+            this.crmServiceAdapterMock
+                .Setup(svc => svc.ExecuteManySolutionHistoryOperation(
+                    It.IsAny<IEnumerable<OrganizationRequest>>(),
+                    It.IsAny<string>(),
+                    It.IsAny<Action<OrganizationRequest, Exception>>()))
+                .Callback<IEnumerable<OrganizationRequest>, string, Action<OrganizationRequest, Exception>>(
+                    (requests, username, onError) =>
+                    {
+                        onError(requests.First(), new FaultException<OrganizationServiceFault>(fault));
+                    });
 
             this.processDeploymentSvc.SetStates(
                 new List<string>
@@ -292,28 +292,22 @@
                 .Returns(new EntityCollection(processes));
         }
 
-        private void MockExecuteMultipleSolutionHistoryOperationResponse(
-            IEnumerable<ExecuteMultipleResponseItem> responses = null,
-            Expression<Func<ICrmServiceAdapter, IEnumerable<ExecuteMultipleResponseItem>>> expression = null,
+        private void MockExecuteManySolutionHistoryOperationResponse(
+            IEnumerable<OrganizationResponse> responses = null,
+            Expression<Func<ICrmServiceAdapter, IEnumerable<OrganizationResponse>>> expression = null,
             bool verifiable = false)
         {
             if (expression == null)
             {
-                expression = svc => svc.ExecuteMultipleSolutionHistoryOperation(
+                expression = svc => svc.ExecuteManySolutionHistoryOperation(
                     It.IsAny<IEnumerable<OrganizationRequest>>(),
                     It.IsAny<string>(),
-                    It.IsAny<int?>());
+                    It.IsAny<Action<OrganizationRequest, Exception>>());
             }
 
             if (responses == null)
             {
-                var executeMultipleResponse = new ExecuteMultipleResponse();
-                executeMultipleResponse.Results["Responses"] = new ExecuteMultipleResponseItemCollection()
-                {
-                    new ExecuteMultipleResponseItem() { RequestIndex = 0 },
-                    new ExecuteMultipleResponseItem() { RequestIndex = 1 },
-                };
-                responses = executeMultipleResponse.Responses;
+                responses = Enumerable.Empty<OrganizationResponse>();
             }
 
             var returnResult = this.crmServiceAdapterMock

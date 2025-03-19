@@ -107,9 +107,14 @@
                 public const string Name = "name";
 
                 /// <summary>
-                /// The name of the process.
+                /// The state code.
                 /// </summary>
                 public const string StateCode = "statecode";
+
+                /// <summary>
+                /// The status code.
+                /// </summary>
+                public const string StatusCode = "statuscode";
             }
         }
 

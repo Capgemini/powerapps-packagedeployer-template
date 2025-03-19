@@ -134,5 +134,15 @@
         /// <param name="timeout">Timeout in seconds.</param>
         /// <returns>Returns an <see cref="ExecuteMultipleResponseItem"/>.</returns>
         IEnumerable<ExecuteMultipleResponseItem> ExecuteMultipleSolutionHistoryOperation(IEnumerable<OrganizationRequest> requests, string username, int? timeout = null);
+
+        /// <summary>
+        /// Executes multiple requests individually and performs a check on the Solution History during the operation.
+        /// </summary>
+        /// <param name="requests">The collection of <see cref="OrganizationRequest"/> to execute.</param>
+        /// <param name="username">The user to impersonate.</param>
+        /// <param name="onError">An action to be called for each errored request.</param>
+        /// <returns>Returns a collection of <see cref="OrganizationResponse"/>.</returns>
+        IEnumerable<OrganizationResponse> ExecuteManySolutionHistoryOperation(IEnumerable<OrganizationRequest> requests, string username, Action<OrganizationRequest, Exception> onError = null);
+
     }
 }
