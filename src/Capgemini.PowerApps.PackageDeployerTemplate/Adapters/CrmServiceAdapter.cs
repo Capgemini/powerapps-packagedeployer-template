@@ -432,11 +432,11 @@
         /// <inheritdoc/>
         public IDictionary<OrganizationRequest, OrganizationResponse> ExecuteManySolutionHistoryOperation(IEnumerable<OrganizationRequest> requests, string username, Action<OrganizationRequest, Exception> onError = null)
         {
-            return requests.ToDictionary<OrganizationRequest, OrganizationRequest, OrganizationResponse>(r => r, r =>
+            return requests.ToDictionary(r => r, r =>
             {
                 try
                 {
-                    this.CustomizationLockPolicy.Execute(() =>
+                    return this.CustomizationLockPolicy.Execute(() =>
                     {
                         try
                         {
