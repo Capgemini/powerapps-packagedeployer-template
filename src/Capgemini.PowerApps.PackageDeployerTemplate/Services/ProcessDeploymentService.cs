@@ -119,13 +119,43 @@
             var nameMap = requestsByProcess.Keys
                 .ToDictionary(e => e.Id, e => e.GetAttributeValue<string>(Constants.Workflow.Fields.Name));
 
-            this.crmSvc.ExecuteManySolutionHistoryOperation(
-                requestsByProcess.Values.Where(r => r != null),
-                user,
-                (r, ex) =>
-                {
-                    this.logger.LogError($"Failed to update status of process {nameMap[((UpdateRequest)r).Target.Id]} with the following error: {((FaultException<OrganizationServiceFault>)ex).Detail.Message}");
-                });
+            var remainingRequests = requestsByProcess.Values.Where(r => r != null);
+            if (!remainingRequests.Any())
+            {
+                return;
+            }
+
+            this.logger.LogInformation($"Updating the states of {remainingRequests.Count()} processes.");
+
+            var iteration = 1;
+            var iterationSuccessfulRequestCount = 0;
+            var errorMessages = new List<string>();
+            do
+            {
+                errorMessages = new List<string>();
+                var responses = this.crmSvc.ExecuteManySolutionHistoryOperation(
+                    remainingRequests,
+                    user,
+                    (r, ex) =>
+                    {
+                        errorMessages.Add($"Failed to update status of process {nameMap[((UpdateRequest)r).Target.Id]} with the following error: {((FaultException<OrganizationServiceFault>)ex).Detail.Message}");
+                    });
+
+                remainingRequests = responses
+                    .Where(kvp => kvp.Value is null)
+                    .Select(kvp => kvp.Key)
+                    .Cast<UpdateRequest>();
+
+                iterationSuccessfulRequestCount = responses.Values.Where(v => v != null).Count();
+                this.logger.LogInformation($"Successfully updated the state of {iterationSuccessfulRequestCount} processes in iteration {iteration}.");
+                iteration++;
+            }
+            while (remainingRequests.Any() && iterationSuccessfulRequestCount > 0);
+
+            foreach (var errorMessage in errorMessages)
+            {
+                this.logger.LogError(errorMessage);
+            }
         }
 
         private IDictionary<Entity, UpdateRequest> GetRequestByProcess(IEnumerable<Entity> processes, IEnumerable<string> processesToDeactivate)
@@ -145,11 +175,11 @@
 
                     if (stateCode.Value == p.GetAttributeValue<OptionSetValue>(Constants.Workflow.Fields.StateCode).Value)
                     {
-                        this.logger.LogDebug($"Process {p[Constants.Workflow.Fields.Name]} already has desired state. Skipping.");
+                        this.logger.LogInformation($"Process {p[Constants.Workflow.Fields.Name]} will be skipped. Already has desired state.");
                         return null;
                     }
 
-                    this.logger.LogInformation($"Setting process status for {p[Constants.Workflow.Fields.Name]} with statecode {stateCode.Value} and statuscode {statusCode.Value}");
+                    this.logger.LogInformation($"Process {p[Constants.Workflow.Fields.Name]} will be {(stateCode.Value == Constants.Workflow.StateCodeActive ? "activated" : "deactivated")}.");
 
                     return new UpdateRequest
                     {

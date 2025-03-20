@@ -90,10 +90,11 @@
         /// <param name="request">The request.</param>
         /// <param name="username">The user to impersonate.</param>
         /// <param name="fallbackToExistingUser">Whether to fallback to the authenticated user if the action fails as the specified user.</param>
+        /// <param name="logErrors">Whether to log errors.</param>
         /// <typeparam name="TResponse">The type of response.</typeparam>
         /// <returns>The response.</returns>
         /// <exception cref="ArgumentException">Thrown when the specified user doesn't exist and fallback is disabled.</exception>
-        public TResponse Execute<TResponse>(OrganizationRequest request, string username, bool fallbackToExistingUser = true)
+        public TResponse Execute<TResponse>(OrganizationRequest request, string username, bool fallbackToExistingUser = true, bool logErrors = true)
             where TResponse : OrganizationResponse;
 
         /// <summary>
@@ -141,8 +142,7 @@
         /// <param name="requests">The collection of <see cref="OrganizationRequest"/> to execute.</param>
         /// <param name="username">The user to impersonate.</param>
         /// <param name="onError">An action to be called for each errored request.</param>
-        /// <returns>Returns a collection of <see cref="OrganizationResponse"/>.</returns>
-        IEnumerable<OrganizationResponse> ExecuteManySolutionHistoryOperation(IEnumerable<OrganizationRequest> requests, string username, Action<OrganizationRequest, Exception> onError = null);
-
+        /// <returns>A dictionary of responses keyed by request.</returns>
+        IDictionary<OrganizationRequest, OrganizationResponse> ExecuteManySolutionHistoryOperation(IEnumerable<OrganizationRequest> requests, string username, Action<OrganizationRequest, Exception> onError = null);
     }
 }

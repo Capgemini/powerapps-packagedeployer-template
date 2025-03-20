@@ -238,8 +238,13 @@
                 .Callback<IEnumerable<OrganizationRequest>, string, Action<OrganizationRequest, Exception>>(
                     (requests, username, onError) =>
                     {
-                        onError(requests.First(), new FaultException<OrganizationServiceFault>(fault));
-                    });
+                        foreach (var request in requests)
+                        {
+                            onError(request, new FaultException<OrganizationServiceFault>(fault));
+                        }
+                    })
+                .Returns<IEnumerable<OrganizationRequest>, string, Action<OrganizationRequest, Exception>>(
+                    (requests, username, onError) => requests.ToDictionary(r => r, r => (OrganizationResponse)null));
 
             this.processDeploymentSvc.SetStates(
                 new List<string>
@@ -293,8 +298,8 @@
         }
 
         private void MockExecuteManySolutionHistoryOperationResponse(
-            IEnumerable<OrganizationResponse> responses = null,
-            Expression<Func<ICrmServiceAdapter, IEnumerable<OrganizationResponse>>> expression = null,
+            IDictionary<OrganizationRequest, OrganizationResponse> response = null,
+            Expression<Func<ICrmServiceAdapter, IDictionary<OrganizationRequest, OrganizationResponse>>> expression = null,
             bool verifiable = false)
         {
             if (expression == null)
@@ -305,14 +310,14 @@
                     It.IsAny<Action<OrganizationRequest, Exception>>());
             }
 
-            if (responses == null)
+            if (response == null)
             {
-                responses = Enumerable.Empty<OrganizationResponse>();
+                response = new Dictionary<OrganizationRequest, OrganizationResponse>();
             }
 
             var returnResult = this.crmServiceAdapterMock
                 .Setup(expression)
-                .Returns(responses);
+                .Returns(response);
 
             if (verifiable)
             {

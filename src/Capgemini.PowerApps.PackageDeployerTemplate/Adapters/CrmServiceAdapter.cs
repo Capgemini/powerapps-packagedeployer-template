@@ -5,7 +5,9 @@
     using System.IO;
     using System.Linq;
     using System.ServiceModel;
+    using System.Web.Configuration;
     using Capgemini.PowerApps.PackageDeployerTemplate.Exceptions;
+    using DocumentFormat.OpenXml.Office2016.Excel;
     using Microsoft.Extensions.Logging;
     using Microsoft.Xrm.Sdk;
     using Microsoft.Xrm.Sdk.Messages;
@@ -292,7 +294,7 @@
         }
 
         /// <inheritdoc/>
-        public TResponse Execute<TResponse>(OrganizationRequest request, string username, bool fallbackToExistingUser = true)
+        public TResponse Execute<TResponse>(OrganizationRequest request, string username, bool fallbackToExistingUser = true, bool logErrors = true)
             where TResponse : OrganizationResponse
         {
             if (request is null)
@@ -320,7 +322,7 @@
                 {
                     this.logger.LogWarning($"Failed to execute {request.RequestName} as {username} as the user was not found.");
                 }
-                else
+                else if (logErrors)
                 {
                     this.logger.LogWarning(ex, $"Failed to execute {request.RequestName} as {username}. {ex.Message}");
                 }
@@ -428,63 +430,42 @@
         }
 
         /// <inheritdoc/>
-        public IEnumerable<OrganizationResponse> ExecuteManySolutionHistoryOperation(IEnumerable<OrganizationRequest> requests, string username, Action<OrganizationRequest, Exception> onError = null)
+        public IDictionary<OrganizationRequest, OrganizationResponse> ExecuteManySolutionHistoryOperation(IEnumerable<OrganizationRequest> requests, string username, Action<OrganizationRequest, Exception> onError = null)
         {
-            var responses = requests.ToDictionary(r => r, r => (OrganizationResponse)null);
-            var remainingRequests = requests.Reverse().ToList();
-
-            while (remainingRequests.Any())
+            return requests.ToDictionary<OrganizationRequest, OrganizationRequest, OrganizationResponse>(r => r, r =>
             {
-                var exceptions = remainingRequests.ToDictionary(r => r, r => (Exception)null);
-                var initialRequestCount = remainingRequests.Count;
-
-                for (int i = remainingRequests.Count - 1; i >= 0; i--)
+                try
                 {
-                    try
+                    this.CustomizationLockPolicy.Execute(() =>
                     {
-                        this.CustomizationLockPolicy.Execute(() =>
+                        try
                         {
-                            try
+                            if (string.IsNullOrEmpty(username))
                             {
-                                if (string.IsNullOrEmpty(username))
-                                {
-                                    responses[remainingRequests[i]] = this.crmSvc.Execute(remainingRequests[i]);
-                                }
+                                return this.crmSvc.Execute(r);
+                            }
 
-                                responses[remainingRequests[i]] = this.Execute<OrganizationResponse>(remainingRequests[i], username, true);
-                            }
-                            catch (FaultException<OrganizationServiceFault> ex) when (ex.Detail.ErrorCode == Constants.ErrorCodes.SolutionConcurrencyFailure)
-                            {
-                                throw new SolutionConcurrencyException($"Request failed due to solution concurrency errors.");
-                            }
-                            catch (FaultException<OrganizationServiceFault> ex) when (CustomizationLockErrorCodes.Contains(ex.Detail.ErrorCode))
-                            {
-                                throw new CustomizationLockException($"Request failed due to customization lock errors.");
-                            }
-                        });
-
-                        remainingRequests.RemoveAt(i);
-                    }
-                    catch (Exception ex)
-                    {
-                        // Swallow and leave in remaining requests - possibly an activation order issue.
-                        exceptions[remainingRequests[i]] = ex;
-                    }
+                            return this.Execute<OrganizationResponse>(r, username, false, false);
+                        }
+                        catch (FaultException<OrganizationServiceFault> ex) when (ex.Detail.ErrorCode == Constants.ErrorCodes.SolutionConcurrencyFailure)
+                        {
+                            // Policy will handle this exception.
+                            throw new SolutionConcurrencyException($"Request failed due to solution concurrency errors.");
+                        }
+                        catch (FaultException<OrganizationServiceFault> ex) when (CustomizationLockErrorCodes.Contains(ex.Detail.ErrorCode))
+                        {
+                            // Policy will handle this exception.
+                            throw new CustomizationLockException($"Request failed due to customization lock errors.");
+                        }
+                    });
                 }
-
-                if (initialRequestCount == remainingRequests.Count)
+                catch (Exception ex)
                 {
-                    // No new successes this iteration.
-                    foreach (var kvp in exceptions.Where(kvp => kvp.Value != null))
-                    {
-                        onError(kvp.Key, kvp.Value);
-                    }
-
-                    break;
+                    onError(r, ex);
                 }
-            }
 
-            return responses.Values;
+                return null;
+            });
         }
 
         /// <inheritdoc/>
