@@ -432,7 +432,11 @@
         /// <inheritdoc/>
         public IDictionary<OrganizationRequest, OrganizationResponse> ExecuteManySolutionHistoryOperation(IEnumerable<OrganizationRequest> requests, string username, Action<OrganizationRequest, Exception> onError = null)
         {
-            return requests.ToDictionary(r => r, r =>
+            // Errors are expected and caught and handled. Uncaught errors are handled and logged via the onError callback.
+            var previousTraceLevel = TraceControlSettings.TraceLevel;
+            TraceControlSettings.TraceLevel = System.Diagnostics.SourceLevels.Off;
+
+            var results = requests.ToDictionary(r => r, r =>
             {
                 try
                 {
@@ -466,6 +470,10 @@
 
                 return null;
             });
+
+            TraceControlSettings.TraceLevel = previousTraceLevel;
+
+            return results;
         }
 
         /// <inheritdoc/>
