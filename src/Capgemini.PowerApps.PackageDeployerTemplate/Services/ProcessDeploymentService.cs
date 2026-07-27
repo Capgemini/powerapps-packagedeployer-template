@@ -39,6 +39,19 @@
         {
             this.logger.LogInformation("Setting process states in solution(s).");
 
+            var categoryOrder = new[]
+            {
+                Constants.WorkflowCategory.BusinessRule,
+                Constants.WorkflowCategory.Action,
+                Constants.WorkflowCategory.Workflow,
+                Constants.WorkflowCategory.BusinessProcessFlow,
+                Constants.WorkflowCategory.ModernFlow,
+                Constants.WorkflowCategory.Dialog,
+                Constants.WorkflowCategory.DesktopFlow,
+                Constants.WorkflowCategory.AiFlow,
+                Constants.WorkflowCategory.WebClientApiFlow,
+            };
+
             if (solutions == null || !solutions.Any())
             {
                 this.logger.LogInformation("No solutions were provided to activate processes for.");
@@ -49,9 +62,26 @@
                 solutions,
                 Constants.SolutionComponent.ComponentTypeWorkflow,
                 Constants.Workflow.LogicalName,
-                new ColumnSet(Constants.Workflow.Fields.Name, Constants.Workflow.Fields.StateCode)).Entities;
+                new ColumnSet(
+                    Constants.Workflow.Fields.Name,
+                    Constants.Workflow.Fields.Category,
+                    Constants.Workflow.Fields.StateCode)).Entities;
 
-            this.SetStates(deployedProcesses, componentsToDeactivate, user);
+            foreach (var category in categoryOrder)
+            {
+                this.logger.LogInformation($"Checking for deployed processes in solution(s) with category {category}.");
+
+                var processesInCategory = deployedProcesses.Where(p => p.GetAttributeValue<OptionSetValue>(Constants.Workflow.Fields.Category).Value == category);
+                if (!processesInCategory.Any())
+                {
+                    this.logger.LogInformation($"No deployed processes were found in solution(s) with category {category}.");
+                    continue;
+                }
+
+                this.logger.LogInformation($"Found {processesInCategory.Count()} deployed processes in solution(s) with category {category}.");
+
+                this.SetStates(processesInCategory, componentsToDeactivate, user);
+            }
         }
 
         /// <summary>
@@ -202,7 +232,7 @@
                 ColumnSet = new ColumnSet(Constants.Workflow.Fields.Name, Constants.Workflow.Fields.StateCode, Constants.Workflow.Fields.Type),
             };
             query.Criteria.AddCondition(Constants.Workflow.Fields.Name, ConditionOperator.In, names.ToArray<object>());
-            query.Criteria.AddCondition(Constants.Workflow.Fields.Type, ConditionOperator.Equal, Constants.Workflow.TypeDefinition);
+            query.Criteria.AddCondition(Constants.Workflow.Fields.Type, ConditionOperator.Equal, Constants.WorkflowType.Definition);
 
             var results = this.crmSvc.RetrieveMultiple(query);
             this.logger.LogInformation($"Found {results.Entities.Count} processes matching the {names.Count()} provided names.");

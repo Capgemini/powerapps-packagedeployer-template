@@ -47,16 +47,6 @@
         public static class Workflow
         {
             /// <summary>
-            /// Definition option set value for type option set.
-            /// </summary>
-            public const int TypeDefinition = 1;
-
-            /// <summary>
-            /// Modern flow option set value for type option set.
-            /// </summary>
-            public const int CategoryModernFlow = 5;
-
-            /// <summary>
             /// The logical name.
             /// </summary>
             public const string LogicalName = "workflow";
@@ -116,6 +106,78 @@
                 /// </summary>
                 public const string StatusCode = "statuscode";
             }
+        }
+
+        /// <summary>
+        /// Workflow types.
+        /// </summary>
+        public static class WorkflowType
+        {
+            /// <summary>
+            /// Workflow type for definition workflows.
+            /// </summary>
+            public const int Definition = 1;
+
+            /// <summary>
+            /// Workflow type for activation workflows.
+            /// </summary>
+            public const int Activation = 2;
+
+            /// <summary>
+            /// Workflow type for template workflows.
+            /// </summary>
+            public const int Template = 3;
+        }
+
+        /// <summary>
+        /// Constants related to workflow categories.
+        /// </summary>
+        public static class WorkflowCategory
+        {
+            /// <summary>
+            /// Workflow category for workflows.
+            /// </summary>
+            public const int Workflow = 0;
+
+            /// <summary>
+            /// Workflow category for dialogs.
+            /// </summary>
+            public const int Dialog = 1;
+
+            /// <summary>
+            /// Workflow category for business rules.
+            /// </summary>
+            public const int BusinessRule = 2;
+
+            /// <summary>
+            /// Workflow category for actions.
+            /// </summary>
+            public const int Action = 3;
+
+            /// <summary>
+            /// Workflow category for business process flows.
+            /// </summary>
+            public const int BusinessProcessFlow = 4;
+
+            /// <summary>
+            /// Workflow category for modern flows.
+            /// </summary>
+            public const int ModernFlow = 5;
+
+            /// <summary>
+            /// Workflow category for desktop flows.
+            /// </summary>
+            public const int DesktopFlow = 6;
+
+            /// <summary>
+            /// Workflow category for AI flows.
+            /// </summary>
+            public const int AiFlow = 7;
+
+            /// <summary>
+            /// Workflow category for web client API flows.
+            /// </summary>
+            public const int WebClientApiFlow = 9000;
         }
 
         /// <summary>
