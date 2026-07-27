@@ -79,7 +79,7 @@ namespace Capgemini.PowerApps.PackageDeployerTemplate.UnitTests.Services
 
             this.connectionReferenceSvc.ConnectConnectionReferences(connectionMap, connectionOwner);
 
-            this.crmSvc.Verify(svc => svc.Execute<ExecuteMultipleResponse>(It.IsAny<OrganizationRequest>(), connectionOwner, true));
+            this.crmSvc.Verify(svc => svc.Execute<ExecuteMultipleResponse>(It.IsAny<OrganizationRequest>(), connectionOwner, It.IsAny<bool>(), It.IsAny<bool>()));
         }
 
         [Fact]
@@ -119,8 +119,12 @@ namespace Capgemini.PowerApps.PackageDeployerTemplate.UnitTests.Services
 
         private void MockUpdateConnectionReferencesResponse(ExecuteMultipleResponse response)
         {
-            this.crmSvc.Setup(svc => svc.Execute(It.IsAny<ExecuteMultipleRequest>())).Returns(response);
-            this.crmSvc.Setup(svc => svc.Execute<ExecuteMultipleResponse>(It.IsAny<ExecuteMultipleRequest>(), It.IsAny<string>(), true)).Returns(response);
+            this.crmSvc
+                .Setup(svc => svc.Execute(It.IsAny<ExecuteMultipleRequest>()))
+                .Returns(response);
+            this.crmSvc
+                .Setup(svc => svc.Execute<ExecuteMultipleResponse>(It.IsAny<ExecuteMultipleRequest>(), It.IsAny<string>(), It.IsAny<bool>(), It.IsAny<bool>()))
+                .Returns(response);
         }
 
         private EntityCollection MockConnectionReferencesForConnectionMap(Dictionary<string, string> connectionMap)

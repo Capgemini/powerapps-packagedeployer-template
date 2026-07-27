@@ -4,7 +4,10 @@
     using System.Collections.Generic;
     using System.IO;
     using System.Linq;
+    using System.ServiceModel;
+    using System.Web.Configuration;
     using Capgemini.PowerApps.PackageDeployerTemplate.Exceptions;
+    using DocumentFormat.OpenXml.Office2016.Excel;
     using Microsoft.Extensions.Logging;
     using Microsoft.Xrm.Sdk;
     using Microsoft.Xrm.Sdk.Messages;
@@ -17,8 +20,19 @@
     /// </summary>
     public class CrmServiceAdapter : ICrmServiceAdapter, IDisposable
     {
+        private static readonly int[] CustomizationLockErrorCodes = new int[]
+        {
+            Constants.ErrorCodes.CustomizationLockExBlockingUnknown,
+            Constants.ErrorCodes.CustomizationLockExBothKnownDifferent,
+            Constants.ErrorCodes.CustomizationLockExBothKnownSame,
+            Constants.ErrorCodes.CustomizationLockExBlockedUnknown,
+            Constants.ErrorCodes.CustomizationLockExBothUnknown,
+        };
+
         private readonly CrmServiceClient crmSvc;
         private readonly ILogger logger;
+
+        private Policy customizationLockPolicy;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="CrmServiceAdapter"/> class.
@@ -33,6 +47,24 @@
 
         /// <inheritdoc/>
         public Guid? CallerAADObjectId { get => this.crmSvc.CallerAADObjectId; set => this.crmSvc.CallerAADObjectId = value; }
+
+        private Policy CustomizationLockPolicy
+        {
+            get
+            {
+                this.customizationLockPolicy ??= Policy
+                        .Handle<CustomizationLockException>()
+                        .RetryForever(_ => this.WaitForSolutionHistoryRecordsToComplete())
+                        .Wrap(
+                            Policy
+                            .Handle<SolutionConcurrencyException>()
+                            .WaitAndRetryForever(
+                                sleepDurationProvider: retryAttempt => TimeSpan.FromSeconds(30),
+                                onRetry: (_, timeSpan) => this.logger.LogInformation("A solution concurrency issue has occured.  Waiting for {0} seconds before retrying.", timeSpan.TotalSeconds)));
+
+                return this.customizationLockPolicy;
+            }
+        }
 
         /// <inheritdoc/>
         public ExecuteMultipleResponse ExecuteMultiple(IEnumerable<OrganizationRequest> requests, bool continueOnError = true, bool returnResponses = true, int? timeout = null)
@@ -262,7 +294,7 @@
         }
 
         /// <inheritdoc/>
-        public TResponse Execute<TResponse>(OrganizationRequest request, string username, bool fallbackToExistingUser = true)
+        public TResponse Execute<TResponse>(OrganizationRequest request, string username, bool fallbackToExistingUser = true, bool logErrors = true)
             where TResponse : OrganizationResponse
         {
             if (request is null)
@@ -290,7 +322,7 @@
                 {
                     this.logger.LogWarning($"Failed to execute {request.RequestName} as {username} as the user was not found.");
                 }
-                else
+                else if (logErrors)
                 {
                     this.logger.LogWarning(ex, $"Failed to execute {request.RequestName} as {username}. {ex.Message}");
                 }
@@ -342,31 +374,13 @@
         }
 
         /// <inheritdoc/>
+        [Obsolete("Please use ExecuteManySolutionHistoryOperation.", true)]
         public IEnumerable<ExecuteMultipleResponseItem> ExecuteMultipleSolutionHistoryOperation(IEnumerable<OrganizationRequest> requests, string username, int? timeout = null)
         {
-            var customizationLockErrorCodes = new int[]
-            {
-                Constants.ErrorCodes.CustomizationLockExBlockingUnknown,
-                Constants.ErrorCodes.CustomizationLockExBothKnownDifferent,
-                Constants.ErrorCodes.CustomizationLockExBothKnownSame,
-                Constants.ErrorCodes.CustomizationLockExBlockedUnknown,
-                Constants.ErrorCodes.CustomizationLockExBothUnknown,
-            };
-
             var firstIndexByRequest = requests.ToDictionary(request => request, request => default(int?));
             var responseByRequest = requests.ToDictionary(request => request, request => (ExecuteMultipleResponseItem)null);
 
-            var retryPolicy = Policy
-                .Handle<CustomizationLockException>()
-                .RetryForever(_ => this.WaitForSolutionHistoryRecordsToComplete())
-                .Wrap(
-                    Policy
-                    .Handle<SolutionConcurrencyException>()
-                    .WaitAndRetryForever(
-                        sleepDurationProvider: retryAttempt => TimeSpan.FromSeconds(30),
-                        onRetry: (_, timeSpan) => this.logger.LogInformation("A solution concurrency issue has occured.  Waiting for {0} seconds before retrying.", timeSpan.TotalSeconds)));
-
-            retryPolicy.Execute(() =>
+            this.CustomizationLockPolicy.Execute(() =>
             {
                 var res = string.IsNullOrEmpty(username)
                     ? this.ExecuteMultiple(requests, true, true, timeout)
@@ -384,24 +398,26 @@
                     responseByRequest[request] = response;
                 }
 
-                if (res.IsFaulted)
+                if (!res.IsFaulted)
                 {
-                    requests = res.Responses
-                        .Where(r => r.Fault != null)
-                        .Select(r => requests.ElementAt(r.RequestIndex))
-                        .ToList();
+                    return;
+                }
 
-                    var solutionConcurrencyErrors = res.Responses.Where(r => r.Fault?.ErrorCode == Constants.ErrorCodes.SolutionConcurrencyFailure);
-                    if (solutionConcurrencyErrors.Any())
-                    {
-                        throw new SolutionConcurrencyException($"{solutionConcurrencyErrors.Count()} requests failed due to solution concurrency errors.");
-                    }
+                requests = res.Responses
+                    .Where(r => r.Fault != null)
+                    .Select(r => requests.ElementAt(r.RequestIndex))
+                    .ToList();
 
-                    var customizationLockErrors = res.Responses.Where(r => r.Fault != null && customizationLockErrorCodes.Contains(r.Fault.ErrorCode));
-                    if (customizationLockErrors.Any())
-                    {
-                        throw new CustomizationLockException($"{customizationLockErrors.Count()} requests failed due to customization lock errors.");
-                    }
+                var solutionConcurrencyErrors = res.Responses.Where(r => r.Fault?.ErrorCode == Constants.ErrorCodes.SolutionConcurrencyFailure);
+                if (solutionConcurrencyErrors.Any())
+                {
+                    throw new SolutionConcurrencyException($"{solutionConcurrencyErrors.Count()} requests failed due to solution concurrency errors.");
+                }
+
+                var customizationLockErrors = res.Responses.Where(r => r.Fault != null && CustomizationLockErrorCodes.Contains(r.Fault.ErrorCode));
+                if (customizationLockErrors.Any())
+                {
+                    throw new CustomizationLockException($"{customizationLockErrors.Count()} requests failed due to customization lock errors.");
                 }
             });
 
@@ -411,6 +427,53 @@
             }
 
             return responseByRequest.Values;
+        }
+
+        /// <inheritdoc/>
+        public IDictionary<OrganizationRequest, OrganizationResponse> ExecuteManySolutionHistoryOperation(IEnumerable<OrganizationRequest> requests, string username, Action<OrganizationRequest, Exception> onError = null)
+        {
+            // Errors are expected and caught and handled. Uncaught errors are handled and logged via the onError callback.
+            var previousTraceLevel = TraceControlSettings.TraceLevel;
+            TraceControlSettings.TraceLevel = System.Diagnostics.SourceLevels.Off;
+
+            var results = requests.ToDictionary(r => r, r =>
+            {
+                try
+                {
+                    return this.CustomizationLockPolicy.Execute(() =>
+                    {
+                        try
+                        {
+                            if (string.IsNullOrEmpty(username))
+                            {
+                                return this.crmSvc.Execute(r);
+                            }
+
+                            return this.Execute<OrganizationResponse>(r, username, false, false);
+                        }
+                        catch (FaultException<OrganizationServiceFault> ex) when (ex.Detail.ErrorCode == Constants.ErrorCodes.SolutionConcurrencyFailure)
+                        {
+                            // Policy will handle this exception.
+                            throw new SolutionConcurrencyException($"Request failed due to solution concurrency errors.");
+                        }
+                        catch (FaultException<OrganizationServiceFault> ex) when (CustomizationLockErrorCodes.Contains(ex.Detail.ErrorCode))
+                        {
+                            // Policy will handle this exception.
+                            throw new CustomizationLockException($"Request failed due to customization lock errors.");
+                        }
+                    });
+                }
+                catch (Exception ex)
+                {
+                    onError(r, ex);
+                }
+
+                return null;
+            });
+
+            TraceControlSettings.TraceLevel = previousTraceLevel;
+
+            return results;
         }
 
         /// <inheritdoc/>

@@ -81,7 +81,7 @@
         {
             var workflowQuery = new QueryByAttribute(Constants.Workflow.LogicalName);
             workflowQuery.AddAttributeValue(Constants.Workflow.Fields.Name, "When a contact is created do nothing");
-            workflowQuery.AddAttributeValue(Constants.Workflow.Fields.Type, Constants.Workflow.TypeDefinition);
+            workflowQuery.AddAttributeValue(Constants.Workflow.Fields.Type, Constants.WorkflowType.Definition);
             workflowQuery.ColumnSet = new ColumnSet("statecode");
 
             var workflow = this.fixture.ServiceClient.RetrieveMultiple(workflowQuery).Entities.FirstOrDefault();
@@ -94,7 +94,7 @@
         {
             var workflowQuery = new QueryByAttribute(Constants.Workflow.LogicalName);
             workflowQuery.AddAttributeValue(Constants.Workflow.Fields.Name, "When an account is created do nothing");
-            workflowQuery.AddAttributeValue(Constants.Workflow.Fields.Type, Constants.Workflow.TypeDefinition);
+            workflowQuery.AddAttributeValue(Constants.Workflow.Fields.Type, Constants.WorkflowType.Definition);
             workflowQuery.ColumnSet = new ColumnSet("statecode");
 
             var workflow = this.fixture.ServiceClient.RetrieveMultiple(workflowQuery).Entities.FirstOrDefault();
