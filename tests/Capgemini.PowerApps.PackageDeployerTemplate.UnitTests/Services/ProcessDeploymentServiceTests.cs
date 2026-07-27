@@ -268,6 +268,9 @@
                     {
                         Constants.Workflow.Fields.StateCode, new OptionSetValue(stateCode)
                     },
+                    {
+                        Constants.Workflow.Fields.Category, new OptionSetValue(Constants.WorkflowCategory.Workflow)
+                    },
                 },
             };
         }
